@@ -1,0 +1,96 @@
+//-- Start imported schema ch.admin.bazg.autorisaziun.common.v3.BusinessPartnerRole.avdl
+	enum BusinessPartnerRole {
+		DECLARANT,
+		IMPORTER,
+		EXPORTER,
+		CONSIGNEE,
+		CONSIGNOR
+	}
+//-- End imported schema
+
+//-- Start imported schema ch.admin.bazg.autorisaziun.common.v1.Address.avdl
+	Address {
+		string streetAndNumber;
+		string postCode;
+		string city;
+		string country;
+	}
+//-- End imported schema
+
+//-- Start imported schema ch.admin.bazg.autorisaziun.common.v2.PermitOwner.avdl
+	PermitOwner {
+		union{null, string} id = null;
+		union{null, string} name = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v3.BusinessPartnerRole} role = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v1.Address} address = null;
+	}
+//-- End imported schema
+
+//-- Start imported schema ch.admin.bazg.autorisaziun.common.v2.AdditionalInformation.avdl
+	AdditionalInformation {
+		int sequenceNumber;
+		string key;
+		string value;
+	}
+//-- End imported schema
+
+//-- Start imported schema ch.admin.bazg.autorisaziun.common.v4.Commodity.avdl
+	Commodity {
+		string nationalCustomsTariffNumber;
+		string controlCode;
+		union {null, string} countryOfOrigin = null;
+		double grossMass;
+		union {null, double} netMass = null;
+		union {null, double} additionalMass = null;
+		union {null, string} commodityIdentificationNumber = null;
+		union {null, array<ch.admin.bazg.autorisaziun.common.v2.AdditionalInformation>} additionalInformation = null;
+	}
+//-- End imported schema
+
+//-- Start imported schema ch.admin.bazg.autorisaziun.common.v2.Person.avdl
+	Person {
+		union {null, string} id =  null;
+		union {null, string} name =  null;
+		union {null, ch.admin.bazg.autorisaziun.common.v1.Address} address = null;
+	}
+//-- End imported schema
+
+//-- Start AutorisaziunValidatePermitV2Command
+
+	ValidatePermitV2Payload {
+		string permitNumber;
+		int restrictionCode;
+		int goodsProvision;
+		string goodsDeclarationReferenceNumber;
+		int goodsDeclarationReferenceNumberVersion;
+
+		//  Zeitpunkt der Anfrage aus der Senderperspektive
+		timestamp_ms goodsActivationTimestamp;
+		ch.admin.bazg.autorisaziun.common.v2.PermitOwner permitOwner;
+		ch.admin.bazg.autorisaziun.common.v4.Commodity commodity;
+
+		union{null, string} countryOfDestination = null;
+		union{null, string} countryOfDispatch = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} consignee = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} consignor = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} exporter = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} importer = null;
+	}
+
+	ValidatePermitV2References {
+		ValidatePermitV2Reference reference;
+	}
+
+	ValidatePermitV2Reference {
+		string type;
+		string goodsDeclarationReferenceNumber;
+	}
+
+	AutorisaziunValidatePermitV2Command {
+		ch.admin.bit.jeap.messaging.avro.AvroMessageIdentity identity;
+		ch.admin.bit.jeap.messaging.avro.AvroMessageType type;
+		ch.admin.bit.jeap.messaging.avro.AvroMessagePublisher publisher;
+		ValidatePermitV2References references;
+		ValidatePermitV2Payload payload;
+		string commandVersion;
+	}

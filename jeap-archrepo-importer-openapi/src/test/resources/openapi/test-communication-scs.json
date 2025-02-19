@@ -1,0 +1,1766 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Test-Communication Service",
+        "description": "Rest API for Some-Communication Service",
+        "version": "1"
+    },
+    "servers": [
+        {
+            "url": "https://some-url/communication",
+            "description": "Generated server url"
+        }
+    ],
+    "security": [
+        {
+            "OIDC": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "TestSupportController",
+            "description": "TestSupportController to see the feature configuration"
+        }
+    ],
+    "paths": {
+        "/ui-api/messages/{id}/revalidate": {
+            "post": {
+                "tags": [
+                    "ui-message-controller"
+                ],
+                "operationId": "revalidate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/ui-api/messages/{id}/recreate": {
+            "post": {
+                "tags": [
+                    "ui-message-controller"
+                ],
+                "operationId": "recreate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/ui-api/messages/{id}/accept": {
+            "post": {
+                "tags": [
+                    "ui-message-controller"
+                ],
+                "operationId": "acceptDespiteValidationErrors",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v2/messages/search": {
+            "post": {
+                "tags": [
+                    "messages-v-2-controller"
+                ],
+                "summary": "Pageable, sorted message search result.",
+                "operationId": "search",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessageSearchDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageMessageMetaDataDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/messages/ne131": {
+            "post": {
+                "tags": [
+                    "messages-v-2-controller"
+                ],
+                "summary": "Creates something",
+                "operationId": "sendStatusUpdate",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusUpdateDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/testsupport/storagehub/outgoing/object": {
+            "post": {
+                "tags": [
+                    "TestSupportController"
+                ],
+                "summary": "Get storage hub file from outgoing bucket with storage hub key",
+                "operationId": "readOutgoingStorageHubObject",
+                "parameters": [
+                    {
+                        "name": "objectName",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/testsupport/storagehub/incoming/object": {
+            "post": {
+                "tags": [
+                    "TestSupportController"
+                ],
+                "summary": "Get storage hub file from incoming bucket with storage hub reference id",
+                "operationId": "readIncomingStorageHubObject",
+                "parameters": [
+                    {
+                        "name": "objectName",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ui-api/messages/{id}": {
+            "get": {
+                "tags": [
+                    "ui-message-controller"
+                ],
+                "summary": "Returns the message content, version and messageType. Content returned as XML or JSON depending on parameter 'contentTypeXML'",
+                "operationId": "get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "contentTypeXML",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageContentDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ui-api/messages/search": {
+            "get": {
+                "tags": [
+                    "ui-message-controller"
+                ],
+                "operationId": "search_1",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "DE"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "freeText",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dateCreatedFrom",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dateCreatedTo",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "messageDirection",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "states",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "DUPLICATE_MESSAGE",
+                                    "RECEIVED",
+                                    "INVALID_SYNTAX",
+                                    "INVALID_SEMANTICS",
+                                    "IMPLAUSIBLE",
+                                    "PROCESS_CONFLICT",
+                                    "VALIDATED",
+                                    "CREATED",
+                                    "SENT",
+                                    "CONFIRMED"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageMessageSearchResponseUiDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/messages/{id}": {
+            "get": {
+                "tags": [
+                    "messages-v-2-controller"
+                ],
+                "summary": "Returns the message content, version and messageType. Content returned as XML or JSON depending on parameter 'contentTypeXML'",
+                "operationId": "get_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "contentTypeXML",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageContentDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/testsupport/featureflags": {
+            "get": {
+                "tags": [
+                    "TestSupportController"
+                ],
+                "summary": "FeatureFlag States",
+                "operationId": "getFeatureFlags",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/testsupport/codelists/{code}": {
+            "get": {
+                "tags": [
+                    "TestSupportController"
+                ],
+                "summary": "Get specific codelist from national codes",
+                "operationId": "getCode",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "NCL0009",
+                                "NCL0010",
+                                "NCL0014",
+                                "NCL0015",
+                                "NCL0016",
+                                "NCL0017",
+                                "NCL0019",
+                                "NCL0020",
+                                "NCL0027",
+                                "NCL0029",
+                                "NCL0048",
+                                "NCL0053",
+                                "NCL0056",
+                                "NCL0070",
+                                "NCL0105",
+                                "NCL0112",
+                                "NCL0116",
+                                "NCL0118",
+                                "NCL0119",
+                                "NCL0147",
+                                "NCL0162",
+                                "NCL0197",
+                                "NCL0217",
+                                "NCL0218",
+                                "NCL0219",
+                                "NCL0221",
+                                "NCL0231",
+                                "NCL0232",
+                                "NCL0234",
+                                "NCL0239",
+                                "NCL0244",
+                                "NCL0248",
+                                "NCL0251",
+                                "NCL0252",
+                                "NCL0296",
+                                "NCL0326",
+                                "NCL0347",
+                                "NCL0349",
+                                "NCL0380",
+                                "NCL0505",
+                                "NCL0704",
+                                "NCL0750",
+                                "NCL0754",
+                                "NCL1012",
+                                "NCL1040",
+                                "NCL1048",
+                                "NCL1060",
+                                "NCL1053",
+                                "NCL1054",
+                                "NCL1057",
+                                "NCL1108",
+                                "NCL1109",
+                                "NCL1110",
+                                "NCL1111",
+                                "NCL1112",
+                                "NCL1113",
+                                "NCL1115",
+                                "NCL1117",
+                                "NCL1118",
+                                "NCL1119",
+                                "NCL1120",
+                                "NCL1121",
+                                "NCL1123",
+                                "NCL1125",
+                                "NCL1130",
+                                "NCL1141",
+                                "NCL1150",
+                                "NCL1151",
+                                "NCL1160",
+                                "NCL1161",
+                                "NCL1162",
+                                "NCL1170",
+                                "NCL1180",
+                                "NCL1182",
+                                "NCL1191",
+                                "NCL1192",
+                                "NCL1193",
+                                "NCL1212",
+                                "NCL1213",
+                                "NCL1214",
+                                "NCL1411",
+                                "NCL1412",
+                                "NCL1413",
+                                "NCL1414",
+                                "NCL1415",
+                                "NCL1416",
+                                "NCL1417",
+                                "NCL1418",
+                                "NCL1419",
+                                "NCL1420",
+                                "NCL1421",
+                                "NCL1422",
+                                "NCL1423",
+                                "NCL1424",
+                                "NCL2000",
+                                "NCL3000",
+                                "NCL5003",
+                                "NCL5004",
+                                "NCL5005",
+                                "NCL5010"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/testsupport/codelists/{code}/{value}": {
+            "get": {
+                "tags": [
+                    "TestSupportController"
+                ],
+                "summary": "Check specific codelist value in national codes",
+                "operationId": "testCode",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "NCL0009",
+                                "NCL0010",
+                                "NCL0014",
+                                "NCL0015",
+                                "NCL0016",
+                                "NCL0017",
+                                "NCL0019",
+                                "NCL0020",
+                                "NCL0027",
+                                "NCL0029",
+                                "NCL0048",
+                                "NCL0053",
+                                "NCL0056",
+                                "NCL0070",
+                                "NCL0105",
+                                "NCL0112",
+                                "NCL0116",
+                                "NCL0118",
+                                "NCL0119",
+                                "NCL0147",
+                                "NCL0162",
+                                "NCL0197",
+                                "NCL0217",
+                                "NCL0218",
+                                "NCL0219",
+                                "NCL0221",
+                                "NCL0231",
+                                "NCL0232",
+                                "NCL0234",
+                                "NCL0239",
+                                "NCL0244",
+                                "NCL0248",
+                                "NCL0251",
+                                "NCL0252",
+                                "NCL0296",
+                                "NCL0326",
+                                "NCL0347",
+                                "NCL0349",
+                                "NCL0380",
+                                "NCL0505",
+                                "NCL0704",
+                                "NCL0750",
+                                "NCL0754",
+                                "NCL1012",
+                                "NCL1040",
+                                "NCL1048",
+                                "NCL1060",
+                                "NCL1053",
+                                "NCL1054",
+                                "NCL1057",
+                                "NCL1108",
+                                "NCL1109",
+                                "NCL1110",
+                                "NCL1111",
+                                "NCL1112",
+                                "NCL1113",
+                                "NCL1115",
+                                "NCL1117",
+                                "NCL1118",
+                                "NCL1119",
+                                "NCL1120",
+                                "NCL1121",
+                                "NCL1123",
+                                "NCL1125",
+                                "NCL1130",
+                                "NCL1141",
+                                "NCL1150",
+                                "NCL1151",
+                                "NCL1160",
+                                "NCL1161",
+                                "NCL1162",
+                                "NCL1170",
+                                "NCL1180",
+                                "NCL1182",
+                                "NCL1191",
+                                "NCL1192",
+                                "NCL1193",
+                                "NCL1212",
+                                "NCL1213",
+                                "NCL1214",
+                                "NCL1411",
+                                "NCL1412",
+                                "NCL1413",
+                                "NCL1414",
+                                "NCL1415",
+                                "NCL1416",
+                                "NCL1417",
+                                "NCL1418",
+                                "NCL1419",
+                                "NCL1420",
+                                "NCL1421",
+                                "NCL1422",
+                                "NCL1423",
+                                "NCL1424",
+                                "NCL2000",
+                                "NCL3000",
+                                "NCL5003",
+                                "NCL5004",
+                                "NCL5005",
+                                "NCL5010"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "value",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NationalCodeListItem"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/configuration": {
+            "get": {
+                "tags": [
+                    "configuration-controller"
+                ],
+                "operationId": "getConfiguration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConfigurationDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "MessageSearchDto": {
+                "type": "object",
+                "properties": {
+                    "referenceNumber": {
+                        "type": "string",
+                        "description": "Optional reference number (i.e. MRN, GDRN or JRN). Exact match search criterion.",
+                        "example": "123456789123456789"
+                    },
+                    "dateCreatedFrom": {
+                        "type": "string",
+                        "description": "Optional search criterion. Compared against > dateCreatedFrom.",
+                        "format": "date-time",
+                        "example": "2019-03-25T09:53:20.508Z"
+                    },
+                    "dateCreatedTo": {
+                        "type": "string",
+                        "description": "Optional search criterion. Compared against < dateCreatedTo.",
+                        "format": "date-time",
+                        "example": "2019-03-25T09:53:20.508Z"
+                    },
+                    "sender": {
+                        "type": "string",
+                        "description": "Optional SenderCountry. Exact match search criterion.",
+                        "example": "DE"
+                    },
+                    "recipient": {
+                        "type": "string",
+                        "description": "Optional RecipientCountry. Exact match search criterion.",
+                        "example": "CH"
+                    },
+                    "messageType": {
+                        "type": "string",
+                        "description": "Optional type. Exact match search criterion.",
+                        "example": "CC004C",
+                        "enum": [
+                            "UNKNOWN",
+                            "NE004",
+                            "NE009",
+                            "NE013",
+                            "NE014",
+                            "NE015",
+                            "NE021",
+                            "NE028",
+                            "NE029",
+                            "NE056",
+                            "NE060",
+                            "NE069",
+                            "NE083",
+                            "NE096",
+                            "NE130",
+                            "NE131",
+                            "NI004",
+                            "NI009",
+                            "NI013",
+                            "NI014",
+                            "NI015",
+                            "NI028",
+                            "NI029",
+                            "NI056",
+                            "NI060",
+                            "NI081",
+                            "NI082",
+                            "NI083",
+                            "NT004",
+                            "NT007",
+                            "NT008",
+                            "NT009",
+                            "NT013",
+                            "NT014",
+                            "NT015",
+                            "NT019",
+                            "NT021",
+                            "NT025",
+                            "NT028",
+                            "NT029",
+                            "NT035",
+                            "NT043",
+                            "NT044",
+                            "NT045",
+                            "NT051",
+                            "NT055",
+                            "NT056",
+                            "NT057",
+                            "NT060",
+                            "NT061",
+                            "NT140",
+                            "NT141",
+                            "NT146",
+                            "NT182",
+                            "NT504",
+                            "NT513",
+                            "NT515",
+                            "NT528",
+                            "NC016",
+                            "NC084",
+                            "NC123",
+                            "NC124",
+                            "NC909",
+                            "NR021",
+                            "NR123",
+                            "NR124",
+                            "NR304",
+                            "NR309",
+                            "NR313",
+                            "NR314",
+                            "NR315",
+                            "BR313",
+                            "BR315",
+                            "NR328",
+                            "NR329",
+                            "NR360",
+                            "NR380",
+                            "NW304",
+                            "NW313",
+                            "NW315",
+                            "NW328",
+                            "NW360",
+                            "NW380",
+                            "CD001C",
+                            "CD002C",
+                            "CD003C",
+                            "CD006C",
+                            "CD010C",
+                            "CD012C",
+                            "CD018C",
+                            "CD024C",
+                            "CD027C",
+                            "CD038C",
+                            "CD049C",
+                            "CD050C",
+                            "CD059C",
+                            "CD063C",
+                            "CD070C",
+                            "CD071C",
+                            "CD078C",
+                            "CD094C",
+                            "CD095C",
+                            "CD114C",
+                            "CD115C",
+                            "CD118C",
+                            "CD142C",
+                            "CD143C",
+                            "CD144C",
+                            "CD145C",
+                            "CD150C",
+                            "CD151C",
+                            "CD152C",
+                            "CD160C",
+                            "CD164C",
+                            "CD165C",
+                            "CD168C",
+                            "CD180C",
+                            "CD181C",
+                            "CD200C",
+                            "CD201C",
+                            "CD203C",
+                            "CD204C",
+                            "CD205C",
+                            "CD209C",
+                            "CD411D",
+                            "CD903D",
+                            "CD906C",
+                            "CD917C",
+                            "CD971C",
+                            "CD974C",
+                            "CD975C"
+                        ]
+                    },
+                    "state": {
+                        "type": "string",
+                        "description": "Optional state. Exact match search criterion.",
+                        "example": "RECEIVED",
+                        "enum": [
+                            "DUPLICATE_MESSAGE",
+                            "RECEIVED",
+                            "INVALID_SYNTAX",
+                            "INVALID_SEMANTICS",
+                            "IMPLAUSIBLE",
+                            "PROCESS_CONFLICT",
+                            "VALIDATED",
+                            "CREATED",
+                            "SENT",
+                            "CONFIRMED"
+                        ]
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "Optional requested page size. Default 20.",
+                        "format": "int32",
+                        "example": 20
+                    },
+                    "page": {
+                        "type": "integer",
+                        "description": "Optional requested page number. Default 0",
+                        "format": "int32",
+                        "example": 0
+                    },
+                    "messageDirection": {
+                        "type": "string",
+                        "description": "Optional Message Direction. Default in",
+                        "example": "in"
+                    },
+                    "messageIdentification": {
+                        "type": "string",
+                        "description": "Optional messageIdentification. Exact match search criterion.",
+                        "example": "9696969"
+                    },
+                    "correlationIdentifier": {
+                        "type": "string",
+                        "description": "Optional correlationIdentifier. Exact match search criterion.",
+                        "example": "9696969"
+                    }
+                },
+                "description": "Message search criteria model. Default sorting by creationDateTime DESC is forced."
+            },
+            "MessageMetaDataDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Message identifier"
+                    },
+                    "creationDateTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updateDateTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "gdrn": {
+                        "type": "string"
+                    },
+                    "mrn": {
+                        "type": "string"
+                    },
+                    "lrn": {
+                        "type": "string"
+                    },
+                    "journeyReference": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string",
+                        "enum": [
+                            "DUPLICATE_MESSAGE",
+                            "RECEIVED",
+                            "INVALID_SYNTAX",
+                            "INVALID_SEMANTICS",
+                            "IMPLAUSIBLE",
+                            "PROCESS_CONFLICT",
+                            "VALIDATED",
+                            "CREATED",
+                            "SENT",
+                            "CONFIRMED"
+                        ]
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "UNKNOWN",
+                            "NE004",
+                            "NE009",
+                            "NE013",
+                            "NE014",
+                            "NE015",
+                            "NE021",
+                            "NE028",
+                            "NE029",
+                            "NE056",
+                            "NE060",
+                            "NE069",
+                            "NE083",
+                            "NE096",
+                            "NE130",
+                            "NE131",
+                            "NI004",
+                            "NI009",
+                            "NI013",
+                            "NI014",
+                            "NI015",
+                            "NI028",
+                            "NI029",
+                            "NI056",
+                            "NI060",
+                            "NI081",
+                            "NI082",
+                            "NI083",
+                            "NT004",
+                            "NT007",
+                            "NT008",
+                            "NT009",
+                            "NT013",
+                            "NT014",
+                            "NT015",
+                            "NT019",
+                            "NT021",
+                            "NT025",
+                            "NT028",
+                            "NT029",
+                            "NT035",
+                            "NT043",
+                            "NT044",
+                            "NT045",
+                            "NT051",
+                            "NT055",
+                            "NT056",
+                            "NT057",
+                            "NT060",
+                            "NT061",
+                            "NT140",
+                            "NT141",
+                            "NT146",
+                            "NT182",
+                            "NT504",
+                            "NT513",
+                            "NT515",
+                            "NT528",
+                            "NC016",
+                            "NC084",
+                            "NC123",
+                            "NC124",
+                            "NC909",
+                            "NR021",
+                            "NR123",
+                            "NR124",
+                            "NR304",
+                            "NR309",
+                            "NR313",
+                            "NR314",
+                            "NR315",
+                            "BR313",
+                            "BR315",
+                            "NR328",
+                            "NR329",
+                            "NR360",
+                            "NR380",
+                            "NW304",
+                            "NW313",
+                            "NW315",
+                            "NW328",
+                            "NW360",
+                            "NW380",
+                            "CD001C",
+                            "CD002C",
+                            "CD003C",
+                            "CD006C",
+                            "CD010C",
+                            "CD012C",
+                            "CD018C",
+                            "CD024C",
+                            "CD027C",
+                            "CD038C",
+                            "CD049C",
+                            "CD050C",
+                            "CD059C",
+                            "CD063C",
+                            "CD070C",
+                            "CD071C",
+                            "CD078C",
+                            "CD094C",
+                            "CD095C",
+                            "CD114C",
+                            "CD115C",
+                            "CD118C",
+                            "CD142C",
+                            "CD143C",
+                            "CD144C",
+                            "CD145C",
+                            "CD150C",
+                            "CD151C",
+                            "CD152C",
+                            "CD160C",
+                            "CD164C",
+                            "CD165C",
+                            "CD168C",
+                            "CD180C",
+                            "CD181C",
+                            "CD200C",
+                            "CD201C",
+                            "CD203C",
+                            "CD204C",
+                            "CD205C",
+                            "CD209C",
+                            "CD411D",
+                            "CD903D",
+                            "CD906C",
+                            "CD917C",
+                            "CD971C",
+                            "CD974C",
+                            "CD975C"
+                        ]
+                    },
+                    "sender": {
+                        "type": "string"
+                    },
+                    "recipient": {
+                        "type": "string"
+                    },
+                    "messageDirection": {
+                        "type": "string"
+                    }
+                },
+                "description": "Wrapper for Message."
+            },
+            "PageMessageMetaDataDto": {
+                "type": "object",
+                "properties": {
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageMetaDataDto"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PageableObject": {
+                "type": "object",
+                "properties": {
+                    "paged": {
+                        "type": "boolean"
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "offset": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    },
+                    "unpaged": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SortObject": {
+                "type": "object",
+                "properties": {
+                    "direction": {
+                        "type": "string"
+                    },
+                    "nullHandling": {
+                        "type": "string"
+                    },
+                    "ascending": {
+                        "type": "boolean"
+                    },
+                    "property": {
+                        "type": "string"
+                    },
+                    "ignoreCase": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "StatusUpdateDto": {
+                "required": [
+                    "referenceNumber",
+                    "state",
+                    "version"
+                ],
+                "type": "object",
+                "properties": {
+                    "referenceNumber": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "traderNumber": {
+                        "type": "string"
+                    },
+                    "reason": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Reason"
+                        }
+                    }
+                }
+            },
+            "Reason": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "reference": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                }
+            },
+            "MessageContentDto": {
+                "type": "object",
+                "properties": {
+                    "messageType": {
+                        "type": "string",
+                        "enum": [
+                            "UNKNOWN",
+                            "NE004",
+                            "NE009",
+                            "NE013",
+                            "NE014",
+                            "NE015",
+                            "NE021",
+                            "NE028",
+                            "NE029",
+                            "NE056",
+                            "NE060",
+                            "NE069",
+                            "NE083",
+                            "NE096",
+                            "NE130",
+                            "NE131",
+                            "NI004",
+                            "NI009",
+                            "NI013",
+                            "NI014",
+                            "NI015",
+                            "NI028",
+                            "NI029",
+                            "NI056",
+                            "NI060",
+                            "NI081",
+                            "NI082",
+                            "NI083",
+                            "NT004",
+                            "NT007",
+                            "NT008",
+                            "NT009",
+                            "NT013",
+                            "NT014",
+                            "NT015",
+                            "NT019",
+                            "NT021",
+                            "NT025",
+                            "NT028",
+                            "NT029",
+                            "NT035",
+                            "NT043",
+                            "NT044",
+                            "NT045",
+                            "NT051",
+                            "NT055",
+                            "NT056",
+                            "NT057",
+                            "NT060",
+                            "NT061",
+                            "NT140",
+                            "NT141",
+                            "NT146",
+                            "NT182",
+                            "NT504",
+                            "NT513",
+                            "NT515",
+                            "NT528",
+                            "NC016",
+                            "NC084",
+                            "NC123",
+                            "NC124",
+                            "NC909",
+                            "NR021",
+                            "NR123",
+                            "NR124",
+                            "NR304",
+                            "NR309",
+                            "NR313",
+                            "NR314",
+                            "NR315",
+                            "BR313",
+                            "BR315",
+                            "NR328",
+                            "NR329",
+                            "NR360",
+                            "NR380",
+                            "NW304",
+                            "NW313",
+                            "NW315",
+                            "NW328",
+                            "NW360",
+                            "NW380",
+                            "CD001C",
+                            "CD002C",
+                            "CD003C",
+                            "CD006C",
+                            "CD010C",
+                            "CD012C",
+                            "CD018C",
+                            "CD024C",
+                            "CD027C",
+                            "CD038C",
+                            "CD049C",
+                            "CD050C",
+                            "CD059C",
+                            "CD063C",
+                            "CD070C",
+                            "CD071C",
+                            "CD078C",
+                            "CD094C",
+                            "CD095C",
+                            "CD114C",
+                            "CD115C",
+                            "CD118C",
+                            "CD142C",
+                            "CD143C",
+                            "CD144C",
+                            "CD145C",
+                            "CD150C",
+                            "CD151C",
+                            "CD152C",
+                            "CD160C",
+                            "CD164C",
+                            "CD165C",
+                            "CD168C",
+                            "CD180C",
+                            "CD181C",
+                            "CD200C",
+                            "CD201C",
+                            "CD203C",
+                            "CD204C",
+                            "CD205C",
+                            "CD209C",
+                            "CD411D",
+                            "CD903D",
+                            "CD906C",
+                            "CD917C",
+                            "CD971C",
+                            "CD974C",
+                            "CD975C"
+                        ]
+                    },
+                    "version": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "object"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "messageDirection": {
+                        "type": "string"
+                    },
+                    "referenceNumber": {
+                        "type": "string"
+                    }
+                }
+            },
+            "MessageSearchResponseUiDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Message identifier"
+                    },
+                    "creationDateTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updateDateTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "referenceNumber": {
+                        "type": "string"
+                    },
+                    "oppositeInformationReferenceNumber": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string",
+                        "enum": [
+                            "DUPLICATE_MESSAGE",
+                            "RECEIVED",
+                            "INVALID_SYNTAX",
+                            "INVALID_SEMANTICS",
+                            "IMPLAUSIBLE",
+                            "PROCESS_CONFLICT",
+                            "VALIDATED",
+                            "CREATED",
+                            "SENT",
+                            "CONFIRMED"
+                        ]
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "UNKNOWN",
+                            "NE004",
+                            "NE009",
+                            "NE013",
+                            "NE014",
+                            "NE015",
+                            "NE021",
+                            "NE028",
+                            "NE029",
+                            "NE056",
+                            "NE060",
+                            "NE069",
+                            "NE083",
+                            "NE096",
+                            "NE130",
+                            "NE131",
+                            "NI004",
+                            "NI009",
+                            "NI013",
+                            "NI014",
+                            "NI015",
+                            "NI028",
+                            "NI029",
+                            "NI056",
+                            "NI060",
+                            "NI081",
+                            "NI082",
+                            "NI083",
+                            "NT004",
+                            "NT007",
+                            "NT008",
+                            "NT009",
+                            "NT013",
+                            "NT014",
+                            "NT015",
+                            "NT019",
+                            "NT021",
+                            "NT025",
+                            "NT028",
+                            "NT029",
+                            "NT035",
+                            "NT043",
+                            "NT044",
+                            "NT045",
+                            "NT051",
+                            "NT055",
+                            "NT056",
+                            "NT057",
+                            "NT060",
+                            "NT061",
+                            "NT140",
+                            "NT141",
+                            "NT146",
+                            "NT182",
+                            "NT504",
+                            "NT513",
+                            "NT515",
+                            "NT528",
+                            "NC016",
+                            "NC084",
+                            "NC123",
+                            "NC124",
+                            "NC909",
+                            "NR021",
+                            "NR123",
+                            "NR124",
+                            "NR304",
+                            "NR309",
+                            "NR313",
+                            "NR314",
+                            "NR315",
+                            "BR313",
+                            "BR315",
+                            "NR328",
+                            "NR329",
+                            "NR360",
+                            "NR380",
+                            "NW304",
+                            "NW313",
+                            "NW315",
+                            "NW328",
+                            "NW360",
+                            "NW380",
+                            "CD001C",
+                            "CD002C",
+                            "CD003C",
+                            "CD006C",
+                            "CD010C",
+                            "CD012C",
+                            "CD018C",
+                            "CD024C",
+                            "CD027C",
+                            "CD038C",
+                            "CD049C",
+                            "CD050C",
+                            "CD059C",
+                            "CD063C",
+                            "CD070C",
+                            "CD071C",
+                            "CD078C",
+                            "CD094C",
+                            "CD095C",
+                            "CD114C",
+                            "CD115C",
+                            "CD118C",
+                            "CD142C",
+                            "CD143C",
+                            "CD144C",
+                            "CD145C",
+                            "CD150C",
+                            "CD151C",
+                            "CD152C",
+                            "CD160C",
+                            "CD164C",
+                            "CD165C",
+                            "CD168C",
+                            "CD180C",
+                            "CD181C",
+                            "CD200C",
+                            "CD201C",
+                            "CD203C",
+                            "CD204C",
+                            "CD205C",
+                            "CD209C",
+                            "CD411D",
+                            "CD903D",
+                            "CD906C",
+                            "CD917C",
+                            "CD971C",
+                            "CD974C",
+                            "CD975C"
+                        ]
+                    },
+                    "typeDescription": {
+                        "type": "string"
+                    },
+                    "sender": {
+                        "type": "string"
+                    },
+                    "recipient": {
+                        "type": "string"
+                    },
+                    "messageDirection": {
+                        "type": "string"
+                    }
+                },
+                "description": "Wrapper for Message."
+            },
+            "PageMessageSearchResponseUiDto": {
+                "type": "object",
+                "properties": {
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageSearchResponseUiDto"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "NationalCodeListItem": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "codtxt": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "writeOnly": true
+                    },
+                    "codeText": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "ConfigurationDto": {
+                "type": "object",
+                "properties": {
+                    "authority": {
+                        "type": "string"
+                    },
+                    "applicationUrl": {
+                        "type": "string"
+                    },
+                    "mockPams": {
+                        "type": "boolean"
+                    },
+                    "pamsEnvironment": {
+                        "type": "string"
+                    },
+                    "tokenAwarePatterns": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "redirectUrl": {
+                        "type": "string"
+                    },
+                    "clientId": {
+                        "type": "string"
+                    },
+                    "useAutoLogin": {
+                        "type": "boolean"
+                    },
+                    "journeyUrl": {
+                        "type": "string"
+                    },
+                    "nctsDeclarationUrl": {
+                        "type": "string"
+                    },
+                    "manualProcedureUrl": {
+                        "type": "string"
+                    },
+                    "nationalDeclarationUrl": {
+                        "type": "string"
+                    },
+                    "nationalTransitUrl": {
+                        "type": "string"
+                    },
+                    "nctsCommunicationUrl": {
+                        "type": "string"
+                    },
+                    "processContextUrl": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "OIDC": {
+                "type": "openIdConnect",
+                "description": "OAuth2-Authentication",
+                "openIdConnectUrl": "https://<<someOpenIdConnectUrl>>/realms/<<some-realm>>/.well-known/openid-configuration"
+            }
+        }
+    }
+}

@@ -1,0 +1,10 @@
+@namespace("ch.admin.ezv.wvs.domainevent.common.v4")
+protocol JourneyReferenceProtocol {
+	record JourneyReference {
+		string type = "JourneyReference";
+		string dbId;
+		string referenceNumber;
+		string modeOfTransport;
+		union {null, int} journeyVersion = null;
+	}
+}

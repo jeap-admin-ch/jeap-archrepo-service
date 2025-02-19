@@ -1,0 +1,44 @@
+server:
+  servlet:
+    context-path: /${spring.application.name}
+
+jeap.web.tls.enabled: false
+
+spring:
+  application:
+    name: applicationplatform-archrepo-service
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:mem:testdb;INIT=CREATE SCHEMA IF NOT EXISTS data;DATABASE_TO_UPPER=FALSE;MODE=PostgreSQL"
+    username: sa
+    password:
+    hikari:
+      schema: data
+
+archrepo:
+  openapi-base-url: "https://base-url"
+  update-schedule: "-"
+  api:
+    secret: "{noop}secret"
+  documentation-generator:
+    update-schedule: "-"
+    space-key: "FOO"
+    root-page-name: "BAR"
+    confluence:
+      url: "https://foo.bar"
+      space-key: "ARCDOCTEST"
+      root-page-name: "Systeme"
+      username: "ezv-archrepo-techuser"
+      password: "PASSWORD"
+      mock-confluence-client: true
+
+prometheus-cf:
+  hosts:
+    - host: "host"
+      api-key: "api-key"
+
+pactbroker:
+  url: "https://foo.bar"
+
+

@@ -1,0 +1,44 @@
+<div th:fragment="relations-table" xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <table class="wrapped relative-table" style="width: 100.0%;" th:unless="${relations.empty}">
+        <colgroup>
+            <col style="width: 25.0%;"/>
+            <col style="width: 25.0%;"/>
+            <col style="width: 25.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1" th:text="${counterpartLabel}">Anbieter</th>
+            <th colspan="1">Name</th>
+            <th colspan="1">Links</th>
+        </tr>
+        <tr th:each="relation: ${relations}">
+            <td colspan="1">
+                <ac:link th:if="${relation.counterpart}">
+                    <ri:page th:ri:content-title="${relation.counterpart}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${relation.counterpart}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+                <p th:unless="${relation.counterpart}">unbekannt</p>
+            </td>
+            <td colspan="1">
+                <ac:link th:if="${relation.labelLinkable}">
+                    <ri:page th:ri:content-title="${relation.label}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${relation.label}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+                <p th:unless="${relation.labelLinkable}" th:text="${relation.label}"></p>
+            </td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="linkEntry: ${relation.links}">
+                        <a th:href="${linkEntry.value}" th:text="${linkEntry.key}" target="_blank"></a>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${relations.empty}">Keine</p>
+</div>

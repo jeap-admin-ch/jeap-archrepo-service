@@ -1,0 +1,92 @@
+<ac:structured-macro ac:name="info" ac:schema-version="1">
+    <ac:rich-text-body>
+        <p>Diese Seite wurde automatisch generiert.</p>
+    </ac:rich-text-body>
+</ac:structured-macro>
+<p></p>
+
+<ac:structured-macro ac:name="children" ac:schema-version="2">
+    <ac:parameter ac:name="depth">2</ac:parameter>
+</ac:structured-macro>
+
+<table class="wrapped relative-table" style="width: 80.0%;">
+    <colgroup>
+        <col style="width: 22.0%;"/>
+        <col style="width: 78.0%;"/>
+    </colgroup>
+    <tbody>
+    <tr>
+        <td colspan="1">Typ</td>
+        <td colspan="1">Backend Service</td>
+    </tr>
+    <tr>
+        <td colspan="1">Team</td>
+        <td colspan="1"></td>
+
+    </tr>
+    <tr>
+        <td colspan="1">System</td>
+        <td colspan="1">
+            <ac:link>
+                <ri:page ri:content-title="System (System)"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[System]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h1>Kontext</h1>
+
+<ac:structured-macro ac:name="plantuml" ac:schema-version="1">
+    <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+    <ac:plain-text-body><![CDATA[]]></ac:plain-text-body>
+</ac:structured-macro>
+
+<h1>Rest API</h1>
+
+
+<p>
+    <a href="https://base-url/system/systemcomponent">OpenApi Specification</a>
+</p>
+
+<h1>Ausgehende Beziehungen</h1>
+
+<h2>Aufgerufene REST-APIs</h2>
+
+
+<p>Keine</p>
+
+
+<h2>Produzierte Events</h2>
+
+
+<p>Keine</p>
+
+
+<h2>Gesendete Commands</h2>
+
+
+<p>Keine</p>
+
+
+<h1>Eingehende Beziehungen</h1>
+
+<h2>Eingehende Aufrufe auf REST-APIs</h2>
+
+
+<p>Keine</p>
+
+
+<h2>Konsumierte Events</h2>
+
+
+<p>Keine</p>
+
+
+<h2>Empfangene Commands</h2>
+
+
+<p>Keine</p>

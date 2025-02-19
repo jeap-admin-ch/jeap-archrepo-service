@@ -1,0 +1,86 @@
+<div th:fragment="message-type" xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <ac:structured-macro ac:name="children" ac:schema-version="2">
+        <ac:parameter ac:name="depth">2</ac:parameter>
+    </ac:structured-macro>
+
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 78.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <td colspan="1">Name</td>
+            <td colspan="1" th:text="${messageType.messageTypeName}"></td>
+        </tr>
+        <tr>
+            <td colspan="1">Dokumentation</td>
+            <td colspan="1">
+                <a th:href="${messageType.documentationUrl}" th:if="${messageType.documentationUrl != null}">Link</a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="1">Deskriptor</td>
+            <td colspan="1">
+                <a th:href="${messageType.descriptorUrl}">Link</a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="1">Scope</td>
+            <td colspan="1" th:text="${messageType.scope}"></td>
+        </tr>
+        <tr>
+            <td colspan="1">Topic</td>
+            <td colspan="1" th:text="${messageType.topic}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <h2>Versionen</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;" th:unless="${messageType.messageVersions.empty}">
+        <colgroup>
+            <col style="width: 20.0%;"/>
+            <col style="width: 40.0%;"/>
+            <col style="width: 40.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Version</th>
+            <th colspan="1">Key</th>
+            <th colspan="1">Value</th>
+        </tr>
+        <tr th:each="version: ${messageType.messageVersions}">
+            <td colspan="1" th:text="${version.version}"></td>
+            <td colspan="1">
+                <a th:href="${version.keySchemaUrl}" th:if="${version.keySchemaUrl!= null}"
+                   th:text="${version.keySchemaName}"></a>
+                <ac:structured-macro ac:name="code" ac:schema-version="1" th:if="${version.keySchemaUrl!= null}">
+                    <ac:parameter ac:name="title">Schema</ac:parameter>
+                    <ac:parameter ac:name="collapse">true</ac:parameter>
+                    <ac:plain-text-body
+                            th:utext="${'<![CDATA[' + version.keySchemaResolved + ']]>'}">
+                    </ac:plain-text-body>
+                </ac:structured-macro>
+            </td>
+            <td colspan="1">
+                <a th:href="${version.valueSchemaUrl}" th:text="${version.valueSchemaName}"></a>
+                <p th:if="${version.compatibilityMode != null and version.compatibleVersion != null}"
+                   th:utext="'Avro Schema Compatibility with Version ' + ${version.compatibleVersion} + ': <strong>' + ${version.compatibilityMode} + '</strong>'">
+                </p>
+                <p th:if="${version.compatibilityMode  != null and version.compatibleVersion == null}"
+                   th:utext="'Avro Schema Compatibility: <strong>' + ${version.compatibilityMode} + '</strong>'">
+                </p>
+                <ac:structured-macro ac:name="code" ac:schema-version="1">
+                    <ac:parameter ac:name="title">Schema</ac:parameter>
+                    <ac:parameter ac:name="collapse">true</ac:parameter>
+                    <ac:plain-text-body
+                            th:utext="${'<![CDATA[' + version.valueSchemaResolved + ']]>'}">
+                    </ac:plain-text-body>
+                </ac:structured-macro>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${messageType.messageVersions.empty}">Keine</p>
+</div>

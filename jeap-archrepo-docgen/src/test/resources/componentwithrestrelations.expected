@@ -1,0 +1,569 @@
+<ac:structured-macro ac:name="info" ac:schema-version="1">
+    <ac:rich-text-body>
+        <p>Diese Seite wurde automatisch generiert.</p>
+    </ac:rich-text-body>
+</ac:structured-macro>
+    <p></p>
+
+    <ac:structured-macro ac:name="children" ac:schema-version="2">
+        <ac:parameter ac:name="depth">2</ac:parameter>
+    </ac:structured-macro>
+
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 78.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <td colspan="1">Typ</td>
+            <td colspan="1">Backend Service</td>
+        </tr>
+        <tr>
+            <td colspan="1">Team</td>
+            <td colspan="1"></td>
+
+        </tr>
+        <tr>
+            <td colspan="1">System</td>
+            <td colspan="1">
+                <ac:link>
+                    <ri:page ri:content-title="System (System)"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[System]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h1>Kontext</h1>
+
+    <ac:structured-macro ac:name="plantuml" ac:schema-version="1">
+        <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+        <ac:plain-text-body><![CDATA[]]></ac:plain-text-body>
+    </ac:structured-macro>
+
+    <h1>Rest API</h1>
+
+    <p>-</p>
+
+
+    <h1>Ausgehende Beziehungen</h1>
+
+    <h2>Aufgerufene REST-APIs</h2>
+
+    <table class="wrapped relative-table" style="width: 100.0%;">
+        <colgroup>
+            <col style="width: 25.0%;"/>
+            <col style="width: 25.0%;"/>
+            <col style="width: 25.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">REST-API-Anbieter</th>
+            <th colspan="1">Name</th>
+            <th colspan="1">Links</th>
+        </tr>
+        <tr>
+            <td colspan="1">
+                <ac:link>
+                    <ri:page ri:content-title="consumer1"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[consumer1]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+
+            </td>
+            <td colspan="1">
+
+                <p>GET /api/outgoing</p>
+            </td>
+            <td colspan="1">
+                <ul>
+
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="1">
+                <ac:link>
+                    <ri:page ri:content-title="consumer1"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[consumer1]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+
+            </td>
+            <td colspan="1">
+
+                <p>PUT /api/outgoing/value</p>
+            </td>
+            <td colspan="1">
+                <ul>
+                    <li>
+                        <a href="http://pact_outgoing" target="_blank">Pact</a>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+
+    <h2>Produzierte Events</h2>
+
+
+    <p>Keine</p>
+
+
+    <h2>Gesendete Commands</h2>
+
+
+    <p>Keine</p>
+
+
+    <h1>Eingehende Beziehungen</h1>
+
+    <h2>Eingehende Aufrufe auf REST-APIs</h2>
+
+    <table class="wrapped relative-table" style="width: 100.0%;">
+        <colgroup>
+            <col style="width: 40.0%;"/>
+            <col style="width: 10.0%;"/>
+            <col style="width: 50.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Path</th>
+            <th colspan="1">Method</th>
+            <th colspan="1">REST-API-Aufrufer</th>
+        </tr>
+
+        <tr>
+
+                <td colspan="1" rowspan="1">
+                    <p>/api/a/b</p>
+                </td>
+
+            <td colspan="1">
+                <p>GET</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer3"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer3]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+                <td colspan="1" rowspan="3">
+                    <p>/api/b/c</p>
+                </td>
+
+            <td colspan="1">
+                <p>DELETE</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer3"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer3]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+
+
+            <td colspan="1">
+                <p>GET</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer2"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer2]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+
+
+            <td colspan="1">
+                <p>PUT</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer1"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer1]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+                <td colspan="1" rowspan="3">
+                    <p>/api/incoming</p>
+                </td>
+
+            <td colspan="1">
+                <p>DELETE</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer1"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer1]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer4"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer4]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+
+
+            <td colspan="1">
+                <p>GET</p>
+            </td>
+
+            <td colspan="1">
+                <div class="content-wrapper">
+                    <ac:structured-macro ac:name="expand" ac:schema-version="1">
+                        <ac:parameter ac:name="title">More than three ...</ac:parameter>
+                        <ac:rich-text-body>
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer1"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer1]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer2"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer2]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing2" target="_blank">Pact</a>
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer3"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer3]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing3" target="_blank">Pact</a>
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer4"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer4]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+
+                                </li>
+                            </ul>
+
+                        </ac:rich-text-body>
+                    </ac:structured-macro>
+                </div>
+            </td>
+
+
+
+        </tr>
+
+        <tr>
+
+
+
+            <td colspan="1">
+                <p>PUT</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer1"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer1]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+                <td colspan="1" rowspan="1">
+                    <p>/api/incoming/other</p>
+                </td>
+
+            <td colspan="1">
+                <p>GET</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer1"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer1]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer2"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer2]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing2" target="_blank">Pact</a>
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer3"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer3]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing3" target="_blank">Pact</a>
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+                <td colspan="1" rowspan="1">
+                    <p>/foo/bar</p>
+                </td>
+
+            <td colspan="1">
+                <p>GET</p>
+            </td>
+
+
+
+            <td colspan="1">
+
+                            <ul>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer1"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer1]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+
+
+                                </li>
+                                <li>
+
+                                    <ac:link>
+                                        <ri:page ri:content-title="consumer2"/>
+                                        <ac:plain-text-link-body>
+                                            <![CDATA[consumer2]]>
+                                        </ac:plain-text-link-body>
+                                    </ac:link>
+
+
+                                    /
+                                    <a href="http://pact_outgoing2" target="_blank">Pact</a>
+
+
+                                </li>
+                            </ul>
+
+            </td>
+
+        </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h2>Konsumierte Events</h2>
+
+
+    <p>Keine</p>
+
+
+    <h2>Empfangene Commands</h2>
+
+
+    <p>Keine</p>

@@ -1,0 +1,38 @@
+@namespace("ch.admin.bazg.input.event")
+protocol TestEventProtocol {
+  import idl "DomainEventBaseTypes.avdl";
+
+  record TestPayload {
+       timestamp_ms savedAt;
+  }
+
+  record DocArchivedReferences {
+      FileIdReference fileId;
+      ContextReference contextId;
+      DalaGuidReference dalaGuid;
+  }
+
+  record FileIdReference {
+      string type = "FileId";
+      string id;
+  }
+
+  record ContextReference {
+      string type = "ContextId";
+      string id;
+  }
+
+  record DalaGuidReference {
+    string type = "DalaGuid";
+    string id;
+  }
+
+  record TestEvent {
+    ch.admin.bit.jeap.domainevent.avro.AvroDomainEventIdentity identity;
+    ch.admin.bit.jeap.domainevent.avro.AvroDomainEventType type;
+    ch.admin.bit.jeap.domainevent.avro.AvroDomainEventPublisher publisher;
+    DocArchivedReferences references;
+    TestPayload payload;
+    string domainEventVersion;
+  }
+}

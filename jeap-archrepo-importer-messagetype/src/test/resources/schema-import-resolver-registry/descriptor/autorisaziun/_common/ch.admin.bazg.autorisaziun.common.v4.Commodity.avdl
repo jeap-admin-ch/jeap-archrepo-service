@@ -1,0 +1,16 @@
+@namespace("ch.admin.bazg.autorisaziun.common.v4")
+protocol CommodityProtocol {
+	import idl "ch.admin.bazg.autorisaziun.common.v2.AdditionalInformation.avdl";
+
+	record Commodity {
+		string nationalCustomsTariffNumber;
+		string controlCode;
+		union {null, string} countryOfOrigin = null;
+		double grossMass;
+		union {null, double} netMass = null;
+		union {null, double} additionalMass = null;
+		union {null, string} commodityIdentificationNumber = null;
+		union {null, array<ch.admin.bazg.autorisaziun.common.v2.AdditionalInformation>} additionalInformation = null;
+	}
+}
+

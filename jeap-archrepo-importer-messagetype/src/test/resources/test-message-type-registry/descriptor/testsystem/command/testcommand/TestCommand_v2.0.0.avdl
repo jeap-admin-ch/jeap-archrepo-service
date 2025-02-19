@@ -1,0 +1,27 @@
+@namespace("ch.admin.bazg.input.event")
+protocol TestCommandProtocol {
+  import idl "MessagingBaseTypes.avdl";
+
+  record TestReferences {
+      TestReference fileId;
+      TestContextReference contextId;
+  }
+
+  record TestReference {
+      string type = "InputFileId";
+      string id;
+  }
+
+  record TestContextReference {
+      string type = "InputContextId";
+      string id;
+  }
+
+  record TestCommand {
+    ch.admin.bit.jeap.messaging.avro.AvroMessageIdentity identity;
+    ch.admin.bit.jeap.messaging.avro.AvroMessageType type;
+    ch.admin.bit.jeap.messaging.avro.AvroMessagePublisher publisher;
+    TestReferences references;
+    string commandVersion;
+  }
+}

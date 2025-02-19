@@ -1,0 +1,55 @@
+<ac:structured-macro ac:name="info" ac:schema-version="1">
+    <ac:rich-text-body>
+        <p>Diese Seite wurde automatisch generiert.</p>
+    </ac:rich-text-body>
+</ac:structured-macro>
+
+<p>Description</p>
+
+<p>
+    <a href="https://link">Dokumentation System</a>
+</p>
+
+<h2>Komponenten</h2>
+<table class="wrapped relative-table" style="width: 80.0%;">
+    <colgroup>
+        <col style="width: 22.0%;"/>
+        <col style="width: 22.0%;"/>
+        <col style="width: 22.0%;"/>
+        <col style="width: 34.0%;"/>
+    </colgroup>
+    <tbody>
+        <tr>
+            <th colspan="1">Komponente</th>
+            <th colspan="1">Typ</th>
+            <th colspan="1">Owner</th>
+            <th colspan="1">Beschreibung</th>
+        </tr>
+        <tr>
+          <td colspan="1">
+                <ac:link>
+                    <ri:page ri:content-title="test-ui" />
+                    <ac:plain-text-link-body>
+                     <![CDATA[test-ui]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+             <td colspan="1">Frontend</td>
+            <td colspan="1">Testteam</td>
+            <td colspan="1">desc</td>
+        </tr>
+    </tbody>
+</table>
+
+<h1>Kontext</h1>
+
+<ac:structured-macro ac:name="plantuml" ac:schema-version="1">
+    <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+    <ac:plain-text-body><![CDATA[]]></ac:plain-text-body>
+</ac:structured-macro>
+
+<h2>Events</h2>
+<p>Keine</p>
+
+<h2>Commands</h2>
+<p>Keine</p>

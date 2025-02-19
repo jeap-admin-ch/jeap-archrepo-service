@@ -1,0 +1,78 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <div th:replace="~{fragment/generated-infoblock :: generated-infoblock}"></div>
+    <p th:text="${systemComponent.description}"></p>
+
+    <ac:structured-macro ac:name="children" ac:schema-version="2">
+        <ac:parameter ac:name="depth">2</ac:parameter>
+    </ac:structured-macro>
+
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 78.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <td colspan="1">Typ</td>
+            <td colspan="1" th:text="${systemComponent.type.label}"></td>
+        </tr>
+        <tr>
+            <td colspan="1">Team</td>
+            <td colspan="1" th:if="${systemComponent.ownedBy} == null"></td>
+            <td colspan="1" th:text="${systemComponent.ownedBy.name}"
+                th:unless="${systemComponent.ownedBy} == null"></td>
+        </tr>
+        <tr>
+            <td colspan="1">System</td>
+            <td colspan="1">
+                <ac:link>
+                    <ri:page th:ri:content-title="${systemComponent.parent.name + ' (System)'}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${systemComponent.parent.name}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h1>Kontext</h1>
+
+    <ac:structured-macro ac:name="plantuml" ac:schema-version="1" th:ac:macro-id="${plantUmlMacroId}">
+        <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+        <ac:plain-text-body
+                th:utext="${'<![CDATA[' + contextViewPlantUml + ']]>'}">
+        </ac:plain-text-body>
+    </ac:structured-macro>
+
+    <h1>Rest API</h1>
+
+    <p th:if="${openApiSpecUrl.isEmpty()}">-</p>
+    <p th:unless="${openApiSpecUrl.isEmpty()}">
+        <a th:href="${openApiSpecUrl}" th:text="'OpenApi Specification'"></a>
+    </p>
+
+    <h1>Ausgehende Beziehungen</h1>
+
+    <h2>Aufgerufene REST-APIs</h2>
+    <div th:replace="~{fragment/relations-table :: relations-table(relations=${consumedRestApiRelations}, counterpartLabel='REST-API-Anbieter', label='Methode / Endpunkt')}"></div>
+
+    <h2>Produzierte Events</h2>
+    <div th:replace="~{fragment/grouped-relations-table :: grouped-relations-table(relations=${producedEventRelations}, counterpartLabel='Event Consumer', label='Event')}"></div>
+
+    <h2>Gesendete Commands</h2>
+    <div th:replace="~{fragment/grouped-relations-table :: grouped-relations-table(relations=${sentCommandRelations}, counterpartLabel='Command Receiver', label='Command')}"></div>
+
+    <h1>Eingehende Beziehungen</h1>
+
+    <h2>Eingehende Aufrufe auf REST-APIs</h2>
+    <div th:replace="~{fragment/grouped-api-relations-table :: grouped-api-relations-table(relations=${providedRestApiRelations}, counterpartLabel='REST-API-Aufrufer', label='Methode / Endpunkt')}"></div>
+
+    <h2>Konsumierte Events</h2>
+    <div th:replace="~{fragment/grouped-relations-table :: grouped-relations-table(relations=${consumedEventRelations}, counterpartLabel='Event Producer', label='Event')}"></div>
+
+    <h2>Empfangene Commands</h2>
+    <div th:replace="~{fragment/grouped-relations-table :: grouped-relations-table(relations=${receivedCommandRelations}, counterpartLabel='Command Sender', label='Command')}"></div>
+
+
+</th:block>

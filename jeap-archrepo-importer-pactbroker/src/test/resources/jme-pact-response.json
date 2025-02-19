@@ -1,0 +1,430 @@
+{
+  "provider": {
+    "name": "bit-jme-cdc-provider-service"
+  },
+  "consumer": {
+    "name": "bit-jme-cdc-consumer-service"
+  },
+  "interactions": [
+    {
+      "_id": "c19e9ea285387b363d39264da4c110225241d48c",
+      "description": "A request to /cdc/api/task/${task-id}",
+      "request": {
+        "method": "GET",
+        "path": "/cdc/api/task/123456789",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ0YXNrQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsidGFzay1yZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.WYVArBklC8oyxjibht0TksBdAYJQgnOxrpekV5sJ77ARbl8EuiqzvIu6UCry18-KHwxP0EGaMNc9SghvI7fgdYHyxd8VRLfLs2IbqzWN-mDqorMYc5Zd3k97Lm9AXzXiRMmNbgllNDk1Im-aarx21MJYeqQOHL_Rr71MxX7axyZhRiXerbnUHIikF7X92gOzs2glgiueslhZxZhLv06bCiiAkH6gKJtCTQfRi-cPYfvVe4q6Xvx3pGRCs5pxzieGjwNQ3NZ9xHNxd8YjuSACfXey8WO60bGRqmPcS5llxNqAsX3Wb8R-U8wq8Pe89p3zyZY0CtNE_xa36_4WrJhbiw"
+        },
+        "generators": {
+          "path": {
+            "type": "ProviderState",
+            "expression": "/cdc/api/task/${task-id}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; encoding=utf-8"
+        },
+        "body": {
+          "id": "123456789",
+          "title": "test-title",
+          "content": "test-content"
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.content": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "ProviderState",
+              "expression": "${task-id}"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A task is present"
+        }
+      ]
+    },
+    {
+      "_id": "2453955ac5855d6f5dbf4b68bb9f886846fee60e",
+      "description": "A GET request to /cdc/api/task/${task-id}",
+      "request": {
+        "method": "GET",
+        "path": "/cdc/api/task/123456789",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ0YXNrQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsidGFzay1yZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.WYVArBklC8oyxjibht0TksBdAYJQgnOxrpekV5sJ77ARbl8EuiqzvIu6UCry18-KHwxP0EGaMNc9SghvI7fgdYHyxd8VRLfLs2IbqzWN-mDqorMYc5Zd3k97Lm9AXzXiRMmNbgllNDk1Im-aarx21MJYeqQOHL_Rr71MxX7axyZhRiXerbnUHIikF7X92gOzs2glgiueslhZxZhLv06bCiiAkH6gKJtCTQfRi-cPYfvVe4q6Xvx3pGRCs5pxzieGjwNQ3NZ9xHNxd8YjuSACfXey8WO60bGRqmPcS5llxNqAsX3Wb8R-U8wq8Pe89p3zyZY0CtNE_xa36_4WrJhbiw"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; encoding=utf-8"
+        },
+        "body": {
+          "id": "123456789",
+          "title": "test-title",
+          "content": "test-content"
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.content": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A task with task id ${task-id} is present",
+          "params": {
+            "task-id": "123456789"
+          }
+        }
+      ]
+    },
+    {
+      "_id": "e1f7acb2e343191c3a906ac0caef663ef87e9b36",
+      "description": "A GET request to /cdc/api/task/1",
+      "request": {
+        "method": "GET",
+        "path": "/cdc/api/task/1",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ0YXNrQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsidGFzay1yZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.WYVArBklC8oyxjibht0TksBdAYJQgnOxrpekV5sJ77ARbl8EuiqzvIu6UCry18-KHwxP0EGaMNc9SghvI7fgdYHyxd8VRLfLs2IbqzWN-mDqorMYc5Zd3k97Lm9AXzXiRMmNbgllNDk1Im-aarx21MJYeqQOHL_Rr71MxX7axyZhRiXerbnUHIikF7X92gOzs2glgiueslhZxZhLv06bCiiAkH6gKJtCTQfRi-cPYfvVe4q6Xvx3pGRCs5pxzieGjwNQ3NZ9xHNxd8YjuSACfXey8WO60bGRqmPcS5llxNqAsX3Wb8R-U8wq8Pe89p3zyZY0CtNE_xa36_4WrJhbiw"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; encoding=utf-8"
+        },
+        "body": {
+          "id": "1",
+          "title": "test-title",
+          "content": "test-content"
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.content": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A task with task id '1' is present"
+        }
+      ]
+    },
+    {
+      "_id": "aa3bd3bd83551bc584aa51abb1805979ebd19caa",
+      "description": "A request to /cdc/api/task/1 with insufficient authorization",
+      "request": {
+        "method": "GET",
+        "path": "/cdc/api/task/1",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ0YXNrQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsic29tZS11bnJlbGF0ZWQtcm9sZSJdLCJjdHgiOiJTWVMiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2F1dGgiLCJleHAiOjQ3MzM1MDY4MDAsImlhdCI6MTU3NzgzMzIwMCwianRpIjoidGVzdC10b2tlbiJ9.nJiTj0Z2q4vVNha2LjcOpqe6kVXWUHGtYfH4VF9eS1T_sl7RFgotH9HdX0vb6qymxx9jLOz1Vd1f2UhQ07qLrUAuEyxPfjGTWySPnRt5WjSy7Gl2TToyNfIk-zIslhpNnp3CN1DzjDgQx6HfrdE5YtubhJ43P7O9G9Xo-pmIRrdEDYtx7lrJ293PMOlwqgXcqcxRzAJeKljrcOg2R_5BW_tSXBCLdT-oIkV9DgtJMl3K6-3FtGrAHVq2VlPt-5v4Ynf1jhTqgbZXaWCvrAXyYmy4VAeEVVkGDD1TS2jVJ8mFPqq9UMw3hXn3jbYav7ovD0XKGEdlyAfQOM6fomd8LA"
+        }
+      },
+      "response": {
+        "status": 403
+      },
+      "providerStates": [
+        {
+          "name": "A task with task id '1' is present"
+        }
+      ]
+    },
+    {
+      "_id": "6c6bc4a82df83825af4ca4e61f72ff0375265953",
+      "description": "A request to /cdc/api/task",
+      "request": {
+        "method": "GET",
+        "path": "/cdc/api/task",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ0YXNrQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsidGFzay1yZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.WYVArBklC8oyxjibht0TksBdAYJQgnOxrpekV5sJ77ARbl8EuiqzvIu6UCry18-KHwxP0EGaMNc9SghvI7fgdYHyxd8VRLfLs2IbqzWN-mDqorMYc5Zd3k97Lm9AXzXiRMmNbgllNDk1Im-aarx21MJYeqQOHL_Rr71MxX7axyZhRiXerbnUHIikF7X92gOzs2glgiueslhZxZhLv06bCiiAkH6gKJtCTQfRi-cPYfvVe4q6Xvx3pGRCs5pxzieGjwNQ3NZ9xHNxd8YjuSACfXey8WO60bGRqmPcS5llxNqAsX3Wb8R-U8wq8Pe89p3zyZY0CtNE_xa36_4WrJhbiw"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "body": [
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          },
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          },
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          },
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          },
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          },
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          },
+          {
+            "id": "123456789",
+            "title": "test-title",
+            "content": "test-content"
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 2
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[*].content": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "Several tasks are present"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.0.7"
+    }
+  },
+  "createdAt": "2020-04-21T08:58:50+00:00",
+  "_links": {
+    "self": {
+      "title": "Pact",
+      "name": "Pact between bit-jme-cdc-consumer-service (1.0.0-2) and bit-jme-cdc-provider-service",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/version/1.0.0-2"
+    },
+    "pb:consumer": {
+      "title": "Consumer",
+      "name": "bit-jme-cdc-consumer-service",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service"
+    },
+    "pb:consumer-version": {
+      "title": "Consumer version",
+      "name": "1.0.0-2",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service/versions/1.0.0-2"
+    },
+    "pb:provider": {
+      "title": "Provider",
+      "name": "bit-jme-cdc-provider-service",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-provider-service"
+    },
+    "pb:latest-pact-version": {
+      "title": "Latest version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/latest"
+    },
+    "pb:all-pact-versions": {
+      "title": "All versions of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/versions"
+    },
+    "pb:latest-untagged-pact-version": {
+      "title": "Latest untagged version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/latest-untagged"
+    },
+    "pb:latest-tagged-pact-version": {
+      "title": "Latest tagged version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/latest/{tag}",
+      "templated": true
+    },
+    "pb:previous-distinct": {
+      "title": "Previous distinct version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/version/1.0.0-2/previous-distinct"
+    },
+    "pb:diff-previous-distinct": {
+      "title": "Diff with previous distinct version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/version/1.0.0-2/diff/previous-distinct"
+    },
+    "pb:diff": {
+      "title": "Diff with another specified version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/pact-version/cc48a762324f8a11e763a8d1ad806294535da58f/diff/pact-version/{pactVersion}",
+      "templated": true
+    },
+    "pb:pact-webhooks": {
+      "title": "Webhooks for the pact between bit-jme-cdc-consumer-service and bit-jme-cdc-provider-service",
+      "href": "https://some-pactbroker-url/webhooks/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service"
+    },
+    "pb:consumer-webhooks": {
+      "title": "Webhooks for all pacts with provider bit-jme-cdc-provider-service",
+      "href": "https://some-pactbroker-url/webhooks/consumer/bit-jme-cdc-provider-service"
+    },
+    "pb:tag-prod-version": {
+      "title": "PUT to this resource to tag this consumer version as 'production'",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service/versions/1.0.0-2/tags/prod"
+    },
+    "pb:tag-version": {
+      "title": "PUT to this resource to tag this consumer version",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service/versions/1.0.0-2/tags/{tag}"
+    },
+    "pb:publish-verification-results": {
+      "title": "Publish verification results",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/pact-version/cc48a762324f8a11e763a8d1ad806294535da58f/verification-results"
+    },
+    "pb:latest-verification-results": {
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/pact-version/cc48a762324f8a11e763a8d1ad806294535da58f/verification-results/latest"
+    },
+    "pb:triggered-webhooks": {
+      "title": "Webhooks triggered by the publication of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/version/1.0.0-2/triggered-webhooks"
+    },
+    "curies": [
+      {
+        "name": "pb",
+        "href": "https://some-pactbroker-url/doc/{rel}?context=pact",
+        "templated": true
+      }
+    ]
+  }
+}

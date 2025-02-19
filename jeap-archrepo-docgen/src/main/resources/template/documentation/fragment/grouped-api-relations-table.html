@@ -1,0 +1,44 @@
+<div th:fragment="grouped-api-relations-table" xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <table class="wrapped relative-table" style="width: 100.0%;" th:unless="${relations.empty}">
+        <colgroup>
+            <col style="width: 40.0%;"/>
+            <col style="width: 10.0%;"/>
+            <col style="width: 50.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Path</th>
+            <th colspan="1">Method</th>
+            <th colspan="1" th:text="${counterpartLabel}">Anbieter</th>
+        </tr>
+
+        <tr th:each="relation: ${relations}">
+
+            <td th:if="${relation.key}" colspan="1" th:rowspan="${relation.key.rowspan}">
+                <p th:text="${relation.key.path}"></p>
+            </td>
+
+            <td colspan="1">
+                <p th:text="${relation.method}"></p>
+            </td>
+
+            <td colspan="1" th:if="${relation.relations.size > 3}">
+                <div class="content-wrapper">
+                    <ac:structured-macro ac:name="expand" ac:schema-version="1">
+                        <ac:parameter ac:name="title">More than three ...</ac:parameter>
+                        <ac:rich-text-body>
+                            <div th:replace="~{fragment/api-relation-list :: api-relation-list(relations=${relations})}"></div>
+                        </ac:rich-text-body>
+                    </ac:structured-macro>
+                </div>
+            </td>
+
+            <td colspan="1" th:if="${relation.relations.size <= 3}">
+                <div th:replace="~{fragment/api-relation-list :: api-relation-list(relations=${relations})}"></div>
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${relations.empty}">Keine</p>
+</div>

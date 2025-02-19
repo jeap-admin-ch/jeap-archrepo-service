@@ -1,0 +1,399 @@
+{
+  "consumer": {
+    "name": "bit-jme-cdc-consumer-service"
+  },
+  "provider": {
+    "name": "bit-jme-cdc-segregatedProvider-service_moduleB"
+  },
+  "interactions": [
+    {
+      "_id": "71e9fc712fa9e90404c0bf703b4add9e09c27a24",
+      "description": "A request to /cdc-segregated-provider-service/api/user/${user-id}",
+      "providerStates": [
+        {
+          "name": "A user is present"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "dataType": "STRING",
+            "expression": "/cdc-segregated-provider-service/api/user/${user-id}",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ1c2VyQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiam1lX0B1c2VyXyNyZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.DmEmpmETxzasIxhjfoYkKEI4B69gLf2SpKPwfknxz7xnDvaqKsJ3m2nBCfylBjcxZsnznS6Qh40TdH6EbFWAK7gCZ2sMQTtiTLWTiDYS2l3TS7-MOlMxjjhJ1NJKlkSAPPhgkoZc8fqOD_JpbzpG4GsHjRjiO0v2HwNUk_MABB9j4OiRZkl49W9jEN4tbzZLy14X-ImOftSwBMeTmWV2KaR3jdOpv3zrYLZiuXDjQ7Z2SApWkEjvBre6nW4Fl6mJqTc1KKorGp_JcC58iqdsCsGDlMT5zIPaQtSHFZysP8cTILQlKnRprXknszkUimCNWfh9K8tbdcj7xGD5vBVi5A"
+        },
+        "method": "GET",
+        "path": "/cdc-segregated-provider-service/api/user/3423489"
+      },
+      "response": {
+        "body": {
+          "id": "3423489",
+          "name": "test-name"
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "dataType": "STRING",
+              "expression": "${user-id}",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; encoding=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "_id": "36b03b7a3c96bcbf683f927acf16b8854095157c",
+      "description": "A GET request to /cdc-segregated-provider-service/api/user/${user-id}",
+      "providerStates": [
+        {
+          "name": "A user with user id ${user-id} is present",
+          "params": {
+            "user-id": "3423489"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ1c2VyQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiam1lX0B1c2VyXyNyZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.DmEmpmETxzasIxhjfoYkKEI4B69gLf2SpKPwfknxz7xnDvaqKsJ3m2nBCfylBjcxZsnznS6Qh40TdH6EbFWAK7gCZ2sMQTtiTLWTiDYS2l3TS7-MOlMxjjhJ1NJKlkSAPPhgkoZc8fqOD_JpbzpG4GsHjRjiO0v2HwNUk_MABB9j4OiRZkl49W9jEN4tbzZLy14X-ImOftSwBMeTmWV2KaR3jdOpv3zrYLZiuXDjQ7Z2SApWkEjvBre6nW4Fl6mJqTc1KKorGp_JcC58iqdsCsGDlMT5zIPaQtSHFZysP8cTILQlKnRprXknszkUimCNWfh9K8tbdcj7xGD5vBVi5A"
+        },
+        "method": "GET",
+        "path": "/cdc-segregated-provider-service/api/user/3423489"
+      },
+      "response": {
+        "body": {
+          "id": "3423489",
+          "name": "test-name"
+        },
+        "headers": {
+          "Content-Type": "application/json; encoding=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "_id": "2efa0e8eb0b60a9442b4a0e820ce0ad798868b19",
+      "description": "A GET request to /cdc-segregated-provider-service/api/user/1",
+      "providerStates": [
+        {
+          "name": "A user with user id '1' is present"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ1c2VyQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiam1lX0B1c2VyXyNyZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.DmEmpmETxzasIxhjfoYkKEI4B69gLf2SpKPwfknxz7xnDvaqKsJ3m2nBCfylBjcxZsnznS6Qh40TdH6EbFWAK7gCZ2sMQTtiTLWTiDYS2l3TS7-MOlMxjjhJ1NJKlkSAPPhgkoZc8fqOD_JpbzpG4GsHjRjiO0v2HwNUk_MABB9j4OiRZkl49W9jEN4tbzZLy14X-ImOftSwBMeTmWV2KaR3jdOpv3zrYLZiuXDjQ7Z2SApWkEjvBre6nW4Fl6mJqTc1KKorGp_JcC58iqdsCsGDlMT5zIPaQtSHFZysP8cTILQlKnRprXknszkUimCNWfh9K8tbdcj7xGD5vBVi5A"
+        },
+        "method": "GET",
+        "path": "/cdc-segregated-provider-service/api/user/1"
+      },
+      "response": {
+        "body": {
+          "id": "1",
+          "name": "test-name"
+        },
+        "headers": {
+          "Content-Type": "application/json; encoding=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "_id": "023e6905963bf15e8f6dc8b6a6764ac6ebd334d5",
+      "description": "A request to /cdc-segregated-provider-service/api/user/1 with insufficient authorization",
+      "providerStates": [
+        {
+          "name": "A user with user id '1' is present"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ1c2VyQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsic29tZS11bnJlbGF0ZWQtcm9sZSJdLCJjdHgiOiJTWVMiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2F1dGgiLCJleHAiOjQ3MzM1MDY4MDAsImlhdCI6MTU3NzgzMzIwMCwianRpIjoidGVzdC10b2tlbiJ9.ewSGVnodlc7Nu3wNUpOBDJpp3hzxxejTVb_TfuObdwrqwyZd0NZp8n8jug_4Hdf4I5Otis2qVmMWoL5nIBO8fI89D6Ngnf3IjhHnPG5MDBdfJ1zzNA8nTXLrt9nUuNZVrKeAhwSd9Msree7efaDISnhdGF0l8bcoNYBqhoW95fjWunKg72ZFGfJb3yOpjTq7gB_HgCM1u-Ow9SougKHZZ_Jm4qAysz6II2LTaW1tqUubt2vsy_cIl38KeR6pEFwr-5qvuSwTk_c4DVlS6Ljw8szV7r3irPFd0IAWbkFQkdc8sYh1lHX8muh8uOjz3hgfqRTpJR8ljj4F6YEz8nQ57Q"
+        },
+        "method": "GET",
+        "path": "/cdc-segregated-provider-service/api/user/1"
+      },
+      "response": {
+        "status": 403
+      }
+    },
+    {
+      "_id": "23a174ebdb9d039bc7fc908c24d65612b1034b74",
+      "description": "A request to /cdc-segregated-provider-service/api/user",
+      "providerStates": [
+        {
+          "name": "Several users are present"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJ1c2VyQ2xpZW50IiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiam1lX0B1c2VyXyNyZWFkIl0sImN0eCI6IlNZUyIsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdFwvYXV0aCIsImV4cCI6NDczMzUwNjgwMCwiaWF0IjoxNTc3ODMzMjAwLCJqdGkiOiJ0ZXN0LXRva2VuIn0.DmEmpmETxzasIxhjfoYkKEI4B69gLf2SpKPwfknxz7xnDvaqKsJ3m2nBCfylBjcxZsnznS6Qh40TdH6EbFWAK7gCZ2sMQTtiTLWTiDYS2l3TS7-MOlMxjjhJ1NJKlkSAPPhgkoZc8fqOD_JpbzpG4GsHjRjiO0v2HwNUk_MABB9j4OiRZkl49W9jEN4tbzZLy14X-ImOftSwBMeTmWV2KaR3jdOpv3zrYLZiuXDjQ7Z2SApWkEjvBre6nW4Fl6mJqTc1KKorGp_JcC58iqdsCsGDlMT5zIPaQtSHFZysP8cTILQlKnRprXknszkUimCNWfh9K8tbdcj7xGD5vBVi5A"
+        },
+        "method": "GET",
+        "path": "/cdc-segregated-provider-service/api/user"
+      },
+      "response": {
+        "body": [
+          {
+            "id": "3423489",
+            "name": "test-name"
+          },
+          {
+            "id": "3423489",
+            "name": "test-name"
+          },
+          {
+            "id": "3423489",
+            "name": "test-name"
+          },
+          {
+            "id": "3423489",
+            "name": "test-name"
+          },
+          {
+            "id": "3423489",
+            "name": "test-name"
+          },
+          {
+            "id": "3423489",
+            "name": "test-name"
+          },
+          {
+            "id": "3423489",
+            "name": "test-name"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 2
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.1"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "createdAt": "2023-09-11T12:07:42+00:00",
+  "_links": {
+    "self": {
+      "title": "Pact",
+      "name": "Pact between bit-jme-cdc-consumer-service (0.1.0-20230911140611-a237f8b42ce6) and bit-jme-cdc-segregatedProvider-service_moduleB",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/version/0.1.0-20230911140611-a237f8b42ce6"
+    },
+    "pb:consumer": {
+      "title": "Consumer",
+      "name": "bit-jme-cdc-consumer-service",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service"
+    },
+    "pb:consumer-version": {
+      "title": "Consumer version",
+      "name": "0.1.0-20230911140611-a237f8b42ce6",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service/versions/0.1.0-20230911140611-a237f8b42ce6"
+    },
+    "pb:provider": {
+      "title": "Provider",
+      "name": "bit-jme-cdc-segregatedProvider-service_moduleB",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-segregatedProvider-service_moduleB"
+    },
+    "pb:pact-version": {
+      "title": "Pact content version permalink",
+      "name": "6a3ac34bc9a8e0d990f01ef8bf52aaaa022c70dd",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/pact-version/6a3ac34bc9a8e0d990f01ef8bf52aaaa022c70dd"
+    },
+    "pb:latest-pact-version": {
+      "title": "Latest version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/latest"
+    },
+    "pb:all-pact-versions": {
+      "title": "All versions of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/versions"
+    },
+    "pb:latest-untagged-pact-version": {
+      "title": "Latest untagged version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/latest-untagged"
+    },
+    "pb:latest-tagged-pact-version": {
+      "title": "Latest tagged version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/latest/{tag}",
+      "templated": true
+    },
+    "pb:previous-distinct": {
+      "title": "Previous distinct version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/version/0.1.0-20230911140611-a237f8b42ce6/previous-distinct"
+    },
+    "pb:diff-previous-distinct": {
+      "title": "Diff with previous distinct version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/version/0.1.0-20230911140611-a237f8b42ce6/diff/previous-distinct"
+    },
+    "pb:diff": {
+      "title": "Diff with another specified version of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/pact-version/6a3ac34bc9a8e0d990f01ef8bf52aaaa022c70dd/diff/pact-version/{pactVersion}",
+      "templated": true
+    },
+    "pb:pact-webhooks": {
+      "title": "Webhooks for the pact between bit-jme-cdc-consumer-service and bit-jme-cdc-segregatedProvider-service_moduleB",
+      "href": "https://some-pactbroker-url/webhooks/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service"
+    },
+    "pb:consumer-webhooks": {
+      "title": "Webhooks for all pacts with provider bit-jme-cdc-segregatedProvider-service_moduleB",
+      "href": "https://some-pactbroker-url/webhooks/consumer/bit-jme-cdc-segregatedProvider-service_moduleB"
+    },
+    "pb:tag-prod-version": {
+      "title": "PUT to this resource to tag this consumer version as 'production'",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service/versions/0.1.0-20230911140611-a237f8b42ce6/tags/prod"
+    },
+    "pb:tag-version": {
+      "title": "PUT to this resource to tag this consumer version",
+      "href": "https://some-pactbroker-url/pacticipants/bit-jme-cdc-consumer-service/versions/0.1.0-20230911140611-a237f8b42ce6/tags/{tag}"
+    },
+    "pb:publish-verification-results": {
+      "title": "Publish verification results",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/pact-version/6a3ac34bc9a8e0d990f01ef8bf52aaaa022c70dd/metadata/Y3Y9NTg1Mzg/verification-results"
+    },
+    "pb:latest-verification-results": {
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/pact-version/6a3ac34bc9a8e0d990f01ef8bf52aaaa022c70dd/verification-results/latest"
+    },
+    "pb:triggered-webhooks": {
+      "title": "Webhooks triggered by the publication of this pact",
+      "href": "https://some-pactbroker-url/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/version/0.1.0-20230911140611-a237f8b42ce6/triggered-webhooks"
+    },
+    "pb:matrix-for-consumer-version": {
+      "title": "View matrix rows for the consumer version to which this pact belongs",
+      "href": "https://some-pactbroker-url/matrix?q[][pacticipant]=bit-jme-cdc-consumer-service&q[][version]=0.1.0-20230911140611-a237f8b42ce6&latestby=cvpv"
+    },
+    "curies": [
+      {
+        "name": "pb",
+        "href": "https://some-pactbroker-url/doc/{rel}?context=pact",
+        "templated": true
+      }
+    ]
+  }
+}

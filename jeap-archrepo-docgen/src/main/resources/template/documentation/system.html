@@ -1,0 +1,155 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <div th:replace="~{fragment/generated-infoblock :: generated-infoblock}"></div>
+
+    <p th:text="${system.description}"></p>
+
+    <p>
+        <a th:href="${system.confluenceLink}" th:text="'Dokumentation ' + ${system.name}"></a>
+    </p>
+
+    <h2>Komponenten</h2>
+
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 22.0%;"/>
+            <col style="width: 22.0%;"/>
+            <col style="width: 34.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Komponente</th>
+            <th colspan="1">Typ</th>
+            <th colspan="1">Owner</th>
+            <th colspan="1">Beschreibung</th>
+        </tr>
+        <tr th:each="component: ${system.systemComponents}">
+            <td colspan="1">
+                <ac:link>
+                    <ri:page th:ri:content-title="${component.name}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${component.name}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1" th:text="${component.type?.label}"></td>
+            <td colspan="1" th:text="${component.ownedBy?.name}"></td>
+            <td colspan="1" th:text="${component.description}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h1>Kontext</h1>
+
+    <ac:structured-macro ac:name="plantuml" ac:schema-version="1" th:ac:macro-id="${plantUmlMacroId}">
+        <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+        <ac:plain-text-body
+                th:utext="${'<![CDATA[' + contextViewPlantUml + ']]>'}">
+        </ac:plain-text-body>
+    </ac:structured-macro>
+
+    <h2>Events</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;" th:unless="${systemEvents.empty}">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 22.0%;"/>
+            <col style="width: 22.0%;"/>
+            <col style="width: 34.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Event</th>
+            <th colspan="1">Publisher</th>
+            <th colspan="1">Consumer</th>
+        </tr>
+        <tr th:each="systemEvent: ${systemEvents}">
+            <td colspan="1">
+                <ac:link>
+                    <ri:page th:ri:content-title="${systemEvent.name}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${systemEvent.name}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="providerName : ${systemEvent.providerNames}" th:if="${providerName != null}">
+                        <ac:link>
+                            <ri:page th:ri:content-title="${providerName}"/>
+                            <ac:plain-text-link-body>
+                                <![CDATA[[[${providerName}]]]]>
+                            </ac:plain-text-link-body>
+                        </ac:link>
+                    </li>
+                </ul>
+            </td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="consumerName : ${systemEvent.consumerNames}" th:if="${consumerName != null}">
+                        <ac:link>
+                            <ri:page th:ri:content-title="${consumerName}"/>
+                            <ac:plain-text-link-body>
+                                <![CDATA[[[${consumerName}]]]]>
+                            </ac:plain-text-link-body>
+                        </ac:link>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${systemEvents.empty}">Keine</p>
+
+    <h2>Commands</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;" th:unless="${systemCommands.empty}">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 22.0%;"/>
+            <col style="width: 22.0%;"/>
+            <col style="width: 34.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Command</th>
+            <th colspan="1">Receiver</th>
+            <th colspan="1">Sender</th>
+        </tr>
+        <tr th:each="systemCommand: ${systemCommands}">
+            <td colspan="1">
+                <ac:link>
+                    <ri:page th:ri:content-title="${systemCommand.name}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${systemCommand.name}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="receiverName : ${systemCommand.receiverNames}" th:if="${receiverName != null}">
+                        <ac:link>
+                            <ri:page th:ri:content-title="${receiverName}"/>
+                            <ac:plain-text-link-body>
+                                <![CDATA[[[${receiverName}]]]]>
+                            </ac:plain-text-link-body>
+                        </ac:link>
+                    </li>
+                </ul>
+            </td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="senderName : ${systemCommand.senderNames}" th:if="${senderName != null}">
+                        <ac:link>
+                            <ri:page th:ri:content-title="${senderName}"/>
+                            <ac:plain-text-link-body>
+                                <![CDATA[[[${senderName}]]]]>
+                            </ac:plain-text-link-body>
+                        </ac:link>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${systemCommands.empty}">Keine</p>
+
+</th:block>

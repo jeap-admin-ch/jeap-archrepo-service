@@ -1,0 +1,58 @@
+# Persistence
+spring:
+  thymeleaf:
+    check-template-location: false
+  flyway:
+    locations: classpath:db/migration/common
+    # Flyway creates automatically the default schema if it doesn't exist
+    default-schema: data
+  jpa:
+    database: postgresql
+    show-sql: false
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: data
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:mem:testdb;INIT=CREATE SCHEMA IF NOT EXISTS data;DATABASE_TO_UPPER=FALSE;MODE=PostgreSQL"
+    username: sa
+    password:
+    hikari:
+      schema: data
+  # Open API spec uploads may fail otherwise if the spec is too large, the default file size limit is 1MB
+  servlet:
+    multipart:
+      max-request-size: 20MB
+      max-file-size: 20MB
+
+archrepo:
+  openapi-base-url: "https://base-url"
+  update-schedule: "-"
+  api:
+    secret: "{noop}secret"
+  documentation-generator:
+    update-schedule: "-"
+    space-key: "FOO"
+    root-page-name: "BAR"
+    confluence:
+      url: "https://foo.bar"
+      space-key: "ARCDOCTEST"
+      root-page-name: "Systeme"
+      username: "ezv-archrepo-techuser"
+      password: "PASSWORD"
+      mock-confluence-client: true
+prometheus-cf:
+  hosts:
+    - host: "host"
+      api-key: "api-key"
+
+pactbroker:
+  url: "https://foo.bar"
+
+# TLS enabled only for AWS
+jeap.web.tls.enabled: false

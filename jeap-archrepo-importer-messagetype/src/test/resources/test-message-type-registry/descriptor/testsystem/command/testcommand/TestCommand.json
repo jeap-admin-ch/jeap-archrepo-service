@@ -1,0 +1,25 @@
+{
+  "commandName": "TestCommand",
+  "definingSystem": "TESTSYSTEM",
+  "description": "Test Command",
+  "documentationUrl": "https://someurl/TestCommand",
+  "topic": "test-command-topic",
+  "scope": "public",
+  "compatibilityMode": "BACKWARD",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "valueSchema": "TestCommand_v1.avdl"
+    },
+    {
+      "version": "2.0.0",
+      "valueSchema": "TestCommand_v2.0.0.avdl",
+      "compatibilityMode": "BACKWARD"
+    },
+    {
+      "version": "2.0.1",
+      "valueSchema": "TestCommand_v2.0.0.avdl",
+      "compatibilityMode": "BACKWARD"
+    }
+  ]
+}

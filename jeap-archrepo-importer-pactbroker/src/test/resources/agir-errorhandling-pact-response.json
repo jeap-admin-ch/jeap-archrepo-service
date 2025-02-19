@@ -1,0 +1,582 @@
+{
+  "provider": {
+    "name": "ezv-shared-agir-service"
+  },
+  "consumer": {
+    "name": "bit-jeap-error-handling-service"
+  },
+  "interactions": [
+    {
+      "_id": "82a9e8a1de5545d64fbd83b993b7f52aee58d83d",
+      "description": "a request to create a new task of an existing task type",
+      "request": {
+        "method": "PUT",
+        "path": "/api/tasks/748fda55-7411-44ba-b8f1-f84f8fc5d50e",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJlcnJvci1oYW5kbGluZy1zZXJ2aWNlIiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiYWdpcl93cml0ZSJdLCJjdHgiOiJTWVMiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2F1dGgiLCJleHAiOjQ3MzM1MDY4MDAsImlhdCI6MTU3NzgzMzIwMCwianRpIjoidGVzdC10b2tlbiJ9.Ya6gH9OgpX56Ln65Of4ijYn9H9qf4EdEj4EFUmImXoPhCXeHA3fa9_zD-Fcvg900Bf6e6ZONKszEXUorjXO6v6uhv42QJzs5X5tjD28-LpPTOJ3PLDj9wCrzrcYR_X_-W_dspt2I9VSQ73N-li917JxJQyKiFDhIDZyfGQQEF9IjMgnccVnudrsshvGXQexM-UIc2l1IdhJqAPD6w5sFW0PVoVGqBNBwMcQp_o2_3zySQcl0ynmCoFt7GE0PeENMshpxvyzU7v9kBT6RnvMo2oBQ7q_9v0jlNc3-WbF1965Q1qHJgDXgpc9zWWGhvMl-NOYbbhT9oNt-kOdIzOMlvw",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "system": "jEAP",
+          "references": [
+            {
+              "name": "Error Handling Service",
+              "uri": "http://localhost/test"
+            }
+          ],
+          "due": "2020-04-23T16:15:10",
+          "service": "jeap-error-handling-service",
+          "id": "748fda55-7411-44ba-b8f1-f84f8fc5d50e",
+          "state": "OPEN",
+          "priority": "HIGH",
+          "type": "EventProcessingFailedTaskType",
+          "additionalDetails": [
+            {
+              "name": "Additional information",
+              "value": "Here's some additional information"
+            }
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.due": {
+              "matchers": [
+                {
+                  "match": "timestamp",
+                  "timestamp": "yyyy-MM-dd'T'HH:mm:ss"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.priority": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.type": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.system": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.service": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.references": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.references[*].name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.references[*].uri": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.additionalDetails": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.additionalDetails[*].name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.additionalDetails[*].value": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "a task type with name ${task-type-name} exists for system ${system}",
+          "params": {
+            "system": "jEAP",
+            "task-type-name": "EventProcessingFailedTaskType"
+          }
+        }
+      ]
+    },
+    {
+      "_id": "39630dc6ddb910f99c05452c14cafa956424ba8b",
+      "description": "a request to set the state of the task with id ${id} to CLOSED",
+      "request": {
+        "method": "PUT",
+        "path": "/api/tasks/748fda55-7411-44ba-b8f1-f84f8fc5d50e/state",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJlcnJvci1oYW5kbGluZy1zZXJ2aWNlIiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiYWdpcl93cml0ZSJdLCJjdHgiOiJTWVMiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2F1dGgiLCJleHAiOjQ3MzM1MDY4MDAsImlhdCI6MTU3NzgzMzIwMCwianRpIjoidGVzdC10b2tlbiJ9.Ya6gH9OgpX56Ln65Of4ijYn9H9qf4EdEj4EFUmImXoPhCXeHA3fa9_zD-Fcvg900Bf6e6ZONKszEXUorjXO6v6uhv42QJzs5X5tjD28-LpPTOJ3PLDj9wCrzrcYR_X_-W_dspt2I9VSQ73N-li917JxJQyKiFDhIDZyfGQQEF9IjMgnccVnudrsshvGXQexM-UIc2l1IdhJqAPD6w5sFW0PVoVGqBNBwMcQp_o2_3zySQcl0ynmCoFt7GE0PeENMshpxvyzU7v9kBT6RnvMo2oBQ7q_9v0jlNc3-WbF1965Q1qHJgDXgpc9zWWGhvMl-NOYbbhT9oNt-kOdIzOMlvw",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "state": "CLOSED"
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "a task with id ${id} exists",
+          "params": {
+            "id": "748fda55-7411-44ba-b8f1-f84f8fc5d50e"
+          }
+        }
+      ]
+    },
+    {
+      "_id": "7220c51dd1a65495c5951eef71ad37727e387a3b",
+      "description": "a request to set the state of the non existing task with id ${id} to CLOSED",
+      "request": {
+        "method": "PUT",
+        "path": "/api/tasks/748fda55-7411-44ba-b8f1-f84f8fc5d50e/state",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJlcnJvci1oYW5kbGluZy1zZXJ2aWNlIiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiYWdpcl93cml0ZSJdLCJjdHgiOiJTWVMiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2F1dGgiLCJleHAiOjQ3MzM1MDY4MDAsImlhdCI6MTU3NzgzMzIwMCwianRpIjoidGVzdC10b2tlbiJ9.Ya6gH9OgpX56Ln65Of4ijYn9H9qf4EdEj4EFUmImXoPhCXeHA3fa9_zD-Fcvg900Bf6e6ZONKszEXUorjXO6v6uhv42QJzs5X5tjD28-LpPTOJ3PLDj9wCrzrcYR_X_-W_dspt2I9VSQ73N-li917JxJQyKiFDhIDZyfGQQEF9IjMgnccVnudrsshvGXQexM-UIc2l1IdhJqAPD6w5sFW0PVoVGqBNBwMcQp_o2_3zySQcl0ynmCoFt7GE0PeENMshpxvyzU7v9kBT6RnvMo2oBQ7q_9v0jlNc3-WbF1965Q1qHJgDXgpc9zWWGhvMl-NOYbbhT9oNt-kOdIzOMlvw",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "state": "CLOSED"
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 404
+      },
+      "providerStates": [
+        {
+          "name": "no task with id ${id} exists",
+          "params": {
+            "id": "748fda55-7411-44ba-b8f1-f84f8fc5d50e"
+          }
+        }
+      ]
+    },
+    {
+      "_id": "ebe0541e03b4df7f3accc8e1b70cc5cc00d9999e",
+      "description": "a request to create or update a task type",
+      "request": {
+        "method": "PUT",
+        "path": "/api/task-configs",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJlcnJvci1oYW5kbGluZy1zZXJ2aWNlIiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsiYWdpcl93cml0ZSJdLCJjdHgiOiJTWVMiLCJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2F1dGgiLCJleHAiOjQ3MzM1MDY4MDAsImlhdCI6MTU3NzgzMzIwMCwianRpIjoidGVzdC10b2tlbiJ9.Ya6gH9OgpX56Ln65Of4ijYn9H9qf4EdEj4EFUmImXoPhCXeHA3fa9_zD-Fcvg900Bf6e6ZONKszEXUorjXO6v6uhv42QJzs5X5tjD28-LpPTOJ3PLDj9wCrzrcYR_X_-W_dspt2I9VSQ73N-li917JxJQyKiFDhIDZyfGQQEF9IjMgnccVnudrsshvGXQexM-UIc2l1IdhJqAPD6w5sFW0PVoVGqBNBwMcQp_o2_3zySQcl0ynmCoFt7GE0PeENMshpxvyzU7v9kBT6RnvMo2oBQ7q_9v0jlNc3-WbF1965Q1qHJgDXgpc9zWWGhvMl-NOYbbhT9oNt-kOdIzOMlvw",
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "system": "jEAP",
+            "domain": "error-handling",
+            "display": [
+              {
+                "displayDomain": "Error Handling",
+                "displayName": "Eventverarbeitungsfehler",
+                "description": "Ein technischer Fehler ist aufgrund eines unverarbeitbaren Events aufgetreten.",
+                "language": "DE",
+                "title": "Fehlgeschlagene Event-Verarbeitung"
+              }
+            ],
+            "name": "EventProcessingFailedTaskType"
+          }
+        ],
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$[0].name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].system": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].domain": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].language": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].displayName": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].displayDomain": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "normal operation"
+        }
+      ]
+    },
+    {
+      "_id": "ca080a71f412853ba49fa9a241a4e8cdbb09aa9e",
+      "description": "a request to create or update a task type without needed authorization 'agir_write'",
+      "request": {
+        "method": "PUT",
+        "path": "/api/task-configs",
+        "headers": {
+          "Authorization": "Bearer eyJraWQiOiJkZWZhdWx0LXRlc3Qta2V5IiwiYWxnIjoiUlM1MTIifQ.eyJzdWIiOiJlcnJvci1oYW5kbGluZy1zZXJ2aWNlIiwibmJmIjoxNTc3ODMzMjAwLCJ1c2Vycm9sZXMiOlsic29tZSB1bmRlZmluZWQgbm9uc2Vuc2Ugcm9sZSBpbiByZXNwZWN0IHRvIEFnaXIiXSwiY3R4IjoiU1lTIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0XC9hdXRoIiwiZXhwIjo0NzMzNTA2ODAwLCJpYXQiOjE1Nzc4MzMyMDAsImp0aSI6InRlc3QtdG9rZW4ifQ.VAmPBum9IDKYdN_28wsY3CXxWCFB4-GMeOVQ8etlnf9xKlb5h7MQv0d56zgcSRhojisxx-0Bbc8i583bDzwr_YeOzKMZHRpeX_ul3OWV0QWgqvXMzAmT45aQpchmcGtS6NIZtfzkatZGv9FHidNnvGX--jK6GSzEY1DEh3tgzjK5QYfEnV7h5JelaD0KJ4VeyfQ06EogUhI9Y_tzKD4AVPsLCu0jkTmY594M5iO28-qF7SWjQVR7LMKmouSrtoqt7nZIOdJqs6ts5DZL_aDTrb-uxbokNGxr21yy9apjgutYRtPSwFNvNdO3ZJDl_XE_eTzD0qY4CpgzFepHnVD_yw",
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "system": "jEAP",
+            "domain": "error-handling",
+            "display": [
+              {
+                "displayDomain": "Error Handling",
+                "displayName": "Eventverarbeitungsfehler",
+                "description": "Ein technischer Fehler ist aufgrund eines unverarbeitbaren Events aufgetreten.",
+                "language": "DE",
+                "title": "Fehlgeschlagene Event-Verarbeitung"
+              }
+            ],
+            "name": "EventProcessingFailedTaskType"
+          }
+        ],
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$[0].name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].system": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].domain": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].language": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].displayName": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[0].display[*].displayDomain": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 401
+      },
+      "providerStates": [
+        {
+          "name": "normal operation"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.0.7"
+    }
+  },
+  "createdAt": "2020-05-26T12:50:07+00:00",
+  "_links": {
+    "self": {
+      "title": "Pact",
+      "name": "Pact between bit-jeap-error-handling-service (1.6.0-10) and ezv-shared-agir-service",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/version/1.6.0-10"
+    },
+    "pb:consumer": {
+      "title": "Consumer",
+      "name": "bit-jeap-error-handling-service",
+      "href": "http://localhost:22412/pacticipants/bit-jeap-error-handling-service"
+    },
+    "pb:consumer-version": {
+      "title": "Consumer version",
+      "name": "1.6.0-10",
+      "href": "http://localhost:22412/pacticipants/bit-jeap-error-handling-service/versions/1.6.0-10"
+    },
+    "pb:provider": {
+      "title": "Provider",
+      "name": "ezv-shared-agir-service",
+      "href": "http://localhost:22412/pacticipants/ezv-shared-agir-service"
+    },
+    "pb:latest-pact-version": {
+      "title": "Latest version of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/latest"
+    },
+    "pb:all-pact-versions": {
+      "title": "All versions of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/versions"
+    },
+    "pb:latest-untagged-pact-version": {
+      "title": "Latest untagged version of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/latest-untagged"
+    },
+    "pb:latest-tagged-pact-version": {
+      "title": "Latest tagged version of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/latest/{tag}",
+      "templated": true
+    },
+    "pb:previous-distinct": {
+      "title": "Previous distinct version of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/version/1.6.0-10/previous-distinct"
+    },
+    "pb:diff-previous-distinct": {
+      "title": "Diff with previous distinct version of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/version/1.6.0-10/diff/previous-distinct"
+    },
+    "pb:diff": {
+      "title": "Diff with another specified version of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/pact-version/2cac27487dda924e838e21043af3094b38c55779/diff/pact-version/{pactVersion}",
+      "templated": true
+    },
+    "pb:pact-webhooks": {
+      "title": "Webhooks for the pact between bit-jeap-error-handling-service and ezv-shared-agir-service",
+      "href": "http://localhost:22412/webhooks/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service"
+    },
+    "pb:consumer-webhooks": {
+      "title": "Webhooks for all pacts with provider ezv-shared-agir-service",
+      "href": "http://localhost:22412/webhooks/consumer/ezv-shared-agir-service"
+    },
+    "pb:tag-prod-version": {
+      "title": "PUT to this resource to tag this consumer version as 'production'",
+      "href": "http://localhost:22412/pacticipants/bit-jeap-error-handling-service/versions/1.6.0-10/tags/prod"
+    },
+    "pb:tag-version": {
+      "title": "PUT to this resource to tag this consumer version",
+      "href": "http://localhost:22412/pacticipants/bit-jeap-error-handling-service/versions/1.6.0-10/tags/{tag}"
+    },
+    "pb:publish-verification-results": {
+      "title": "Publish verification results",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/pact-version/2cac27487dda924e838e21043af3094b38c55779/verification-results"
+    },
+    "pb:latest-verification-results": {
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/pact-version/2cac27487dda924e838e21043af3094b38c55779/verification-results/latest"
+    },
+    "pb:triggered-webhooks": {
+      "title": "Webhooks triggered by the publication of this pact",
+      "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/version/1.6.0-10/triggered-webhooks"
+    },
+    "curies": [
+      {
+        "name": "pb",
+        "href": "http://localhost:22412/doc/{rel}?context=pact",
+        "templated": true
+      }
+    ]
+  }
+}

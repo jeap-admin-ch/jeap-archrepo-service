@@ -1,0 +1,45 @@
+@namespace("ch.admin.bazg.autorisaziun.common.api.domain.command.permit.v2")
+protocol AutorisaziunValidatePermitV2CommandProtocol {
+	import idl "ch.admin.bazg.autorisaziun.common.v2.PermitOwner.avdl";
+	import idl "ch.admin.bazg.autorisaziun.common.v4.Commodity.avdl";
+	import idl "ch.admin.bazg.autorisaziun.common.v2.Person.avdl";
+	import idl "MessagingBaseTypes.avdl";
+
+	record ValidatePermitV2Payload {
+		string permitNumber;
+		int restrictionCode;
+		int goodsProvision;
+		string goodsDeclarationReferenceNumber;
+		int goodsDeclarationReferenceNumberVersion;
+
+		//  Zeitpunkt der Anfrage aus der Senderperspektive
+		timestamp_ms goodsActivationTimestamp;
+		ch.admin.bazg.autorisaziun.common.v2.PermitOwner permitOwner;
+		ch.admin.bazg.autorisaziun.common.v4.Commodity commodity;
+
+		union{null, string} countryOfDestination = null;
+		union{null, string} countryOfDispatch = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} consignee = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} consignor = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} exporter = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v2.Person} importer = null;
+	}
+
+	record ValidatePermitV2References {
+		ValidatePermitV2Reference reference;
+	}
+
+	record ValidatePermitV2Reference {
+		string type;
+		string goodsDeclarationReferenceNumber;
+	}
+
+	record AutorisaziunValidatePermitV2Command {
+		ch.admin.bit.jeap.messaging.avro.AvroMessageIdentity identity;
+		ch.admin.bit.jeap.messaging.avro.AvroMessageType type;
+		ch.admin.bit.jeap.messaging.avro.AvroMessagePublisher publisher;
+		ValidatePermitV2References references;
+		ValidatePermitV2Payload payload;
+		string commandVersion;
+	}
+}

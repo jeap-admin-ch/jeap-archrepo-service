@@ -1,0 +1,11 @@
+@namespace("ch.admin.bazg.autorisaziun.common.v1")
+protocol AddressProtocol {
+
+	record Address {
+		string streetAndNumber;
+		string postCode;
+		string city;
+		string country;
+	}
+}
+

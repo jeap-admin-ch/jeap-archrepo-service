@@ -1,0 +1,45 @@
+<div th:fragment="grouped-relations-table" xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <table class="wrapped relative-table" style="width: 100.0%;" th:unless="${relations.size() == 0}">
+        <colgroup>
+            <col style="width: 40.0%;"/>
+            <col style="width: 60.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Name</th>
+            <th colspan="1" th:text="${counterpartLabel}">Anbieter</th>
+        </tr>
+
+        <tr th:each="relation: ${relations.entrySet()}">
+
+            <td colspan="1">
+                <ac:link th:if="${relation.key.labelLinkable}">
+                    <ri:page th:ri:content-title="${relation.key.label}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${relation.key.label}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+                <p th:unless="${relation.key.labelLinkable}" th:text="${relation.key.label}"></p>
+            </td>
+
+            <td colspan="1" th:if="${relation.value.size > 3}">
+                <div class="content-wrapper">
+                    <ac:structured-macro ac:name="expand" ac:schema-version="1">
+                        <ac:parameter ac:name="title">More than three ...</ac:parameter>
+                        <ac:rich-text-body>
+                            <div th:replace="~{fragment/relation-list :: relation-list(relations=${relation.value})}"></div>
+                        </ac:rich-text-body>
+                    </ac:structured-macro>
+                </div>
+            </td>
+
+            <td colspan="1" th:if="${relation.value.size <= 3}">
+                <div th:replace="~{fragment/relation-list :: relation-list(relations=${relation.value})}"></div>
+            </td>
+
+        </tr>
+
+        </tbody>
+    </table>
+    <p th:if="${relations.size() == 0}">Keine</p>
+</div>

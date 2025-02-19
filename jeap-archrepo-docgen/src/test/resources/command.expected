@@ -1,0 +1,165 @@
+<ac:structured-macro ac:name="info" ac:schema-version="1">
+    <ac:rich-text-body>
+        <p>Diese Seite wurde automatisch generiert.</p>
+    </ac:rich-text-body>
+</ac:structured-macro>
+    <p>desc</p>
+
+
+    <ac:structured-macro ac:name="children" ac:schema-version="2">
+        <ac:parameter ac:name="depth">2</ac:parameter>
+    </ac:structured-macro>
+
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 22.0%;"/>
+            <col style="width: 78.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <td colspan="1">Name</td>
+            <td colspan="1">TestCommand</td>
+        </tr>
+        <tr>
+            <td colspan="1">Dokumentation</td>
+            <td colspan="1">
+                <a href="url">Link</a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="1">Deskriptor</td>
+            <td colspan="1">
+                <a href="link">Link</a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="1">Scope</td>
+            <td colspan="1">public</td>
+        </tr>
+        <tr>
+            <td colspan="1">Topic</td>
+            <td colspan="1">topic</td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <h2>Versionen</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 20.0%;"/>
+            <col style="width: 40.0%;"/>
+            <col style="width: 40.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Version</th>
+            <th colspan="1">Key</th>
+            <th colspan="1">Value</th>
+        </tr>
+        <tr>
+            <td colspan="1">1.1.0</td>
+            <td colspan="1">
+
+
+            </td>
+            <td colspan="1">
+                <a href="linkS">value</a>
+                <ac:structured-macro ac:name="code" ac:schema-version="1">
+                    <ac:parameter ac:name="title">Schema</ac:parameter>
+                    <ac:parameter ac:name="collapse">true</ac:parameter>
+                    <ac:plain-text-body><![CDATA[Value Schema 1.1.0 Resolved with "special" <character> ...]]></ac:plain-text-body>
+                </ac:structured-macro>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="1">1.2.0</td>
+            <td colspan="1">
+                <a href="linkS">key</a>
+                <ac:structured-macro ac:name="code" ac:schema-version="1">
+                    <ac:parameter ac:name="title">Schema</ac:parameter>
+                    <ac:parameter ac:name="collapse">true</ac:parameter>
+                    <ac:plain-text-body><![CDATA[Key Schema 1.2.0 Resolved with "special" <character> ...]]></ac:plain-text-body>
+                </ac:structured-macro>
+            </td>
+            <td colspan="1">
+                <a href="linkS">value2</a>
+                <p>Avro Schema Compatibility with Version 1.1.0: <strong>BACKWARD</strong></p>
+                <ac:structured-macro ac:name="code" ac:schema-version="1">
+                    <ac:parameter ac:name="title">Schema</ac:parameter>
+                    <ac:parameter ac:name="collapse">true</ac:parameter>
+                    <ac:plain-text-body><![CDATA[Value Schema 1.2.0 Resolved with "special" <character> ...]]></ac:plain-text-body>
+                </ac:structured-macro>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+
+    <h2>Sender Contracts</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 30.0%;"/>
+            <col style="width: 60.0%;"/>
+            <col style="width: 10.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Komponente</th>
+            <th colspan="1">Topic</th>
+            <th colspan="1">Versionen</th>
+        </tr>
+        <tr>
+            <td colspan="1">
+                <ac:link>
+                    <ri:page ri:content-title="senderService"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[senderService]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1">topic</td>
+            <td colspan="1">
+                <ul>
+
+                    <li>1.2.0</li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <h2>Receiver Contracts</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;">
+        <colgroup>
+            <col style="width: 30.0%;"/>
+            <col style="width: 60.0%;"/>
+            <col style="width: 10.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Komponente</th>
+            <th colspan="1">Topic</th>
+            <th colspan="1">Versionen</th>
+        </tr>
+        <tr>
+            <td colspan="1">
+                <ac:link>
+                    <ri:page ri:content-title="receiverService"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[receiverService]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1">topic</td>
+            <td colspan="1">
+                <ul>
+                    <li>1.1.0</li>
+                    <li>1.2.0</li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>

@@ -1,0 +1,603 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Message Contract Service",
+    "description": "Message Contract Service",
+    "version": "1"
+  },
+  "servers": [
+    {
+      "url": "https://some-url/message-contract-service",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "paths": {
+    "/api/deployments/{appName}/{appVersion}/{environment}": {
+      "put": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Register deployment for an app version on a environment",
+        "operationId": "registerNewDeployment",
+        "parameters": [
+          {
+            "name": "appName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deployment ignored because appName and/or appVersion are unknown",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Deployment successfully registered",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/contracts/{appName}/{appVersion}": {
+      "put": {
+        "tags": [
+          "contract-controller"
+        ],
+        "summary": "Upload contracts for an app version. Users with role messagecontract-contract-upload are allowed to upload contracts",
+        "operationId": "uploadContracts",
+        "parameters": [
+          {
+            "name": "appName",
+            "in": "path",
+            "description": "Name of the application",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appVersion",
+            "in": "path",
+            "description": "Version of the application",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transactionId",
+            "in": "query",
+            "description": "Identifies the upload transaction uniquely",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageContractsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "contract-controller"
+        ],
+        "summary": "Delete a contract",
+        "operationId": "deleteContract",
+        "parameters": [
+          {
+            "name": "appName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageTypeVersion",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CONSUMER",
+                "PRODUCER"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/deployments": {
+      "get": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "List last 10 deployments",
+        "operationId": "findLast10Deployments",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeploymentDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/deployments/compatibility/{appName}/{appVersion}/{environment}": {
+      "get": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Get compatibility of a planned deployment regarding the app's contracts with consumer/producer versions on the environment",
+        "operationId": "getCompatibility",
+        "parameters": [
+          {
+            "name": "appName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App version is compatible with consumers/producers on environment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompatibilityCheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "412": {
+            "description": "App version is not compatible with consumers/producers on environment, schema incompatibilities have been detected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompatibilityCheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contracts": {
+      "get": {
+        "tags": [
+          "contract-controller"
+        ],
+        "summary": "List all contracts",
+        "operationId": "getContracts",
+        "parameters": [
+          {
+            "name": "env",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageContractDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/deployments/{appName}/{environment}": {
+      "delete": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Deletes a deployment of an app on a environment",
+        "operationId": "deleteDeployment",
+        "parameters": [
+          {
+            "name": "appName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deployment deleted",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateMessageContractsDto": {
+        "required": [
+          "contracts"
+        ],
+        "type": "object",
+        "properties": {
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewMessageContractDto"
+            }
+          }
+        }
+      },
+      "NewMessageContractDto": {
+        "required": [
+          "compatibilityMode",
+          "messageType",
+          "messageTypeVersion",
+          "registryUrl",
+          "role",
+          "topic"
+        ],
+        "type": "object",
+        "properties": {
+          "messageType": {
+            "type": "string"
+          },
+          "messageTypeVersion": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CONSUMER",
+              "PRODUCER"
+            ]
+          },
+          "registryUrl": {
+            "type": "string"
+          },
+          "commitHash": {
+            "type": "string"
+          },
+          "branch": {
+            "type": "string"
+          },
+          "compatibilityMode": {
+            "type": "string",
+            "enum": [
+              "BACKWARD",
+              "BACKWARD_TRANSITIVE",
+              "FORWARD",
+              "FORWARD_TRANSITIVE",
+              "FULL",
+              "FULL_TRANSITIVE",
+              "NONE"
+            ]
+          },
+          "encryptionKeyId": {
+            "type": "string"
+          }
+        }
+      },
+      "DeploymentDto": {
+        "type": "object",
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CompatibilityCheckResult": {
+        "type": "object",
+        "properties": {
+          "compatible": {
+            "type": "boolean"
+          },
+          "interactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsumerProducerInteraction"
+            }
+          },
+          "incompatibilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incompatibility"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ConsumerProducerInteraction": {
+        "type": "object",
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "messageTypeVersion": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "PRODUCER",
+              "CONSUMER"
+            ]
+          }
+        }
+      },
+      "Incompatibility": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/ConsumerProducerInteraction"
+          },
+          "target": {
+            "$ref": "#/components/schemas/ConsumerProducerInteraction"
+          },
+          "schemaIncompatibilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchemaIncompatibility"
+            }
+          }
+        }
+      },
+      "SchemaIncompatibility": {
+        "type": "object",
+        "properties": {
+          "incompatibilityType": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          }
+        }
+      },
+      "MessageContractDto": {
+        "type": "object",
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "messageTypeVersion": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CONSUMER",
+              "PRODUCER"
+            ]
+          },
+          "registryUrl": {
+            "type": "string"
+          },
+          "commitHash": {
+            "type": "string"
+          },
+          "branch": {
+            "type": "string"
+          },
+          "compatibilityMode": {
+            "type": "string",
+            "enum": [
+              "BACKWARD",
+              "BACKWARD_TRANSITIVE",
+              "FORWARD",
+              "FORWARD_TRANSITIVE",
+              "FULL",
+              "FULL_TRANSITIVE",
+              "NONE"
+            ]
+          },
+          "encryptionKeyId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "prometheus": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}

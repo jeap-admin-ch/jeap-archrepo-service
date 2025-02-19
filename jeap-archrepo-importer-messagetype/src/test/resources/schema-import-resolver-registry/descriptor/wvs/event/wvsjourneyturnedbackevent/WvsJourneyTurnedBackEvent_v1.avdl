@@ -1,0 +1,30 @@
+@namespace("ch.admin.ezv.wvs.domainevent.journey")
+protocol WvsJourneyTurnedBackEventProtocol {
+	import idl "DomainEventBaseTypes.avdl";
+	import idl "ch.admin.ezv.wvs.domainevent.common.v4.JourneyReference.avdl";
+	import idl "ch.admin.ezv.wvs.domainevent.common.v1.WvsCommunicationReference.avdl";
+
+	//-- REFERENCES
+	record WvsJourneyTurnedBackEventReferences {
+		ch.admin.ezv.wvs.domainevent.common.v4.JourneyReference journeyReference;
+		union {null, ch.admin.ezv.wvs.domainevent.common.v1.WvsCommunicationReference} wvsCommunicationReference = null;
+	}
+
+	//-- PAYLOAD
+	record WvsJourneyTurnedBackEventPayload {
+		string customsOfficeReferenceNumber;
+		union{null, array<string>} gdrns = null;
+	}
+
+	//-- EVENT
+	record WvsJourneyTurnedBackEvent {
+		ch.admin.bit.jeap.domainevent.avro.AvroDomainEventIdentity identity;
+		ch.admin.bit.jeap.domainevent.avro.AvroDomainEventType type;
+		ch.admin.bit.jeap.domainevent.avro.AvroDomainEventPublisher publisher;
+		WvsJourneyTurnedBackEventReferences references;
+		WvsJourneyTurnedBackEventPayload payload;
+		union {null, string} processId = null;
+		string domainEventVersion;
+	}
+
+}

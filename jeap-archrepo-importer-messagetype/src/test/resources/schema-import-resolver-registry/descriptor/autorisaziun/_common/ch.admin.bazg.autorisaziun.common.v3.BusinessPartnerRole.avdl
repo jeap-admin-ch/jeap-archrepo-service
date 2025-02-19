@@ -1,0 +1,11 @@
+@namespace("ch.admin.bazg.autorisaziun.common.v3")
+protocol BusinessPartnerRoleProtocol {
+	enum BusinessPartnerRole {
+		DECLARANT,
+		IMPORTER,
+		EXPORTER,
+		CONSIGNEE,
+		CONSIGNOR
+	}
+}
+

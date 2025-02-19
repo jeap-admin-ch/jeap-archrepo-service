@@ -1,0 +1,13 @@
+@namespace("ch.admin.bazg.autorisaziun.common.v2")
+protocol PermitOwnerProtocol {
+	import idl "ch.admin.bazg.autorisaziun.common.v3.BusinessPartnerRole.avdl";
+	import idl "ch.admin.bazg.autorisaziun.common.v1.Address.avdl";
+
+	record PermitOwner {
+		union{null, string} id = null;
+		union{null, string} name = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v3.BusinessPartnerRole} role = null;
+		union{null, ch.admin.bazg.autorisaziun.common.v1.Address} address = null;
+	}
+}
+

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <url>https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main</url>
+    <scm>
+        <url>https://github.com/jeap-admin-ch/jeap-archrepo-service.git</url>
+        <connection>scm:git:git://github.com/jeap-admin-ch/jeap-archrepo-service.git</connection>
+        <developerConnection>scm:git:ssh://github.com:jeap-admin-ch/jeap-archrepo-service.git</developerConnection>
+    </scm>
+    <developers>
+        <developer>
+            <name>BIT</name>
+            <email>jeap-community@bit.admin.ch</email>
+            <organization>Federal Office of Information Technology, Systems and Telecommunication FOITT</organization>
+            <organizationUrl>https://www.bit.admin.ch/</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <parent>
+        <groupId>ch.admin.bit.jeap</groupId>
+        <artifactId>jeap-spring-boot-parent</artifactId>
+        <version>26.24.2</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <artifactId>jeap-archrepo-service</artifactId>
+    <version>1.10.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <org.eclipse.jgit.version>7.1.0.202411261347-r</org.eclipse.jgit.version>
+        <asciidoc-confluence-publisher-client.version>0.12.0</asciidoc-confluence-publisher-client.version>
+        <wiremock-jre8-standalone.version>2.35.2</wiremock-jre8-standalone.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <guava.version>33.3.1-jre</guava.version>
+    </properties>
+
+    <modules>
+        <module>jeap-archrepo-metamodel</module>
+        <module>jeap-archrepo-importers</module>
+        <module>jeap-archrepo-importer-deploymentlog</module>
+        <module>jeap-archrepo-importer-messagetype</module>
+        <module>jeap-archrepo-importer-pactbroker</module>
+        <module>jeap-archrepo-importer-prometheus</module>
+        <module>jeap-archrepo-persistence</module>
+        <module>jeap-archrepo-docgen</module>
+        <module>jeap-archrepo-web</module>
+        <module>jeap-archrepo-importer-prometheus-aws</module>
+        <module>jeap-archrepo-importer-prometheus-cf</module>
+        <module>jeap-archrepo-importer-prometheus-rhos</module>
+        <module>jeap-archrepo-importer-openapi</module>
+        <module>jeap-archrepo-test</module>
+        <module>jeap-archrepo-instance</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-metamodel</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-persistence</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importers</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-messagetype</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-pactbroker</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-prometheus</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-prometheus-aws</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-prometheus-cf</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-prometheus-rhos</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-deploymentlog</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-openapi</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-docgen</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-web</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-test</artifactId>
+                <version>1.10.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit</artifactId>
+                <version>${org.eclipse.jgit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit.ssh.apache</artifactId>
+                <version>${org.eclipse.jgit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.sahli.asciidoc.confluence.publisher</groupId>
+                <artifactId>asciidoc-confluence-publisher-client</artifactId>
+                <version>${asciidoc-confluence-publisher-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8-standalone</artifactId>
+                <version>${wiremock-jre8-standalone.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!-- License compliance check -->
+            <plugin>
+                <groupId>org.honton.chas</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+            </plugin>
+            <!-- Generates THIRD-PARTY-LICENSES.md -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <!-- Add license to jar manifest -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <Bundle-License>https://www.apache.org/licenses/LICENSE-2.0</Bundle-License>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
+
+

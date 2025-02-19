@@ -1,0 +1,11 @@
+@namespace("ch.admin.bazg.autorisaziun.common.v2")
+protocol PersonProtocol {
+	import idl "ch.admin.bazg.autorisaziun.common.v1.Address.avdl";
+
+	record Person {
+		union {null, string} id =  null;
+		union {null, string} name =  null;
+		union {null, ch.admin.bazg.autorisaziun.common.v1.Address} address = null;
+	}
+}
+

@@ -1,0 +1,10 @@
+@namespace("ch.admin.bazg.autorisaziun.common.v2")
+protocol AdditionalInformationProtocol {
+
+	record AdditionalInformation {
+		int sequenceNumber;
+		string key;
+		string value;
+	}
+}
+

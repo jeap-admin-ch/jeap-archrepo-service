@@ -1,0 +1,76 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <div th:replace="~{fragment/generated-infoblock :: generated-infoblock}"></div>
+    <p th:text="${messageType.description}"></p>
+
+    <div th:replace="~{fragment/message-type :: message-type}"></div>
+
+    <h2>Sender Contracts</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;" th:unless="${messageType.senderContracts.empty}">
+        <colgroup>
+            <col style="width: 30.0%;"/>
+            <col style="width: 60.0%;"/>
+            <col style="width: 10.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Komponente</th>
+            <th colspan="1">Topic</th>
+            <th colspan="1">Versionen</th>
+        </tr>
+        <tr th:each="contract: ${messageType.senderContracts}">
+            <td colspan="1">
+                <ac:link>
+                    <ri:page th:ri:content-title="${contract.componentName}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${contract.componentName}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1" th:text="${contract.topic}"></td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="eventVersion : ${messageType.messageVersions}"
+                        th:if="${contract.versionList.contains(eventVersion.version)}"
+                        th:text="${eventVersion.version}"></li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${messageType.senderContracts.empty}">Keine</p>
+
+    <h2>Receiver Contracts</h2>
+    <table class="wrapped relative-table" style="width: 80.0%;" th:unless="${messageType.receiverContracts.empty}">
+        <colgroup>
+            <col style="width: 30.0%;"/>
+            <col style="width: 60.0%;"/>
+            <col style="width: 10.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Komponente</th>
+            <th colspan="1">Topic</th>
+            <th colspan="1">Versionen</th>
+        </tr>
+        <tr th:each="contract: ${messageType.receiverContracts}">
+            <td colspan="1">
+                <ac:link>
+                    <ri:page th:ri:content-title="${contract.componentName}"/>
+                    <ac:plain-text-link-body>
+                        <![CDATA[[[${contract.componentName}]]]]>
+                    </ac:plain-text-link-body>
+                </ac:link>
+            </td>
+            <td colspan="1" th:text="${contract.topic}"></td>
+            <td colspan="1">
+                <ul>
+                    <li th:each="eventVersion : ${messageType.messageVersions}"
+                        th:if="${contract.versionList.contains(eventVersion.version)}"
+                        th:text="${eventVersion.version}"></li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${messageType.receiverContracts.empty}">Keine</p>
+</th:block>

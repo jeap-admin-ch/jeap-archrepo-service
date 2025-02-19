@@ -1,0 +1,8 @@
+@namespace("ch.admin.ezv.wvs.domainevent.common.v1")
+protocol WvsCommunicationReferenceProtocol {
+	record WvsCommunicationReference {
+		string type = "WVS-Communication";
+		string version = "1";
+		string dbMessageId;
+	}
+}

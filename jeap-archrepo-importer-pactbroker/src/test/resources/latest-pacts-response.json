@@ -1,0 +1,236 @@
+{
+  "pacts": [
+    {
+      "createdAt": "2020-05-26T12:50:07+00:00",
+      "_embedded": {
+        "consumer": {
+          "name": "bit-jeap-error-handling-service",
+          "_embedded": {
+            "version": {
+              "number": "1.6.0-10",
+              "_links": {
+                "self": {
+                  "title": "Version",
+                  "name": "1.6.0-10",
+                  "href": "http://localhost:22412/pacticipants/bit-jeap-error-handling-service/versions/1.6.0-10"
+                }
+              }
+            }
+          },
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jeap-error-handling-service"
+            }
+          }
+        },
+        "provider": {
+          "name": "ezv-shared-agir-service",
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/ezv-shared-agir-service"
+            }
+          }
+        }
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/latest"
+          },
+          {
+            "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/version/1.6.0-10"
+          }
+        ]
+      }
+    },
+    {
+      "createdAt": "2020-04-21T08:58:50+00:00",
+      "_embedded": {
+        "consumer": {
+          "name": "bit-jme-cdc-consumer-service",
+          "_embedded": {
+            "version": {
+              "number": "1.0.0-2",
+              "_links": {
+                "self": {
+                  "title": "Version",
+                  "name": "1.0.0-2",
+                  "href": "http://localhost:22412/pacticipants/bit-jme-cdc-consumer-service/versions/1.0.0-2"
+                }
+              }
+            }
+          },
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jme-cdc-consumer-service"
+            }
+          }
+        },
+        "provider": {
+          "name": "bit-jme-cdc-provider-service",
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jme-cdc-provider-service"
+            }
+          }
+        }
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/latest"
+          },
+          {
+            "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/version/1.0.0-2"
+          }
+        ]
+      }
+    },
+    {
+      "createdAt": "2020-04-02T15:59:14+00:00",
+      "_embedded": {
+        "consumer": {
+          "name": "bit-jme-cdc-consumer-service-ps",
+          "_embedded": {
+            "version": {
+              "number": "0.0.1-2",
+              "_links": {
+                "self": {
+                  "title": "Version",
+                  "name": "0.0.1-2",
+                  "href": "http://localhost:22412/pacticipants/bit-jme-cdc-consumer-service-ps/versions/0.0.1-2"
+                }
+              }
+            }
+          },
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jme-cdc-consumer-service-ps"
+            }
+          }
+        },
+        "provider": {
+          "name": "bit-jme-cdc-provider-service-ps",
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jme-cdc-provider-service-ps"
+            }
+          }
+        }
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-ps/consumer/bit-jme-cdc-consumer-service-ps/latest"
+          },
+          {
+            "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-ps/consumer/bit-jme-cdc-consumer-service-ps/version/0.0.1-2"
+          }
+        ]
+      }
+    },
+    {
+      "createdAt": "2020-03-30T11:58:26+00:00",
+      "_embedded": {
+        "consumer": {
+          "name": "bit-jme-cdc-consumer-service-tagged",
+          "_embedded": {
+            "version": {
+              "number": "0.0.1-master-1",
+              "_links": {
+                "self": {
+                  "title": "Version",
+                  "name": "0.0.1-master-1",
+                  "href": "http://localhost:22412/pacticipants/bit-jme-cdc-consumer-service-tagged/versions/0.0.1-master-1"
+                }
+              }
+            }
+          },
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jme-cdc-consumer-service-tagged"
+            }
+          }
+        },
+        "provider": {
+          "name": "bit-jme-cdc-provider-service-tagged",
+          "_links": {
+            "self": {
+              "href": "http://localhost:22412/pacticipants/bit-jme-cdc-provider-service-tagged"
+            }
+          }
+        }
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-tagged/consumer/bit-jme-cdc-consumer-service-tagged/latest"
+          },
+          {
+            "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-tagged/consumer/bit-jme-cdc-consumer-service-tagged/version/0.0.1-master-1"
+          }
+        ]
+      }
+    }
+  ],
+  "_links": {
+    "self": {
+      "href": "http://localhost:22412/pacts/latest"
+    },
+    "pb:pacts": [
+      {
+        "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/latest",
+        "title": "Latest pact between bit-jeap-error-handling-service and ezv-shared-agir-service"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service and bit-jme-cdc-provider-service"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-ps/consumer/bit-jme-cdc-consumer-service-ps/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service-ps and bit-jme-cdc-provider-service-ps"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-tagged/consumer/bit-jme-cdc-consumer-service-tagged/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service-tagged and bit-jme-cdc-provider-service-tagged"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleA/consumer/bit-jme-cdc-consumer-service/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service and bit-jme-cdc-segregatedProvider-service_moduleA"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-segregatedProvider-service_moduleB/consumer/bit-jme-cdc-consumer-service/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service and bit-jme-cdc-segregatedProvider-service_moduleB"
+      }
+    ],
+    "pacts": [
+      {
+        "href": "http://localhost:22412/pacts/provider/ezv-shared-agir-service/consumer/bit-jeap-error-handling-service/latest",
+        "title": "Latest pact between bit-jeap-error-handling-service and ezv-shared-agir-service",
+        "name": "DEPRECATED - please use the pb:pacts relation"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service/consumer/bit-jme-cdc-consumer-service/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service and bit-jme-cdc-provider-service",
+        "name": "DEPRECATED - please use the pb:pacts relation"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-ps/consumer/bit-jme-cdc-consumer-service-ps/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service-ps and bit-jme-cdc-provider-service-ps",
+        "name": "DEPRECATED - please use the pb:pacts relation"
+      },
+      {
+        "href": "http://localhost:22412/pacts/provider/bit-jme-cdc-provider-service-tagged/consumer/bit-jme-cdc-consumer-service-tagged/latest",
+        "title": "Latest pact between bit-jme-cdc-consumer-service-tagged and bit-jme-cdc-provider-service-tagged",
+        "name": "DEPRECATED - please use the pb:pacts relation"
+      }
+    ],
+    "curies": [
+      {
+        "name": "pb",
+        "href": "http://localhost:22412/doc/{rel}?context=pacts",
+        "templated": true
+      }
+    ]
+  }
+}
