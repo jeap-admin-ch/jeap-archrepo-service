@@ -1,6 +1,5 @@
 package ch.admin.bit.jeap.archrepo.metamodel.message;
 
-import com.google.common.collect.Streams;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -57,7 +56,7 @@ public class Command extends MessageType {
     public Set<String> getComponentNamesWithContract() {
         Stream<MessageContract> senderStream = Optional.ofNullable(senderContracts).map(List::stream).orElse(Stream.empty());
         Stream<MessageContract> receiverStream = Optional.ofNullable(receiverContracts).map(List::stream).orElse(Stream.empty());
-        return Streams.concat(senderStream, receiverStream)
+        return Stream.concat(senderStream, receiverStream)
                 .map(MessageContract::getComponentName)
                 .collect(Collectors.toSet());
     }

@@ -66,6 +66,7 @@ class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
         Set<String> importedNames = importedComponents.stream()
                 .map(ComponentVersionSummaryDto::componentName)
                 .collect(toSet());
+        // Remove components imported only by DeploymentLog. If a component is imported by grafana, the importer 'DeploymentLog' is replaced by 'Grafana'.
         for (SystemComponent systemComponent : architectureModel.getAllSystemComponentsByImporter(Importer.DEPLOYMENT_LOG)) {
             if (!importedNames.contains(systemComponent.getName())) {
                 architectureModel.remove(systemComponent);

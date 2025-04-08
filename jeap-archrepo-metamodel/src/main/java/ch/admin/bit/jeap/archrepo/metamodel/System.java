@@ -10,19 +10,14 @@ import ch.admin.bit.jeap.archrepo.metamodel.relation.*;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
-import com.google.common.collect.Streams;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ch.admin.bit.jeap.archrepo.metamodel.Importable.filterByImporter;
 import static java.util.Collections.unmodifiableList;
@@ -80,11 +75,6 @@ public class System extends MutableDomainEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "definingSystem")
     private List<OpenApiSpec> openApiSpecs = new ArrayList<>();
 
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    @Transient
-    private EventBus domainEventBus;
-
     @SuppressWarnings("java:S107")
     private System(String name, String description, String confluenceLink, Team defaultOwner, List<String> aliases,
                    List<SystemComponent> systemComponents,
@@ -109,11 +99,6 @@ public class System extends MutableDomainEntity {
 
     public static SystemBuilder builder() {
         return new SystemBuilder();
-    }
-
-    void setDomainEventBus(EventBus domainEventBus) {
-        this.domainEventBus = domainEventBus;
-        domainEventBus.register(this);
     }
 
     public List<String> getAliases() {
@@ -210,31 +195,34 @@ public class System extends MutableDomainEntity {
                 .findFirst();
     }
 
-    void removeAllByImporter(Importer importer) {
+    RemovedElements removeAllByImporter(Importer importer) {
         relations.removeAll(MultipleImportable.filterByImportedOnlyByImporter(relations, importer));
         restApis.removeAll(MultipleImportable.filterByImportedOnlyByImporter(restApis, importer));
 
-        filterByImporter(systemComponents, importer).forEach(this::removeSystemComponent);
-        filterByImporter(events, importer).forEach(this::removeEvent);
-        filterByImporter(commands, importer).forEach(this::removeCommand);
+        Set<SystemComponentRemoved> systemComponentRemovedList = new HashSet<>();
+        Set<EventRemoved> eventRemovedList = new HashSet<>();
+        Set<CommandRemoved> commandRemovedList = new HashSet<>();
+
+        filterByImporter(systemComponents, importer).forEach(sc -> systemComponentRemovedList.add(removeSystemComponent(sc)));
+        filterByImporter(events, importer).forEach(e -> eventRemovedList.add(removeEvent(e)));
+        filterByImporter(commands, importer).forEach(c -> commandRemovedList.add(removeCommand(c)));
+
+        return new RemovedElements(systemComponentRemovedList, eventRemovedList, commandRemovedList);
     }
 
-    void removeSystemComponent(SystemComponent systemComponent) {
+    SystemComponentRemoved removeSystemComponent(SystemComponent systemComponent) {
         systemComponents.remove(systemComponent);
-        domainEventBus.post(
-                SystemComponentRemoved.of(systemComponent));
+        return SystemComponentRemoved.of(systemComponent);
     }
 
-    public void removeEvent(Event event) {
+    public EventRemoved removeEvent(Event event) {
         events.remove(event);
-        domainEventBus.post(
-                EventRemoved.of(event));
+        return EventRemoved.of(event);
     }
 
-    public void removeCommand(Command command) {
+    public CommandRemoved removeCommand(Command command) {
         commands.remove(command);
-        domainEventBus.post(
-                CommandRemoved.of(command));
+        return CommandRemoved.of(command);
     }
 
     public void removeRestApiRelation(RestApiRelation restApiRelation) {
@@ -249,7 +237,6 @@ public class System extends MutableDomainEntity {
     /**
      * Remove relations if the consumer or provider has been removed
      */
-    @Subscribe
     void onSystemComponentRemoved(SystemComponentRemoved event) {
         String removedSystemComponentName = event.getSystemComponentName();
         relations.removeIf(rel -> removedSystemComponentName.equals(rel.getProviderName()) || removedSystemComponentName.equals(rel.getConsumerName()));
@@ -260,7 +247,6 @@ public class System extends MutableDomainEntity {
     /**
      * Remove event relations if the underlying event has been removed
      */
-    @Subscribe
     void onEventRemoved(EventRemoved event) {
         String eventName = event.getEventName();
         relations.removeIf(rel ->
@@ -270,7 +256,6 @@ public class System extends MutableDomainEntity {
     /**
      * Remove command relations if the underlying command has been removed
      */
-    @Subscribe
     void onCommandRemoved(CommandRemoved event) {
         String commandName = event.getCommandName();
         relations.removeIf(rel ->
@@ -278,7 +263,7 @@ public class System extends MutableDomainEntity {
     }
 
     public Optional<MessageType> findMessageType(String messageTypeName) {
-        return Streams.concat(events.stream(), commands.stream())
+        return Stream.concat(events.stream(), commands.stream())
                 .filter(messageType -> messageType.getMessageTypeName().equalsIgnoreCase(messageTypeName))
                 .findFirst();
     }
