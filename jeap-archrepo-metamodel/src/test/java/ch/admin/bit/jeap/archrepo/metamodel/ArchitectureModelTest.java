@@ -120,7 +120,7 @@ class ArchitectureModelTest {
         createRestApi(backend2, "PUT", "/api/foo");
 
         // when
-        system1.removeSystemComponent(backend);
+        model.remove(backend);
 
         // then
         assertFalse(system1.getRelations().contains(removedComponentRestProviderRelation));
@@ -141,6 +141,7 @@ class ArchitectureModelTest {
                 .descriptorUrl("link")
                 .publisherContracts(List.of())
                 .consumerContracts(List.of())
+                .importer(Importer.GRAFANA)
                 .build();
         Command command = Command.builder()
                 .scope("public")
@@ -149,33 +150,45 @@ class ArchitectureModelTest {
                 .descriptorUrl("link")
                 .senderContracts(List.of())
                 .receiverContracts(List.of())
+                .importer(Importer.GRAFANA)
                 .build();
         EventRelation eventRelationForDeletedEvent = EventRelation.builder()
                 .eventName(event.getMessageTypeName())
+                .importer(Importer.GRAFANA)
                 .build();
         CommandRelation commandRelationForDeletedCommand = CommandRelation.builder()
                 .commandName(command.getMessageTypeName())
+                .importer(Importer.GRAFANA)
                 .build();
         EventRelation remainingEventRelation = EventRelation.builder()
                 .eventName("not-removed-event")
+                .importer(Importer.MESSAGE_TYPE_REGISTRY)
                 .build();
         CommandRelation remainingCommandRelation = CommandRelation.builder()
                 .commandName("not-removed-command")
+                .importer(Importer.MESSAGE_TYPE_REGISTRY)
                 .build();
+        system1.addEvent(event);
+        system1.addCommand(command);
         system1.addRelation(eventRelationForDeletedEvent);
         system1.addRelation(remainingEventRelation);
+        otherSystem.addEvent(event);
+        otherSystem.addCommand(command);
         otherSystem.addRelation(commandRelationForDeletedCommand);
         otherSystem.addRelation(remainingCommandRelation);
 
         // when
-        system1.removeEvent(event);
-        system1.removeCommand(command);
+        model.removeAllByImporter(Importer.GRAFANA);
 
         // then
+        assertFalse(system1.getEvents().contains(event));
+        assertFalse(system1.getCommands().contains(command));
         assertFalse(system1.getRelations().contains(eventRelationForDeletedEvent));
         assertFalse(otherSystem.getRelations().contains(commandRelationForDeletedCommand));
         assertTrue(system1.getRelations().contains(remainingEventRelation));
         assertTrue(otherSystem.getRelations().contains(remainingCommandRelation));
+        assertFalse(otherSystem.getEvents().contains(event));
+        assertFalse(otherSystem.getCommands().contains(command));
     }
 
     @Test

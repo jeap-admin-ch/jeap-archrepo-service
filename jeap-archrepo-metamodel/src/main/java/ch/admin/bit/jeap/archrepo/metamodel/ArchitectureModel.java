@@ -1,5 +1,8 @@
 package ch.admin.bit.jeap.archrepo.metamodel;
 
+import ch.admin.bit.jeap.archrepo.metamodel.domainevents.CommandRemoved;
+import ch.admin.bit.jeap.archrepo.metamodel.domainevents.EventRemoved;
+import ch.admin.bit.jeap.archrepo.metamodel.domainevents.SystemComponentRemoved;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
@@ -7,15 +10,10 @@ import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentType;
-import com.google.common.collect.Streams;
-import com.google.common.eventbus.EventBus;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,16 +24,12 @@ import static java.util.Collections.unmodifiableList;
 public class ArchitectureModel {
     private final List<Team> teams;
     private final List<System> systems;
-    @EqualsAndHashCode.Exclude
-    private final EventBus domainEventBus;
     private final String openApiBaseUrl;
 
     private ArchitectureModel(List<Team> teams, List<System> systems, String openApiBaseUrl) {
         this.teams = teams;
         this.systems = systems;
         this.openApiBaseUrl = openApiBaseUrl;
-        this.domainEventBus = new EventBus();
-        this.systems.forEach(domain -> domain.setDomainEventBus(domainEventBus));
     }
 
     public List<System> getSystems() {
@@ -107,8 +101,24 @@ public class ArchitectureModel {
     }
 
     public void removeAllByImporter(Importer importer) {
+        Set<SystemComponentRemoved> systemComponentRemovedList = new HashSet<>();
+        Set<EventRemoved> eventRemovedList = new HashSet<>();
+        Set<CommandRemoved> commandRemovedList = new HashSet<>();
+
         getAllSystems()
-                .forEach(s -> s.removeAllByImporter(importer));
+                .forEach(s -> {
+                    RemovedElements removedElements = s.removeAllByImporter(importer);
+                    systemComponentRemovedList.addAll(removedElements.systemComponentRemovedList());
+                    eventRemovedList.addAll(removedElements.eventRemovedList());
+                    commandRemovedList.addAll(removedElements.commandRemovedList());
+                });
+
+        getAllSystems()
+                .forEach(s -> {
+                    systemComponentRemovedList.forEach(s::onSystemComponentRemoved);
+                    eventRemovedList.forEach(s::onEventRemoved);
+                    commandRemovedList.forEach(s::onCommandRemoved);
+                });
     }
 
     public List<SystemComponent> getAllSystemComponentsByImporter(Importer importer) {
@@ -120,7 +130,7 @@ public class ArchitectureModel {
 
     public List<MessageType> getAllMessageTypes() {
         return getAllSystems()
-                .flatMap(s -> Streams.concat(s.getCommands().stream(), s.getEvents().stream()))
+                .flatMap(s -> Stream.concat(s.getCommands().stream(), s.getEvents().stream()))
                 .toList();
     }
 
@@ -152,6 +162,10 @@ public class ArchitectureModel {
     public void remove(SystemComponent component) {
         getAllSystems()
                 .forEach(system -> system.removeSystemComponent(component));
+
+        SystemComponentRemoved systemComponentRemoved = SystemComponentRemoved.of(component);
+        getAllSystems()
+                .forEach(system -> system.onSystemComponentRemoved(systemComponentRemoved));
     }
 
     public Optional<MessageType> findMessageType(String messageTypeName) {
