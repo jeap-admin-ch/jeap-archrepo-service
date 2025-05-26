@@ -8,6 +8,8 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.ITemplateEngine;
@@ -107,7 +109,7 @@ class TemplateRenderer {
         context.setVariable("receivedCommandRelations", componentContext.getReceivedCommandsGroupedByCommand());
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
-
+        context.setVariable("reactions", componentContext.getReactionStatisticsView());
         return templateEngine.process("system-component", context).trim();
     }
 
