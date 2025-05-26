@@ -41,6 +41,7 @@ public class ComponentContext {
     List<ProvidedRestAPIRelationView> providedRestApiRelationViews;
     List<RelationView> consumedEventRelations;
     List<RelationView> receivedCommandRelations;
+    ReactionStatisticsView reactionStatisticsView;
 
     public static ComponentContext of(ArchitectureModel model, SystemComponent systemComponent) {
         List<RelationView> consumedRestApiRelations = getConsumedRelationsByType(model, systemComponent, RelationType.REST_API_RELATION);
@@ -53,6 +54,7 @@ public class ComponentContext {
         List<RelationView> receivedCommandRelations = getConsumedRelationsByType(model, systemComponent, RelationType.COMMAND_RELATION);
 
         String openApiSpecUrl = getOpenApiUrl(model, systemComponent);
+        ReactionStatisticsView reactionStatisticsView = systemComponent.getReactionStatistics() != null ? ReactionStatisticsView.of(systemComponent.getReactionStatistics()) : null;
 
         return ComponentContext.builder()
                 .systemComponent(systemComponent)
@@ -64,6 +66,7 @@ public class ComponentContext {
                 .consumedEventRelations(consumedEventRelations)
                 .receivedCommandRelations(receivedCommandRelations)
                 .openApiSpecUrl(openApiSpecUrl)
+                .reactionStatisticsView(reactionStatisticsView)
                 .build();
     }
 

@@ -4,6 +4,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.Importable;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -37,6 +38,10 @@ public abstract class SystemComponent implements Importable {
     @JoinColumn(name = "team_id")
     @Setter
     Team ownedBy;
+
+    @OneToOne(mappedBy = "component", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Setter
+    ReactionStatistics reactionStatistics;
 
     public abstract SystemComponentType getType();
 

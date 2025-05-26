@@ -1,0 +1,52 @@
+<div th:fragment="reactions-table" xmlns:th="http://www.thymeleaf.org" xmlns:ac="http://www.atlassian.com/confluence" th:remove="tag">
+    <table class="wrapped relative-table" style="width: 100.0%;" th:unless="${#lists.isEmpty(reactions)}">
+        <colgroup>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 8.0%;"/>
+            <col style="width: 8.0%;"/>
+            <col style="width: 8.0%;"/>
+            <col style="width: 16.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Trigger Type</th>
+            <th colspan="1">Trigger FQN</th>
+            <th colspan="1">Action Type</th>
+            <th colspan="1">Action FQN</th>
+            <th colspan="1">Count</th>
+            <th colspan="1">Median</th>
+            <th colspan="1">Percentage</th>
+            <th colspan="1">Properties</th>
+        </tr>
+
+        <tr th:each="reaction: ${reactions}">
+            <td colspan="1">
+                <p th:text="${reaction.triggerType}"></p>
+            </td>
+            <td colspan="1">
+                <p th:text="${reaction.triggerFqn}"></p>
+            </td>
+            <td colspan="1">
+                <p th:text="${reaction.actionType != null ? reaction.actionType : '-'}"></p>
+            </td>
+            <td colspan="1">
+                <p th:text="${reaction.actionFqn != null ? reaction.actionFqn : '-'}"></p>
+            </td>
+            <td colspan="1">
+                <p th:text="${reaction.count}"></p>
+            </td>
+            <td colspan="1">
+                <p th:text="${reaction.median}"></p>
+            </td>
+            <td colspan="1">
+                <p th:text="${reaction.percentage}"></p>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(reactions)}">Keine</p>
+</div>

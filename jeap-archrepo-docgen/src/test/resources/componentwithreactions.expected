@@ -3,7 +3,7 @@
         <p>Diese Seite wurde automatisch generiert.</p>
     </ac:rich-text-body>
 </ac:structured-macro>
-    <p>Description</p>
+    <p></p>
 
     <ac:structured-macro ac:name="children" ac:schema-version="2">
         <ac:parameter ac:name="depth">2</ac:parameter>
@@ -66,53 +66,8 @@
 
     <h2>Gesendete Commands</h2>
 
-    <table class="wrapped relative-table" style="width: 100.0%;">
-        <colgroup>
-            <col style="width: 40.0%;"/>
-            <col style="width: 60.0%;"/>
-        </colgroup>
-        <tbody>
-        <tr>
-            <th colspan="1">Name</th>
-            <th colspan="1">Command Receiver</th>
-        </tr>
 
-        <tr>
-
-            <td colspan="1">
-                <ac:link>
-                    <ri:page ri:content-title="SentCommandName"/>
-                    <ac:plain-text-link-body>
-                        <![CDATA[SentCommandName]]>
-                    </ac:plain-text-link-body>
-                </ac:link>
-
-            </td>
-
-
-
-            <td colspan="1">
-
-    <ul>
-        <li>
-
-            <ac:link>
-                <ri:page ri:content-title="OtherComponent1"/>
-                <ac:plain-text-link-body>
-                    <![CDATA[OtherComponent1]]>
-                </ac:plain-text-link-body>
-            </ac:link>
-
-        </li>
-    </ul>
-
-            </td>
-
-        </tr>
-
-        </tbody>
-    </table>
-
+    <p>Keine</p>
 
 
     <h1>Eingehende Beziehungen</h1>
@@ -131,55 +86,58 @@
 
     <h2>Empfangene Commands</h2>
 
-    <table class="wrapped relative-table" style="width: 100.0%;">
-        <colgroup>
-            <col style="width: 40.0%;"/>
-            <col style="width: 60.0%;"/>
-        </colgroup>
-        <tbody>
-        <tr>
-            <th colspan="1">Name</th>
-            <th colspan="1">Command Sender</th>
-        </tr>
 
-        <tr>
-
-            <td colspan="1">
-                <ac:link>
-                    <ri:page ri:content-title="ReceivedCommandName"/>
-                    <ac:plain-text-link-body>
-                        <![CDATA[ReceivedCommandName]]>
-                    </ac:plain-text-link-body>
-                </ac:link>
-
-            </td>
-
-
-
-            <td colspan="1">
-
-    <ul>
-        <li>
-
-            <ac:link>
-                <ri:page ri:content-title="OtherComponent1"/>
-                <ac:plain-text-link-body>
-                    <![CDATA[OtherComponent1]]>
-                </ac:plain-text-link-body>
-            </ac:link>
-
-        </li>
-    </ul>
-
-            </td>
-
-        </tr>
-
-        </tbody>
-    </table>
+    <p>Keine</p>
 
 
     <h2>Reaktionen</h2>
 
+    <table class="wrapped relative-table" style="width: 100.0%;">
+        <colgroup>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 12.0%;"/>
+            <col style="width: 8.0%;"/>
+            <col style="width: 8.0%;"/>
+            <col style="width: 8.0%;"/>
+            <col style="width: 16.0%;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th colspan="1">Trigger Type</th>
+            <th colspan="1">Trigger FQN</th>
+            <th colspan="1">Action Type</th>
+            <th colspan="1">Action FQN</th>
+            <th colspan="1">Count</th>
+            <th colspan="1">Median</th>
+            <th colspan="1">Percentage</th>
+            <th colspan="1">Properties</th>
+        </tr>
 
-    <p>Keine</p>
+        <tr>
+            <td colspan="1">
+                <p>triggerType1</p>
+            </td>
+            <td colspan="1">
+                <p>com.example.TriggerA</p>
+            </td>
+            <td colspan="1">
+                <p>actionType1</p>
+            </td>
+            <td colspan="1">
+                <p>com.example.ActionA</p>
+            </td>
+            <td colspan="1">
+                <p>10</p>
+            </td>
+            <td colspan="1">
+                <p>5.0</p>
+            </td>
+            <td colspan="1">
+                <p>50.0</p>
+            </td>
+        </tr>
+        </tbody>
+    </table>

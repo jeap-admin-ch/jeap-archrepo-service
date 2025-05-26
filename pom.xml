@@ -58,6 +58,7 @@
         <module>jeap-archrepo-importer-prometheus-cf</module>
         <module>jeap-archrepo-importer-prometheus-rhos</module>
         <module>jeap-archrepo-importer-openapi</module>
+        <module>jeap-archrepo-importer-reaction-observer</module>
         <module>jeap-archrepo-test</module>
         <module>jeap-archrepo-instance</module>
     </modules>
@@ -117,6 +118,11 @@
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-openapi</artifactId>
+                <version>1.14.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.admin.bit.jeap</groupId>
+                <artifactId>jeap-archrepo-importer-reaction-observer</artifactId>
                 <version>1.14.0-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -190,5 +196,3 @@
         </pluginManagement>
     </build>
 </project>
-
-

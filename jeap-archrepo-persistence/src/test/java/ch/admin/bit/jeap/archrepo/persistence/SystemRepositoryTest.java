@@ -6,6 +6,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import org.junit.jupiter.api.Test;
@@ -77,12 +78,28 @@ class SystemRepositoryTest {
 
         System savedSystem = systemRepository.save(system);
 
+        ReactionStatistics statistics = ReactionStatistics.builder()
+                .component(savedSystem.getSystemComponents().getFirst())
+                .triggerType("triggerType1")
+                .triggerFqn("com.example.TriggerD")
+                .actionType("actionType1")
+                .actionFqn("com.example.ActionD")
+                .count(40)
+                .median(20.0)
+                .percentage(80.0)
+                .build();
+        savedSystem.getSystemComponents().getFirst().setReactionStatistics(statistics);
+
         Optional<System> optionalSystem = systemRepository.findByNameContainingIgnoreCase("mySystem");
 
         assertThat(optionalSystem)
                 .isPresent()
                 .contains(savedSystem);
 
+        SystemComponent first = savedSystem.getSystemComponents().getFirst();
+        ReactionStatistics reactionStatistics = first.getReactionStatistics();
+        assertThat(reactionStatistics).isNotNull();
+        assertThat(reactionStatistics.getCount()).isEqualTo(40);
     }
 
 
