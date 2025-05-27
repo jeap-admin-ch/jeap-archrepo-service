@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>ch.admin.bit.jeap</groupId>
+            <artifactId>jeap-archrepo-importer-reaction-observer</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.admin.bit.jeap</groupId>
             <artifactId>jeap-archrepo-persistence</artifactId>
         </dependency>
         <dependency>

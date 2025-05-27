@@ -88,7 +88,7 @@ class SystemRepositoryTest {
                 .median(20.0)
                 .percentage(80.0)
                 .build();
-        savedSystem.getSystemComponents().getFirst().setReactionStatistics(statistics);
+        savedSystem.getSystemComponents().getFirst().addReactionStatistics(statistics);
 
         Optional<System> optionalSystem = systemRepository.findByNameContainingIgnoreCase("mySystem");
 
@@ -97,11 +97,10 @@ class SystemRepositoryTest {
                 .contains(savedSystem);
 
         SystemComponent first = savedSystem.getSystemComponents().getFirst();
-        ReactionStatistics reactionStatistics = first.getReactionStatistics();
-        assertThat(reactionStatistics).isNotNull();
+        assertThat(first.getReactionStatistics()).isNotEmpty();
+        ReactionStatistics reactionStatistics = first.getReactionStatistics().getFirst();
         assertThat(reactionStatistics.getCount()).isEqualTo(40);
     }
 
 
 }
-

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "reactionobserverservice", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "reactionobserverservice")
 @Slf4j
 public class ReactionObserverServiceProperties {
 

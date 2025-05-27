@@ -109,7 +109,7 @@ class TemplateRenderer {
         context.setVariable("receivedCommandRelations", componentContext.getReceivedCommandsGroupedByCommand());
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
-        context.setVariable("reactions", componentContext.getReactionStatisticsView());
+        context.setVariable("reactions", componentContext.getReactionStatisticsViews());
         return templateEngine.process("system-component", context).trim();
     }
 

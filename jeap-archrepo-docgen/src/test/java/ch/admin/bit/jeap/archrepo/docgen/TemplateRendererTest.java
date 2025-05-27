@@ -693,10 +693,22 @@ class TemplateRendererTest {
                 .median(5.0)
                 .percentage(50.0)
                 .build();
+        ReactionStatistics reactionStatistics1 = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("triggerType1")
+                .triggerFqn("com.example.TriggerA")
+                .actionType("actionType1")
+                .actionFqn("com.example.ActionB")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+
         BackendService systemComponent = BackendService.builder()
                 .name("testComponent")
-                .reactionStatistics(reactionStatistics)
                 .build();
+        systemComponent.addReactionStatistics(reactionStatistics);
+        systemComponent.addReactionStatistics(reactionStatistics1);
         System system = System.builder()
                 .name("System")
                 .description("Description")

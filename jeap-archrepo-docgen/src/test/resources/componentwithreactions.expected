@@ -139,5 +139,29 @@
                 <p>50.0</p>
             </td>
         </tr>
+
+        <tr>
+            <td colspan="1">
+                <p>triggerType1</p>
+            </td>
+            <td colspan="1">
+                <p>com.example.TriggerA</p>
+            </td>
+            <td colspan="1">
+                <p>actionType1</p>
+            </td>
+            <td colspan="1">
+                <p>com.example.ActionB</p>
+            </td>
+            <td colspan="1">
+                <p>10</p>
+            </td>
+            <td colspan="1">
+                <p>5.0</p>
+            </td>
+            <td colspan="1">
+                <p>50.0</p>
+            </td>
+        </tr>
         </tbody>
     </table>

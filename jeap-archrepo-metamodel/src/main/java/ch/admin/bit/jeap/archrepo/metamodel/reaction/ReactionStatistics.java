@@ -20,42 +20,35 @@ public class ReactionStatistics extends MutableDomainEntity {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "component_id")
     private SystemComponent component;
 
-    @NotNull
     private String triggerType;
 
-    @NotNull
     private String triggerFqn;
 
-    @NotNull
     private String actionType;
 
-    @NotNull
     private String actionFqn;
 
-    @NotNull
     private Integer count;
 
-    @NotNull
     private Double median;
 
-    @NotNull
     private Double percentage;
 
     protected ReactionStatistics() {super();}
 
     @Builder
-    public ReactionStatistics(@NonNull SystemComponent component,
-                              @NonNull String triggerType,
-                              @NonNull String triggerFqn,
-                              @NonNull String actionType,
-                              @NonNull String actionFqn,
-                              @NonNull Integer count,
-                              @NonNull Double median,
-                              @NonNull Double percentage) {
+    public ReactionStatistics(SystemComponent component,
+                              String triggerType,
+                              String triggerFqn,
+                              String actionType,
+                              String actionFqn,
+                              Integer count,
+                              Double median,
+                              Double percentage) {
         this.id = UUID.randomUUID();
         this.component = component;
         this.triggerType = triggerType;

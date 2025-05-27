@@ -1,7 +1,6 @@
 package ch.admin.bit.jeap.archrepo.importer.reaction;
 
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import ch.admin.bit.jeap.rest.tracing.AddSenderSystemHeader;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,7 +23,7 @@ public class ReactionsObserverImporterConfiguration {
     ReactionObserverService reactionObserverService(ReactionObserverServiceProperties properties) {
         RestClient client = RestClient.builder()
                 .baseUrl(properties.getUrl())
-                .defaultHeader(HttpHeaders.AUTHORIZATION, encodeBasicAuth(properties.getUsername(), properties.getPassword(), null))
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodeBasicAuth(properties.getUsername(), properties.getPassword(), null))
                 .build();
         return HttpServiceProxyFactory
                 .builderFor(RestClientAdapter.create(client))

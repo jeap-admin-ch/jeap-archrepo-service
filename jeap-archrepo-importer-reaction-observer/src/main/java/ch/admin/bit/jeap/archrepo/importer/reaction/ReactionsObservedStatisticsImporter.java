@@ -23,7 +23,6 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
     private final ReactionObserverService reactionObserverService;
     private final ReactionStatisticsRepository reactionStatisticsRepository;
 
-    @Transactional
     @Override
     public void importIntoModel(ArchitectureModel model) {
         log.info("Getting statistics from Reaction Observer Service...");
@@ -34,12 +33,13 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
 
             if (!statistics.isEmpty()) {
                 log.trace("Found {} observed statistics for component {} in system {}", statistics.size(), component, system);
-                ReactionsObservedStatisticsDto statisticsDto = statistics.getFirst();
 
                 model.findSystem(system).flatMap(s -> s.findSystemComponent(component)).ifPresent(systemComponent -> {
-                    ReactionStatistics reactionStatistics = toEntity(statisticsDto, systemComponent);
-                    systemComponent.setReactionStatistics(reactionStatistics);
-                    reactionStatisticsRepository.save(reactionStatistics);
+                    for (ReactionsObservedStatisticsDto statisticsDto : statistics) {
+                        ReactionStatistics reactionStatistics = toEntity(statisticsDto, systemComponent);
+                        systemComponent.addReactionStatistics(reactionStatistics);
+                        reactionStatisticsRepository.save(reactionStatistics);
+                    }
                 });
             } else {
                 log.trace("No reaction statistics found for component {} in system {}", component, system);

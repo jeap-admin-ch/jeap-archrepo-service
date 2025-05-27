@@ -11,6 +11,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -39,9 +41,16 @@ public abstract class SystemComponent implements Importable {
     @Setter
     Team ownedBy;
 
-    @OneToOne(mappedBy = "component", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Setter
-    ReactionStatistics reactionStatistics;
+    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ReactionStatistics> reactionStatistics = new ArrayList<>();
+
+    public void addReactionStatistics(ReactionStatistics statistics) {
+        if (reactionStatistics == null) {
+            reactionStatistics = new ArrayList<>();
+        }
+        reactionStatistics.add(statistics);
+    }
 
     public abstract SystemComponentType getType();
 

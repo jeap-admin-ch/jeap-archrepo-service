@@ -25,6 +25,7 @@ Apache License Version 2.0
  * jeap-archrepo-importer-prometheus-aws - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-aws](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus-aws)
  * jeap-archrepo-importer-prometheus-cf - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-cf](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus-cf)
  * jeap-archrepo-importer-prometheus-rhos - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-rhos](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus-rhos)
+ * jeap-archrepo-importer-reaction-observer - [ch.admin.bit.jeap:jeap-archrepo-importer-reaction-observer](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-reaction-observer)
  * jeap-archrepo-importers - [ch.admin.bit.jeap:jeap-archrepo-importers](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importers)
  * jeap-archrepo-metamodel - [ch.admin.bit.jeap:jeap-archrepo-metamodel](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-metamodel)
  * jeap-archrepo-persistence - [ch.admin.bit.jeap:jeap-archrepo-persistence](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-persistence)

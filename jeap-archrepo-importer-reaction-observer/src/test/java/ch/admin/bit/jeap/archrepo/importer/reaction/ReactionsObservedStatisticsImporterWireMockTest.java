@@ -47,7 +47,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
 
         // Stub for first component with statistics
         stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-existing-component"))
-                .withHeader(HttpHeaders.AUTHORIZATION, equalTo(basicAuth))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("""
@@ -68,7 +68,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
 
         // Stub for second component with statistics
         stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-new-component"))
-                .withHeader(HttpHeaders.AUTHORIZATION, equalTo(basicAuth))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("""
@@ -89,7 +89,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
 
         // Stub for third component with no statistics
         stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-component-no-statistics"))
-                .withHeader(HttpHeaders.AUTHORIZATION, equalTo(basicAuth))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("[]")));
@@ -102,8 +102,8 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         // Assert
         // Verify that the components have the correct statistics
         SystemComponent component1 = testModel.findSystemComponent("system-existing-component").orElseThrow();
-        ReactionStatistics stats1 = component1.getReactionStatistics();
-        assertThat(stats1).isNotNull();
+        assertThat(component1.getReactionStatistics()).isNotEmpty();
+        ReactionStatistics stats1 = component1.getReactionStatistics().getFirst();
         assertThat(stats1.getTriggerType()).isEqualTo("TestTriggerType");
         assertThat(stats1.getTriggerFqn()).isEqualTo("com.example.TestTrigger");
         assertThat(stats1.getActionType()).isEqualTo("TestActionType");
@@ -113,8 +113,8 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         assertThat(stats1.getPercentage()).isEqualTo(75.0);
 
         SystemComponent component2 = testModel.findSystemComponent("system-new-component").orElseThrow();
-        ReactionStatistics stats2 = component2.getReactionStatistics();
-        assertThat(stats2).isNotNull();
+        assertThat(component2.getReactionStatistics()).isNotEmpty();
+        ReactionStatistics stats2 = component2.getReactionStatistics().getFirst();
         assertThat(stats2.getTriggerType()).isEqualTo("AnotherTriggerType");
         assertThat(stats2.getTriggerFqn()).isEqualTo("com.example.AnotherTrigger");
         assertThat(stats2.getActionType()).isEqualTo("AnotherActionType");
@@ -125,7 +125,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
 
         // Verify that the third component doesn't have statistics
         SystemComponent component3 = testModel.findSystemComponent("system-component-no-statistics").orElseThrow();
-        assertThat(component3.getReactionStatistics()).isNull();
+        assertThat(component3.getReactionStatistics()).isEmpty();
     }
 
     private ArchitectureModel createTestModel() {
