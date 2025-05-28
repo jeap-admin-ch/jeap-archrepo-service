@@ -683,7 +683,7 @@ class TemplateRendererTest {
 
     @Test
     void renderSystemComponentPageWithReactions() throws IOException {
-        ReactionStatistics reactionStatistics = ReactionStatistics.builder()
+        ReactionStatistics regularStatistics = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
                 .triggerType("triggerType1")
                 .triggerFqn("com.example.TriggerA")
@@ -693,12 +693,30 @@ class TemplateRendererTest {
                 .median(5.0)
                 .percentage(50.0)
                 .build();
-        ReactionStatistics reactionStatistics1 = ReactionStatistics.builder()
+        ReactionStatistics statisticsForEventTrigger = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
-                .triggerType("triggerType1")
+                .triggerType("event")
                 .triggerFqn("com.example.TriggerA")
                 .actionType("actionType1")
                 .actionFqn("com.example.ActionB")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+        ReactionStatistics statisticsForCommandAction = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("event")
+                .triggerFqn("com.example.TriggerA")
+                .actionType("command")
+                .actionFqn("com.example.ActionB")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+        ReactionStatistics statisticsForNoAction = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("trigger")
+                .triggerFqn("com.example.TriggerA")
                 .count(10)
                 .median(5.0)
                 .percentage(50.0)
@@ -707,8 +725,10 @@ class TemplateRendererTest {
         BackendService systemComponent = BackendService.builder()
                 .name("testComponent")
                 .build();
-        systemComponent.addReactionStatistics(reactionStatistics);
-        systemComponent.addReactionStatistics(reactionStatistics1);
+        systemComponent.addReactionStatistics(regularStatistics);
+        systemComponent.addReactionStatistics(statisticsForEventTrigger);
+        systemComponent.addReactionStatistics(statisticsForCommandAction);
+        systemComponent.addReactionStatistics(statisticsForNoAction);
         System system = System.builder()
                 .name("System")
                 .description("Description")

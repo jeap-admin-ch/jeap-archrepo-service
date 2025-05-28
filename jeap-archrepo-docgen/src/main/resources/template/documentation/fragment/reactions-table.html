@@ -1,15 +1,14 @@
 <div th:fragment="reactions-table" xmlns:th="http://www.thymeleaf.org" xmlns:ac="http://www.atlassian.com/confluence" th:remove="tag">
     <table class="wrapped relative-table" style="width: 100.0%;" th:unless="${#lists.isEmpty(reactions)}">
         <colgroup>
-            <col style="width: 12.0%;"/>
-            <col style="width: 12.0%;"/>
-            <col style="width: 12.0%;"/>
-            <col style="width: 12.0%;"/>
-            <col style="width: 12.0%;"/>
-            <col style="width: 8.0%;"/>
-            <col style="width: 8.0%;"/>
-            <col style="width: 8.0%;"/>
-            <col style="width: 16.0%;"/>
+            <col style="width: 14.0%;"/>
+            <col style="width: 14.0%;"/>
+            <col style="width: 14.0%;"/>
+            <col style="width: 14.0%;"/>
+            <col style="width: 14.0%;"/>
+            <col style="width: 10.0%;"/>
+            <col style="width: 10.0%;"/>
+            <col style="width: 10.0%;"/>
         </colgroup>
         <tbody>
         <tr>
@@ -20,7 +19,6 @@
             <th colspan="1">Count</th>
             <th colspan="1">Median</th>
             <th colspan="1">Percentage</th>
-            <th colspan="1">Properties</th>
         </tr>
 
         <tr th:each="reaction: ${reactions}">
@@ -28,13 +26,28 @@
                 <p th:text="${reaction.triggerType}"></p>
             </td>
             <td colspan="1">
-                <p th:text="${reaction.triggerFqn}"></p>
+                <p th:if="${reaction.triggerType != null and (reaction.triggerType == 'event' or reaction.triggerType == 'command')}">
+                    <ac:link>
+                        <ri:page th:ri:content-title="${reaction.triggerFqn}"/>
+                        <ac:plain-text-link-body>
+                            <![CDATA[[[${reaction.triggerFqn}]]]]>
+                        </ac:plain-text-link-body>
+                    </ac:link>
+                </p><p th:unless="${reaction.triggerType != null and (reaction.triggerType == 'event' or reaction.triggerType == 'command')}" th:text="${reaction.triggerFqn}"></p>
             </td>
             <td colspan="1">
                 <p th:text="${reaction.actionType != null ? reaction.actionType : '-'}"></p>
             </td>
             <td colspan="1">
-                <p th:text="${reaction.actionFqn != null ? reaction.actionFqn : '-'}"></p>
+                <p th:if="${reaction.actionType != null and (reaction.actionType == 'event' or reaction.actionType == 'command')}">
+                    <ac:link>
+                        <ri:page th:ri:content-title="${reaction.actionFqn}"/>
+                        <ac:plain-text-link-body>
+                            <![CDATA[[[${reaction.actionFqn}]]]]>
+                        </ac:plain-text-link-body>
+                    </ac:link>
+                </p><p th:unless="${reaction.actionType != null and (reaction.actionType == 'event' or reaction.actionType == 'command')}"
+                   th:text="${reaction.actionFqn != null ? reaction.actionFqn : '-'}"></p>
             </td>
             <td colspan="1">
                 <p th:text="${reaction.count}"></p>
@@ -43,7 +56,7 @@
                 <p th:text="${reaction.median}"></p>
             </td>
             <td colspan="1">
-                <p th:text="${reaction.percentage}"></p>
+                <p th:text="${reaction.percentage + '%'}"></p>
             </td>
         </tr>
         </tbody>
