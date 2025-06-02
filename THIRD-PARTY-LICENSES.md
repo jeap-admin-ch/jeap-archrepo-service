@@ -52,6 +52,7 @@ Apache License Version 2.0
  * Jackson datatype: jdk8 - [com.fasterxml.jackson.datatype:jackson-datatype-jdk8](https://github.com/FasterXML/jackson-modules-java8/jackson-datatype-jdk8)
  * Jackson datatype: JSR310 - [com.fasterxml.jackson.datatype:jackson-datatype-jsr310](https://github.com/FasterXML/jackson-modules-java8/jackson-datatype-jsr310)
  * Jackson-module-parameter-names - [com.fasterxml.jackson.module:jackson-module-parameter-names](https://github.com/FasterXML/jackson-modules-java8/jackson-module-parameter-names)
+ * Java UUID Generator - [com.fasterxml.uuid:java-uuid-generator](https://github.com/cowtowncoder/java-uuid-generator)
  * colormath - [com.github.ajalt:colormath](https://github.com/ajalt/colormath)
  * mordant - [com.github.ajalt:mordant](https://github.com/ajalt/mordant)
  * Generex - [com.github.mifmif:generex](https://github.com/mifmif/Generex/tree/master)
