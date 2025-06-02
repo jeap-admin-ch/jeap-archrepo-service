@@ -2,9 +2,13 @@ package ch.admin.bit.jeap.archrepo.metamodel.reaction;
 
 import ch.admin.bit.jeap.archrepo.metamodel.MutableDomainEntity;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.UUID;
 
@@ -32,11 +36,11 @@ public class ReactionStatistics extends MutableDomainEntity {
 
     private String actionFqn;
 
-    private Integer count;
+    private int count;
 
-    private Double median;
+    private double median;
 
-    private Double percentage;
+    private double percentage;
 
     protected ReactionStatistics() {super();}
 
@@ -46,10 +50,10 @@ public class ReactionStatistics extends MutableDomainEntity {
                               String triggerFqn,
                               String actionType,
                               String actionFqn,
-                              Integer count,
-                              Double median,
-                              Double percentage) {
-        this.id = UUID.randomUUID();
+                              int count,
+                              double median,
+                              double percentage) {
+        this.id = Generators.timeBasedEpochGenerator().generate();
         this.component = component;
         this.triggerType = triggerType;
         this.triggerFqn = triggerFqn;

@@ -22,10 +22,10 @@
         </tr>
 
         <tr th:each="reaction: ${reactions}">
-            <td colspan="1">
+            <td colspan="1" th:rowspan="${reaction.rowSpan}" th:if="${reaction.rowSpan}">
                 <p th:text="${reaction.triggerType}"></p>
             </td>
-            <td colspan="1">
+            <td colspan="1" th:rowspan="${reaction.rowSpan}" th:if="${reaction.rowSpan}">
                 <p th:if="${reaction.triggerType != null and (reaction.triggerType == 'event' or reaction.triggerType == 'command')}">
                     <ac:link>
                         <ri:page th:ri:content-title="${reaction.triggerFqn}"/>

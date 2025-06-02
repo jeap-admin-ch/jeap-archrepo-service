@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Relation;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -71,11 +72,28 @@ public class ComponentContext {
     }
 
     private static List<ReactionStatisticsView> getReactionStatisticsViews(SystemComponent systemComponent) {
-        return systemComponent.getReactionStatistics().isEmpty() ?
-                Collections.emptyList() :
-                systemComponent.getReactionStatistics().stream()
-                        .map(ReactionStatisticsView::of)
-                        .collect(Collectors.toList());
+        if (systemComponent.getReactionStatistics().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<String, List<ReactionStatistics>> groupedByTrigger = new TreeMap<>(
+            systemComponent.getReactionStatistics().stream()
+                .collect(Collectors.groupingBy(stats -> stats.getTriggerType() + "|" + stats.getTriggerFqn()))
+        );
+
+        List<ReactionStatisticsView> result = new ArrayList<>();
+        for (Map.Entry<String, List<ReactionStatistics>> entry : groupedByTrigger.entrySet()) {
+            List<ReactionStatistics> reactionStatisticsByTrigger = entry.getValue();
+            for (int i = 0; i < reactionStatisticsByTrigger.size(); i++) {
+                if (i == 0) {
+                    // For the first item in the group, we use the rowSpan value
+                    result.add(ReactionStatisticsView.of(reactionStatisticsByTrigger.getFirst(), reactionStatisticsByTrigger.size()));
+                } else {
+                    result.add(ReactionStatisticsView.of(reactionStatisticsByTrigger.get(i), null));
+                }
+            }
+        }
+        return result;
     }
 
     public Set<String> getComponentsInContext() {

@@ -115,34 +115,10 @@
         </tr>
 
         <tr>
-            <td colspan="1">
-                <p>triggerType1</p>
-            </td>
-            <td colspan="1">
-                <p>com.example.TriggerA</p>
-            </td>
-            <td colspan="1">
-                <p>actionType1</p>
-            </td>
-            <td colspan="1">
-                <p>com.example.ActionA</p>
-            </td>
-            <td colspan="1">
-                <p>10</p>
-            </td>
-            <td colspan="1">
-                <p>5.0</p>
-            </td>
-            <td colspan="1">
-                <p>50.0%</p>
-            </td>
-        </tr>
-
-        <tr>
-            <td colspan="1">
+            <td colspan="1" rowspan="2">
                 <p>event</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="2">
                 <p>
                     <ac:link>
                         <ri:page ri:content-title="com.example.TriggerA"/>
@@ -170,19 +146,8 @@
         </tr>
 
         <tr>
-            <td colspan="1">
-                <p>event</p>
-            </td>
-            <td colspan="1">
-                <p>
-                    <ac:link>
-                        <ri:page ri:content-title="com.example.TriggerA"/>
-                        <ac:plain-text-link-body>
-                            <![CDATA[com.example.TriggerA]]>
-                        </ac:plain-text-link-body>
-                    </ac:link>
-                </p>
-            </td>
+
+
             <td colspan="1">
                 <p>command</p>
             </td>
@@ -208,10 +173,34 @@
         </tr>
 
         <tr>
-            <td colspan="1">
-                <p>trigger</p>
+            <td colspan="1" rowspan="1">
+                <p>triggerType1</p>
+            </td>
+            <td colspan="1" rowspan="1">
+                <p>com.example.TriggerA</p>
             </td>
             <td colspan="1">
+                <p>actionType1</p>
+            </td>
+            <td colspan="1">
+                <p>com.example.ActionA</p>
+            </td>
+            <td colspan="1">
+                <p>10</p>
+            </td>
+            <td colspan="1">
+                <p>5.0</p>
+            </td>
+            <td colspan="1">
+                <p>50.0%</p>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="1" rowspan="1">
+                <p>trigger</p>
+            </td>
+            <td colspan="1" rowspan="1">
                 <p>com.example.TriggerA</p>
             </td>
             <td colspan="1">
