@@ -25,8 +25,10 @@ public class ReactionStatisticsView {
     Double percentage;
     
     String providerName;
-    
-    static ReactionStatisticsView of(ReactionStatistics statistics) {
+
+    Integer rowSpan;
+
+    static ReactionStatisticsView of(ReactionStatistics statistics, Integer rowSpan) {
         return ReactionStatisticsView.builder()
                 .triggerType(statistics.getTriggerType())
                 .triggerFqn(statistics.getTriggerFqn())
@@ -36,6 +38,7 @@ public class ReactionStatisticsView {
                 .median(statistics.getMedian())
                 .percentage(statistics.getPercentage())
                 .providerName(statistics.getComponent().getName())
+                .rowSpan(rowSpan)
                 .build();
     }
 }
