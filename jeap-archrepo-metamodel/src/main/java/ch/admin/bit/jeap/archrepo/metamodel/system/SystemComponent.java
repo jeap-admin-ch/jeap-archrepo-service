@@ -4,12 +4,15 @@ import ch.admin.bit.jeap.archrepo.metamodel.Importable;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -37,6 +40,17 @@ public abstract class SystemComponent implements Importable {
     @JoinColumn(name = "team_id")
     @Setter
     Team ownedBy;
+
+    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ReactionStatistics> reactionStatistics = new ArrayList<>();
+
+    public void addReactionStatistics(ReactionStatistics statistics) {
+        if (reactionStatistics == null) {
+            reactionStatistics = new ArrayList<>();
+        }
+        reactionStatistics.add(statistics);
+    }
 
     public abstract SystemComponentType getType();
 

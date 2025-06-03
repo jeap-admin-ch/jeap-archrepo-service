@@ -9,6 +9,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
@@ -678,6 +679,66 @@ class TemplateRendererTest {
 
         String content = templateRenderer.renderCommandPage(command);
         assertContent("command.expected", content);
+    }
+
+    @Test
+    void renderSystemComponentPageWithReactions() throws IOException {
+        ReactionStatistics regularStatistics = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("triggerType1")
+                .triggerFqn("com.example.TriggerA")
+                .actionType("actionType1")
+                .actionFqn("com.example.ActionA")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+        ReactionStatistics statisticsForEventTrigger = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("event")
+                .triggerFqn("com.example.TriggerA")
+                .actionType("actionType1")
+                .actionFqn("com.example.ActionB")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+        ReactionStatistics statisticsForCommandAction = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("event")
+                .triggerFqn("com.example.TriggerA")
+                .actionType("command")
+                .actionFqn("com.example.ActionB")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+        ReactionStatistics statisticsForNoAction = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("trigger")
+                .triggerFqn("com.example.TriggerA")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+
+        BackendService systemComponent = BackendService.builder()
+                .name("testComponent")
+                .build();
+        systemComponent.addReactionStatistics(regularStatistics);
+        systemComponent.addReactionStatistics(statisticsForEventTrigger);
+        systemComponent.addReactionStatistics(statisticsForCommandAction);
+        systemComponent.addReactionStatistics(statisticsForNoAction);
+        System system = System.builder()
+                .name("System")
+                .description("Description")
+                .build();
+        system.addSystemComponent(systemComponent);
+
+        ArchitectureModel model = buildModel(system);
+
+        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        assertContent("componentwithreactions.expected", content);
     }
 
     @BeforeEach

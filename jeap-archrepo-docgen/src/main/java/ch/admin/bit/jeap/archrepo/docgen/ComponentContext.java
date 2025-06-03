@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Relation;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -41,6 +42,7 @@ public class ComponentContext {
     List<ProvidedRestAPIRelationView> providedRestApiRelationViews;
     List<RelationView> consumedEventRelations;
     List<RelationView> receivedCommandRelations;
+    List<ReactionStatisticsView> reactionStatisticsViews;
 
     public static ComponentContext of(ArchitectureModel model, SystemComponent systemComponent) {
         List<RelationView> consumedRestApiRelations = getConsumedRelationsByType(model, systemComponent, RelationType.REST_API_RELATION);
@@ -53,6 +55,7 @@ public class ComponentContext {
         List<RelationView> receivedCommandRelations = getConsumedRelationsByType(model, systemComponent, RelationType.COMMAND_RELATION);
 
         String openApiSpecUrl = getOpenApiUrl(model, systemComponent);
+        List<ReactionStatisticsView> reactionStatisticsViews = getReactionStatisticsViews(systemComponent);
 
         return ComponentContext.builder()
                 .systemComponent(systemComponent)
@@ -64,7 +67,33 @@ public class ComponentContext {
                 .consumedEventRelations(consumedEventRelations)
                 .receivedCommandRelations(receivedCommandRelations)
                 .openApiSpecUrl(openApiSpecUrl)
+                .reactionStatisticsViews(reactionStatisticsViews)
                 .build();
+    }
+
+    private static List<ReactionStatisticsView> getReactionStatisticsViews(SystemComponent systemComponent) {
+        if (systemComponent.getReactionStatistics().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<String, List<ReactionStatistics>> groupedByTrigger = new TreeMap<>(
+            systemComponent.getReactionStatistics().stream()
+                .collect(Collectors.groupingBy(stats -> stats.getTriggerType() + "|" + stats.getTriggerFqn()))
+        );
+
+        List<ReactionStatisticsView> result = new ArrayList<>();
+        for (Map.Entry<String, List<ReactionStatistics>> entry : groupedByTrigger.entrySet()) {
+            List<ReactionStatistics> reactionStatisticsByTrigger = entry.getValue();
+            for (int i = 0; i < reactionStatisticsByTrigger.size(); i++) {
+                if (i == 0) {
+                    // For the first item in the group, we use the rowSpan value
+                    result.add(ReactionStatisticsView.of(reactionStatisticsByTrigger.getFirst(), reactionStatisticsByTrigger.size()));
+                } else {
+                    result.add(ReactionStatisticsView.of(reactionStatisticsByTrigger.get(i), null));
+                }
+            }
+        }
+        return result;
     }
 
     public Set<String> getComponentsInContext() {
