@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>jeap-archrepo-docgen</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
 
     <dependencies>
         <dependency>

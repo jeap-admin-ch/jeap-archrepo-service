@@ -32,6 +32,7 @@
     </parent>
 
     <artifactId>jeap-archrepo-service</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
     <version>1.15.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
