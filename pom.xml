@@ -33,7 +33,7 @@
 
     <artifactId>jeap-archrepo-service</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <version>1.15.0-SNAPSHOT</version>
+    <version>1.15.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -69,77 +69,77 @@
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-metamodel</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-persistence</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importers</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-messagetype</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-pactbroker</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus-aws</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus-cf</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus-rhos</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-deploymentlog</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-openapi</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-reaction-observer</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-docgen</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-web</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-test</artifactId>
-                <version>1.15.0-SNAPSHOT</version>
+                <version>1.15.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
