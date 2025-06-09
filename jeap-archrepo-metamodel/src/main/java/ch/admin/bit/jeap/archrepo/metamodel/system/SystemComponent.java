@@ -41,7 +41,7 @@ public abstract class SystemComponent implements Importable {
     @Setter
     Team ownedBy;
 
-    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "component")
     @Builder.Default
     private List<ReactionStatistics> reactionStatistics = new ArrayList<>();
 
@@ -49,6 +49,7 @@ public abstract class SystemComponent implements Importable {
         if (reactionStatistics == null) {
             reactionStatistics = new ArrayList<>();
         }
+        statistics.setComponent(this);
         reactionStatistics.add(statistics);
     }
 

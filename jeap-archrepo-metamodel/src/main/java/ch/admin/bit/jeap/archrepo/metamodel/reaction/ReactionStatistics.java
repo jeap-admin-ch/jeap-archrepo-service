@@ -5,10 +5,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -26,6 +23,7 @@ public class ReactionStatistics extends MutableDomainEntity {
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "component_id")
+    @Setter
     private SystemComponent component;
 
     private String triggerType;
