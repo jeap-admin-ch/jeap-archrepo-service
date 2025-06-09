@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
@@ -107,7 +108,7 @@ public class MessageDescriptorImporter {
                         .compatibilityMode(v.getCompatibilityMode())
                         .compatibleVersion(compatibleVersion(messageTypeDescriptor.getVersions(), v))
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private String compatibleVersion(List<MessageTypeVersion> versions, MessageTypeVersion version) {
