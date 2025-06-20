@@ -7,8 +7,9 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsV2Dto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @PactTestFor(port = "8888", pactVersion = PactSpecVersion.V3)
 public class ReactionObserverServicePactTestBase {
 
-    private static final String API_PATH = "/api/statistics";
+    private static final String API_PATH = "/api/statisticsV2";
 
     @SuppressWarnings("DataFlowIssue")
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
@@ -38,16 +39,26 @@ public class ReactionObserverServicePactTestBase {
                 .willRespondWith()
                 .status(200)
                 .matchHeader("Content-Type", "application/json")
-                .body(PactDslJsonArray.arrayEachLike()
-                        .stringValue("component", "c1")
-                        .stringValue("triggerType", "command")
-                        .stringValue("triggerFqn", "SomeCommand")
-                        .stringValue("actionType", "event")
-                        .stringValue("actionFqn", "SomeEvent")
-                        .integerType("count")
-                        .decimalType("median")
-                        .decimalType("percentage")
-                        .closeObject())
+                .body("""
+                [
+                  {
+                    "component": "c1",
+                    "triggerType": "command",
+                    "triggerFqn": "SomeCommand",
+                    "actions": [
+                      {
+                        "actionType": "event",
+                        "actionFqn": "SomeEvent",
+                        "actionProperties": {}
+                      }
+                    ],
+                    "count": 100,
+                    "median": 50.0,
+                    "percentage": 75.0,
+                    "triggerProperties": {}
+                  }
+                ]
+                """)
                 .toPact();
     }
 
@@ -62,16 +73,18 @@ public class ReactionObserverServicePactTestBase {
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
-        List<ReactionsObservedStatisticsDto> result = reactionObserverService.getReactionsObservedStatistics("c1");
+        List<ReactionsObservedStatisticsV2Dto> result = reactionObserverService.getReactionsObservedStatistics("c1");
 
         // then
         assertThat(result).isNotEmpty();
-        ReactionsObservedStatisticsDto statisticsDto = result.getFirst();
+        ReactionsObservedStatisticsV2Dto statisticsDto = result.getFirst();
         assertThat(statisticsDto.component()).isEqualTo("c1");
         assertThat(statisticsDto.triggerType()).isEqualTo("command");
         assertThat(statisticsDto.triggerFqn()).isEqualTo("SomeCommand");
-        assertThat(statisticsDto.actionType()).isEqualTo("event");
-        assertThat(statisticsDto.actionFqn()).isEqualTo("SomeEvent");
+        assertThat(statisticsDto.actions()).isNotEmpty();
+        Action action = statisticsDto.actions().getFirst();
+        assertThat(action.actionType()).isEqualTo("event");
+        assertThat(action.actionFqn()).isEqualTo("SomeEvent");
         assertThat(statisticsDto.count()).isGreaterThan(0);
         assertThat(statisticsDto.median()).isGreaterThan(0d);
         assertThat(statisticsDto.percentage()).isGreaterThan(0d);
@@ -105,7 +118,7 @@ public class ReactionObserverServicePactTestBase {
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
-        List<ReactionsObservedStatisticsDto> result = reactionObserverService.getReactionsObservedStatistics("unknown");
+        List<ReactionsObservedStatisticsV2Dto> result = reactionObserverService.getReactionsObservedStatistics("unknown");
 
         // then
         assertThat(result).isEmpty();

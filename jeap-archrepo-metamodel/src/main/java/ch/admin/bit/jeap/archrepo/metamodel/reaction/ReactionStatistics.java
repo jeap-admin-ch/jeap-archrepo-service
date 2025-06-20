@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = false)
@@ -30,15 +32,22 @@ public class ReactionStatistics extends MutableDomainEntity {
 
     private String triggerFqn;
 
-    private String actionType;
-
-    private String actionFqn;
-
     private int count;
 
     private double median;
 
     private double percentage;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "reactionStatistics")
+    private List<ActionEntity> actions = new ArrayList<>();
+
+    public void addAction(ActionEntity action) {
+        if (actions == null) {
+            actions = new ArrayList<>();
+        }
+        action.setReactionStatistics(this);
+        actions.add(action);
+    }
 
     protected ReactionStatistics() {super();}
 
@@ -46,8 +55,6 @@ public class ReactionStatistics extends MutableDomainEntity {
     public ReactionStatistics(SystemComponent component,
                               String triggerType,
                               String triggerFqn,
-                              String actionType,
-                              String actionFqn,
                               int count,
                               double median,
                               double percentage) {
@@ -55,8 +62,6 @@ public class ReactionStatistics extends MutableDomainEntity {
         this.component = component;
         this.triggerType = triggerType;
         this.triggerFqn = triggerFqn;
-        this.actionType = actionType;
-        this.actionFqn = actionFqn;
         this.count = count;
         this.median = median;
         this.percentage = percentage;

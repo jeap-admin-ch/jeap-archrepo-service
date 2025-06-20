@@ -1,7 +1,8 @@
 package ch.admin.bit.jeap.archrepo.importer.reaction;
 
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsV2Dto;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
@@ -50,8 +51,8 @@ class ReactionsObservedStatisticsImporterTest {
         String componentName = "testComponent";
         String systemName = "testSystem";
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(singletonMap(componentName, systemName));
-        
-        ReactionsObservedStatisticsDto statisticsDto = createTestStatisticsDto(componentName);
+
+        ReactionsObservedStatisticsV2Dto statisticsDto = createTestStatisticsDto(componentName);
         when(reactionObserverService.getReactionsObservedStatistics(componentName))
                 .thenReturn(List.of(statisticsDto));
         
@@ -73,11 +74,19 @@ class ReactionsObservedStatisticsImporterTest {
         assertThat(capturedStatistics.getComponent()).isEqualTo(systemComponent);
         assertThat(capturedStatistics.getTriggerType()).isEqualTo(statisticsDto.triggerType());
         assertThat(capturedStatistics.getTriggerFqn()).isEqualTo(statisticsDto.triggerFqn());
-        assertThat(capturedStatistics.getActionType()).isEqualTo(statisticsDto.actionType());
-        assertThat(capturedStatistics.getActionFqn()).isEqualTo(statisticsDto.actionFqn());
+
+        Action firstAction = statisticsDto.actions().getFirst();
+        assertThat(capturedStatistics.getActionType()).isEqualTo(firstAction.actionType());
+        assertThat(capturedStatistics.getActionFqn()).isEqualTo(firstAction.actionFqn());
+
         assertThat(capturedStatistics.getCount()).isEqualTo((int) statisticsDto.count());
         assertThat(capturedStatistics.getMedian()).isEqualTo(statisticsDto.median());
         assertThat(capturedStatistics.getPercentage()).isEqualTo(statisticsDto.percentage());
+
+        assertThat(capturedStatistics.getActions()).hasSize(1);
+        assertThat(capturedStatistics.getActions().getFirst().getActionType()).isEqualTo(firstAction.actionType());
+        assertThat(capturedStatistics.getActions().getFirst().getActionFqn()).isEqualTo(firstAction.actionFqn());
+        assertThat(capturedStatistics.getActions().getFirst().getReactionStatistics()).isEqualTo(capturedStatistics);
     }
 
     @Test
@@ -87,16 +96,16 @@ class ReactionsObservedStatisticsImporterTest {
         String systemName = "testSystem";
         
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(singletonMap(componentName, systemName));
-        
+
         when(reactionObserverService.getReactionsObservedStatistics(componentName))
                 .thenReturn(Collections.emptyList());
-        
+
         ReactionsObservedStatisticsImporter importer = new ReactionsObservedStatisticsImporter(
                 reactionObserverService, reactionStatisticsRepository);
-        
+
         // Act
         importer.importIntoModel(model);
-        
+
         // Assert
         verify(reactionStatisticsRepository).deleteAll();
         verify(reactionStatisticsRepository, never()).save(any());
@@ -108,49 +117,53 @@ class ReactionsObservedStatisticsImporterTest {
         String component1 = "component1";
         String component2 = "component2";
         String systemName = "testSystem";
-        
+
         Map<String, String> componentMap = new HashMap<>();
         componentMap.put(component1, systemName);
         componentMap.put(component2, systemName);
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(componentMap);
-        
-        ReactionsObservedStatisticsDto statisticsDto1 = createTestStatisticsDto(component1);
-        ReactionsObservedStatisticsDto statisticsDto2 = createTestStatisticsDto(component2);
-        
+
+        ReactionsObservedStatisticsV2Dto statisticsDto1 = createTestStatisticsDto(component1);
+        ReactionsObservedStatisticsV2Dto statisticsDto2 = createTestStatisticsDto(component2);
+
         when(reactionObserverService.getReactionsObservedStatistics(component1))
                 .thenReturn(List.of(statisticsDto1));
         when(reactionObserverService.getReactionsObservedStatistics(component2))
                 .thenReturn(List.of(statisticsDto2));
-        
+
         SystemComponent systemComponent1 = BackendService.builder().name(component1).build();
         SystemComponent systemComponent2 = BackendService.builder().name(component2).build();
-        
+
         when(model.findSystem(systemName)).thenReturn(Optional.of(system));
         when(system.findSystemComponent(component1)).thenReturn(Optional.of(systemComponent1));
         when(system.findSystemComponent(component2)).thenReturn(Optional.of(systemComponent2));
-        
+
         ReactionsObservedStatisticsImporter importer = new ReactionsObservedStatisticsImporter(
                 reactionObserverService, reactionStatisticsRepository);
-        
+
         // Act
         importer.importIntoModel(model);
-        
+
         // Assert
         verify(reactionStatisticsRepository).deleteAll();
         verify(reactionStatisticsRepository, times(2)).save(any());
     }
 
-    private ReactionsObservedStatisticsDto createTestStatisticsDto(String componentName) {
-        return new ReactionsObservedStatisticsDto(
+    private ReactionsObservedStatisticsV2Dto createTestStatisticsDto(String componentName) {
+        Action action = new Action(
+                "TestActionType",
+                "com.example.TestAction",
+                Collections.emptyMap()
+        );
+
+        return new ReactionsObservedStatisticsV2Dto(
                 componentName,
                 "TestTriggerType",
                 "com.example.TestTrigger",
-                "TestActionType",
-                "com.example.TestAction",
+                List.of(action),
                 100L,
                 50.0,
                 75.0,
-                Collections.emptyMap(),
                 Collections.emptyMap()
         );
     }

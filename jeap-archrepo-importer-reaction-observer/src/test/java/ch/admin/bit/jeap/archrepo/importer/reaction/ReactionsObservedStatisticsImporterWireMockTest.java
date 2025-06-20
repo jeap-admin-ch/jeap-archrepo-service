@@ -46,7 +46,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
 
         // Stub for first component with statistics
-        stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-existing-component"))
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/statisticsV2/system-existing-component"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -56,18 +56,22 @@ class ReactionsObservedStatisticsImporterWireMockTest {
                                   "component": "system-existing-component",
                                   "triggerType": "TestTriggerType",
                                   "triggerFqn": "com.example.TestTrigger",
-                                  "actionType": "TestActionType",
-                                  "actionFqn": "com.example.TestAction",
+                                  "actions": [
+                                    {
+                                      "actionType": "TestActionType",
+                                      "actionFqn": "com.example.TestAction",
+                                      "actionProperties": {}
+                                    }
+                                  ],
                                   "count": 100,
                                   "median": 50.0,
                                   "percentage": 75.0,
-                                  "triggerProperties": {},
-                                  "actionProperties": {}
+                                  "triggerProperties": {}
                                 }
                                 ]""")));
 
         // Stub for second component with statistics
-        stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-new-component"))
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/statisticsV2/system-new-component"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -77,18 +81,22 @@ class ReactionsObservedStatisticsImporterWireMockTest {
                                   "component": "system-new-component",
                                   "triggerType": "AnotherTriggerType",
                                   "triggerFqn": "com.example.AnotherTrigger",
-                                  "actionType": "AnotherActionType",
-                                  "actionFqn": "com.example.AnotherAction",
+                                  "actions": [
+                                    {
+                                      "actionType": "AnotherActionType",
+                                      "actionFqn": "com.example.AnotherAction",
+                                      "actionProperties": {}
+                                    }
+                                  ],
                                   "count": 200,
                                   "median": 60.0,
                                   "percentage": 85.0,
-                                  "triggerProperties": {},
-                                  "actionProperties": {}
+                                  "triggerProperties": {}
                                 }
                                 ]""")));
 
         // Stub for third component with no statistics
-        stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-component-no-statistics"))
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/statisticsV2/system-component-no-statistics"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -112,6 +120,12 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         assertThat(stats1.getMedian()).isEqualTo(50.0);
         assertThat(stats1.getPercentage()).isEqualTo(75.0);
 
+        // Check that actions are created and associated with the ReactionStatistics entity
+        assertThat(stats1.getActions()).hasSize(1);
+        assertThat(stats1.getActions().get(0).getActionType()).isEqualTo("TestActionType");
+        assertThat(stats1.getActions().get(0).getActionFqn()).isEqualTo("com.example.TestAction");
+        assertThat(stats1.getActions().get(0).getReactionStatistics()).isEqualTo(stats1);
+
         SystemComponent component2 = testModel.findSystemComponent("system-new-component").orElseThrow();
         assertThat(component2.getReactionStatistics()).isNotEmpty();
         ReactionStatistics stats2 = component2.getReactionStatistics().getFirst();
@@ -122,6 +136,12 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         assertThat(stats2.getCount()).isEqualTo(200);
         assertThat(stats2.getMedian()).isEqualTo(60.0);
         assertThat(stats2.getPercentage()).isEqualTo(85.0);
+
+        // Check that actions are created and associated with the ReactionStatistics entity
+        assertThat(stats2.getActions()).hasSize(1);
+        assertThat(stats2.getActions().get(0).getActionType()).isEqualTo("AnotherActionType");
+        assertThat(stats2.getActions().get(0).getActionFqn()).isEqualTo("com.example.AnotherAction");
+        assertThat(stats2.getActions().get(0).getReactionStatistics()).isEqualTo(stats2);
 
         // Verify that the third component doesn't have statistics
         SystemComponent component3 = testModel.findSystemComponent("system-component-no-statistics").orElseThrow();
