@@ -709,7 +709,7 @@ class TemplateRendererTest {
                 .build();
         statisticsForEventTrigger.addAction(action1);
         ActionEntity action2 = ActionEntity.builder().actionType("command")
-                .actionFqn("com.example.ActionB")
+                .actionFqn("com.example.ActionC")
                 .build();
         ReactionStatistics statisticsForCommandAction = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
@@ -728,6 +728,33 @@ class TemplateRendererTest {
                 .median(5.0)
                 .percentage(50.0)
                 .build();
+        ActionEntity action3 = ActionEntity.builder().actionType("command")
+                .actionFqn("com.example.ActionB")
+                .build();
+        ActionEntity action4 = ActionEntity.builder().actionType("command")
+                .actionFqn("com.example.ActionC")
+                .build();
+        ReactionStatistics statisticsMultipleActionsForCommandAction = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .triggerType("event")
+                .triggerFqn("com.example.TriggerA")
+                .count(10)
+                .median(5.0)
+                .percentage(50.0)
+                .build();
+        statisticsMultipleActionsForCommandAction.addAction(action3);
+        statisticsMultipleActionsForCommandAction.addAction(action4);
+
+        ActionEntity action5 = ActionEntity.builder().actionType("command")
+                .actionFqn("com.example.ActionC")
+                .build();
+        ReactionStatistics statisticsNoTrigger = ReactionStatistics.builder()
+                .component(BackendService.builder().name("testComponent").build())
+                .count(10)
+                .median(5.0)
+                .percentage(null)
+                .build();
+        statisticsNoTrigger.addAction(action5);
 
         BackendService systemComponent = BackendService.builder()
                 .name("testComponent")
@@ -736,6 +763,8 @@ class TemplateRendererTest {
         systemComponent.addReactionStatistics(statisticsForEventTrigger);
         systemComponent.addReactionStatistics(statisticsForCommandAction);
         systemComponent.addReactionStatistics(statisticsForNoAction);
+        systemComponent.addReactionStatistics(statisticsMultipleActionsForCommandAction);
+        systemComponent.addReactionStatistics(statisticsNoTrigger);
         System system = System.builder()
                 .name("System")
                 .description("Description")

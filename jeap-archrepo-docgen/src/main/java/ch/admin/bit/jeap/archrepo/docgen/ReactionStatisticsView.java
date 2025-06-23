@@ -22,7 +22,7 @@ public class ReactionStatisticsView {
     
     Double median;
     
-    Double percentage;
+    Integer percentage;
     
     String providerName;
 
@@ -38,7 +38,7 @@ public class ReactionStatisticsView {
                 .actionFqn(actionFqn)
                 .count(statistics.getCount())
                 .median(statistics.getMedian())
-                .percentage(statistics.getPercentage())
+                .percentage(statistics.getPercentage() != null ? (int) Math.round(statistics.getPercentage()) : null)
                 .providerName(statistics.getComponent().getName())
                 .multipleActionsRowSpan(multipleActionsRowSpan)
                 .rowSpan(rowSpan)

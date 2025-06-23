@@ -109,9 +109,9 @@
             <th colspan="1">Trigger FQN</th>
             <th colspan="1">Action Type</th>
             <th colspan="1">Action FQN</th>
-            <th colspan="1">Count</th>
-            <th colspan="1">Median</th>
-            <th colspan="1">Percentage</th>
+            <th colspan="1" style="text-align: right;">Count</th>
+            <th colspan="1" style="text-align: right;">Median</th>
+            <th colspan="1" style="text-align: right;">Percentage</th>
         </tr>
 
         <tr>
@@ -134,20 +134,58 @@
             <td colspan="1">
                 <p>com.example.ActionB</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="1" style="text-align: right;">
                 <p>10</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="1" style="text-align: right;">
                 <p>5.0</p>
             </td>
-            <td colspan="1">
-                <p>50.0%</p>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>50%</p>
             </td>
         </tr>
 
         <tr>
 
 
+            <td colspan="1">
+                <p>command</p>
+            </td>
+            <td colspan="1">
+                <p>
+                    <ac:link>
+                        <ri:page ri:content-title="com.example.ActionC"/>
+                        <ac:plain-text-link-body>
+                            <![CDATA[com.example.ActionC]]>
+                        </ac:plain-text-link-body>
+                    </ac:link>
+                </p>
+            </td>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>10</p>
+            </td>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>5.0</p>
+            </td>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>50%</p>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="1" rowspan="2">
+                <p>event</p>
+            </td>
+            <td colspan="1" rowspan="2">
+                <p>
+                    <ac:link>
+                        <ri:page ri:content-title="com.example.TriggerA"/>
+                        <ac:plain-text-link-body>
+                            <![CDATA[com.example.TriggerA]]>
+                        </ac:plain-text-link-body>
+                    </ac:link>
+                </p>
+            </td>
             <td colspan="1">
                 <p>command</p>
             </td>
@@ -161,14 +199,66 @@
                     </ac:link>
                 </p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="2" style="text-align: right;">
                 <p>10</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="2" style="text-align: right;">
                 <p>5.0</p>
             </td>
+            <td colspan="1" rowspan="2" style="text-align: right;">
+                <p>50%</p>
+            </td>
+        </tr>
+
+        <tr>
+
+
             <td colspan="1">
-                <p>50.0%</p>
+                <p>command</p>
+            </td>
+            <td colspan="1">
+                <p>
+                    <ac:link>
+                        <ri:page ri:content-title="com.example.ActionC"/>
+                        <ac:plain-text-link-body>
+                            <![CDATA[com.example.ActionC]]>
+                        </ac:plain-text-link-body>
+                    </ac:link>
+                </p>
+            </td>
+
+
+
+        </tr>
+
+        <tr>
+            <td colspan="1" rowspan="1">
+                <p></p>
+            </td>
+            <td colspan="1" rowspan="1">
+                <p></p>
+            </td>
+            <td colspan="1">
+                <p>command</p>
+            </td>
+            <td colspan="1">
+                <p>
+                    <ac:link>
+                        <ri:page ri:content-title="com.example.ActionC"/>
+                        <ac:plain-text-link-body>
+                            <![CDATA[com.example.ActionC]]>
+                        </ac:plain-text-link-body>
+                    </ac:link>
+                </p>
+            </td>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>10</p>
+            </td>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>5.0</p>
+            </td>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>-</p>
             </td>
         </tr>
 
@@ -185,14 +275,14 @@
             <td colspan="1">
                 <p>com.example.ActionA</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="1" style="text-align: right;">
                 <p>10</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="1" style="text-align: right;">
                 <p>5.0</p>
             </td>
-            <td colspan="1">
-                <p>50.0%</p>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>50%</p>
             </td>
         </tr>
 
@@ -209,14 +299,14 @@
             <td colspan="1">
                 <p>-</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="1" style="text-align: right;">
                 <p>10</p>
             </td>
-            <td colspan="1">
+            <td colspan="1" rowspan="1" style="text-align: right;">
                 <p>5.0</p>
             </td>
-            <td colspan="1">
-                <p>50.0%</p>
+            <td colspan="1" rowspan="1" style="text-align: right;">
+                <p>50%</p>
             </td>
         </tr>
         </tbody>

@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Relation;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
@@ -101,15 +102,15 @@ public class ComponentContext {
                     result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, null, 1));
                 }
             }
-            for (int i = 0; i < twoOrMoreActions.size(); i++) {
-                ReactionStatistics statistics = twoOrMoreActions.get(i);
-                String actionType = statistics.getActions().getFirst().getActionType();
-                String actionFqn = statistics.getActions().getFirst().getActionFqn();
-                if (i == 0) {
-                    // For the first item in the group, we use the rowSpan value
-                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, twoOrMoreActions.size(), twoOrMoreActions.size()));
-                } else {
-                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, null, twoOrMoreActions.size()));
+            for (ReactionStatistics statistics : twoOrMoreActions) {
+                for (int j = 0; j < statistics.getActions().size(); j++) {
+                    ActionEntity action = statistics.getActions().get(j);
+                    if (j == 0) {
+                        // For the first item in the group, we use the rowSpan value
+                        result.add(ReactionStatisticsView.of(statistics, action.getActionType(), action.getActionFqn(), statistics.getActions().size(), statistics.getActions().size()));
+                    } else {
+                        result.add(ReactionStatisticsView.of(statistics, action.getActionType(), action.getActionFqn(), null, null));
+                    }
                 }
             }
         }

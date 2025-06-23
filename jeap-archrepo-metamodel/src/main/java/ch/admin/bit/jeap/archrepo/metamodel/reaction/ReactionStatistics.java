@@ -34,9 +34,9 @@ public class ReactionStatistics extends MutableDomainEntity {
 
     private int count;
 
-    private double median;
+    private Double median;
 
-    private double percentage;
+    private Double percentage;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "reactionStatistics")
     private List<ActionEntity> actions = new ArrayList<>();
@@ -56,8 +56,8 @@ public class ReactionStatistics extends MutableDomainEntity {
                               String triggerType,
                               String triggerFqn,
                               int count,
-                              double median,
-                              double percentage) {
+                              Double median,
+                              Double percentage) {
         this.id = Generators.timeBasedEpochGenerator().generate();
         this.component = component;
         this.triggerType = triggerType;

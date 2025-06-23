@@ -16,16 +16,16 @@
             <th colspan="1">Trigger FQN</th>
             <th colspan="1">Action Type</th>
             <th colspan="1">Action FQN</th>
-            <th colspan="1">Count</th>
-            <th colspan="1">Median</th>
-            <th colspan="1">Percentage</th>
+            <th colspan="1" style="text-align: right;">Count</th>
+            <th colspan="1" style="text-align: right;">Median</th>
+            <th colspan="1" style="text-align: right;">Percentage</th>
         </tr>
 
         <tr th:each="reaction: ${reactions}">
-            <td colspan="1" th:rowspan="${reaction.rowSpan}" th:if="${reaction.rowSpan}">
+            <td colspan="1" th:rowspan="${reaction.rowSpan}" th:if="${reaction.rowSpan != null and reaction.multipleActionsRowSpan != null}">
                 <p th:text="${reaction.triggerType}"></p>
             </td>
-            <td colspan="1" th:rowspan="${reaction.rowSpan}" th:if="${reaction.rowSpan}">
+            <td colspan="1" th:rowspan="${reaction.rowSpan}" th:if="${reaction.rowSpan != null and reaction.multipleActionsRowSpan != null}">
                 <p th:if="${reaction.triggerType != null and (reaction.triggerType == 'event' or reaction.triggerType == 'command')}">
                     <ac:link>
                         <ri:page th:ri:content-title="${reaction.triggerFqn}"/>
@@ -49,14 +49,14 @@
                 </p><p th:unless="${reaction.actionType != null and (reaction.actionType == 'event' or reaction.actionType == 'command')}"
                    th:text="${reaction.actionFqn != null ? reaction.actionFqn : '-'}"></p>
             </td>
-            <td colspan="1">
+            <td colspan="1" th:rowspan="${reaction.multipleActionsRowSpan}" th:if="${reaction.multipleActionsRowSpan}" style="text-align: right;">
                 <p th:text="${reaction.count}"></p>
             </td>
-            <td colspan="1">
+            <td colspan="1" th:rowspan="${reaction.multipleActionsRowSpan}" th:if="${reaction.multipleActionsRowSpan}" style="text-align: right;">
                 <p th:text="${reaction.median}"></p>
             </td>
-            <td colspan="1">
-                <p th:text="${reaction.percentage + '%'}"></p>
+            <td colspan="1" th:rowspan="${reaction.multipleActionsRowSpan}" th:if="${reaction.multipleActionsRowSpan}" style="text-align: right;">
+                <p th:text="${reaction.percentage != null ? reaction.percentage + '%' : '-'}"></p>
             </td>
         </tr>
         </tbody>
