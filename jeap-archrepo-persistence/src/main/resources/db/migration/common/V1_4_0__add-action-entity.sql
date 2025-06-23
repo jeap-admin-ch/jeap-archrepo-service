@@ -8,3 +8,4 @@ CREATE TABLE action_entity
     modified_at          timestamp with time zone,
     PRIMARY KEY (id)
 );
+CREATE INDEX action_entity_reaction_statistics_id ON action_entity (reaction_statistics_id);
