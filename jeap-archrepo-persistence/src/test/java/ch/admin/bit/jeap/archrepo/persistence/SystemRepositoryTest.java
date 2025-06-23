@@ -6,7 +6,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -79,7 +79,7 @@ class SystemRepositoryTest {
 
         System savedSystem = systemRepository.save(system);
 
-        ActionEntity action = ActionEntity.builder().actionType("actionType1")
+        Action action = Action.builder().actionType("actionType1")
                 .actionFqn("com.example.ActionD")
                 .build();
         ReactionStatistics statistics = ReactionStatistics.builder()

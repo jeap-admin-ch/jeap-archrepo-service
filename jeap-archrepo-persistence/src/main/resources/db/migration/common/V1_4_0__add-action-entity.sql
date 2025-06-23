@@ -1,4 +1,4 @@
-CREATE TABLE action_entity
+CREATE TABLE action
 (
     id                   UUID,
     reaction_statistics_id UUID not null references reaction_statistics (id) ON DELETE CASCADE,
@@ -8,4 +8,4 @@ CREATE TABLE action_entity
     modified_at          timestamp with time zone,
     PRIMARY KEY (id)
 );
-CREATE INDEX action_entity_reaction_statistics_id ON action_entity (reaction_statistics_id);
+CREATE INDEX action_reaction_statistics_id ON action (reaction_statistics_id);

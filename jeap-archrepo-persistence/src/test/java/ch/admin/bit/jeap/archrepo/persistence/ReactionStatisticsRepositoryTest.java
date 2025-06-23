@@ -2,7 +2,7 @@ package ch.admin.bit.jeap.archrepo.persistence;
 
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import org.junit.jupiter.api.Test;
@@ -69,7 +69,7 @@ class ReactionStatisticsRepositoryTest {
         systemB.addSystemComponent(componentC);
         systemRepository.save(systemB);
 
-        ActionEntity action = ActionEntity.builder().actionType("actionType1")
+        Action action = Action.builder().actionType("actionType1")
                 .actionFqn("com.example.ActionA")
                 .build();
         ReactionStatistics statistics = ReactionStatistics.builder()
@@ -83,7 +83,7 @@ class ReactionStatisticsRepositoryTest {
         statistics.addAction(action);
         repository.save(statistics);
 
-        ActionEntity action1 = ActionEntity.builder().actionType("actionType1")
+        Action action1 = Action.builder().actionType("actionType1")
                 .actionFqn("com.example.ActionB")
                 .build();
         ReactionStatistics statistics1 = ReactionStatistics.builder()
@@ -97,7 +97,7 @@ class ReactionStatisticsRepositoryTest {
         statistics1.addAction(action1);
         repository.save(statistics1);
 
-        ActionEntity action2 = ActionEntity.builder()
+        Action action2 = Action.builder()
                 .actionType("actionType1")
                 .actionFqn("com.example.ActionC")
                 .build();
@@ -112,7 +112,7 @@ class ReactionStatisticsRepositoryTest {
         statistics2.addAction(action2);
         repository.save(statistics2);
 
-        ActionEntity action3 = ActionEntity.builder()
+        Action action3 = Action.builder()
                 .actionType("actionType1")
                 .actionFqn("com.example.ActionD")
                 .build();

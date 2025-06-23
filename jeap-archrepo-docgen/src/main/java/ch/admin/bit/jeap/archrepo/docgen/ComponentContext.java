@@ -2,7 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Relation;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
@@ -104,7 +104,7 @@ public class ComponentContext {
             }
             for (ReactionStatistics statistics : twoOrMoreActions) {
                 for (int j = 0; j < statistics.getActions().size(); j++) {
-                    ActionEntity action = statistics.getActions().get(j);
+                    Action action = statistics.getActions().get(j);
                     if (j == 0) {
                         // For the first item in the group, we use the rowSpan value
                         result.add(ReactionStatisticsView.of(statistics, action.getActionType(), action.getActionFqn(), statistics.getActions().size(), statistics.getActions().size()));

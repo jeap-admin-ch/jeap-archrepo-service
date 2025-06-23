@@ -39,9 +39,9 @@ public class ReactionStatistics extends MutableDomainEntity {
     private Double percentage;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "reactionStatistics")
-    private List<ActionEntity> actions = new ArrayList<>();
+    private List<Action> actions = new ArrayList<>();
 
-    public void addAction(ActionEntity action) {
+    public void addAction(Action action) {
         if (actions == null) {
             actions = new ArrayList<>();
         }

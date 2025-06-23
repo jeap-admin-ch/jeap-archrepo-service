@@ -1,11 +1,11 @@
 package ch.admin.bit.jeap.archrepo.importer.reaction;
 
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ActionDto;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.ReactionStatisticsRepository;
@@ -57,8 +57,8 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
                 .median(statisticsDto.median())
                 .percentage(statisticsDto.percentage())
                 .build();
-        for (Action action : statisticsDto.actions()) {
-            ActionEntity actionEntity = ActionEntity.builder()
+        for (ActionDto action : statisticsDto.actions()) {
+            Action actionEntity = Action.builder()
                     .reactionStatistics(reactionStatistics)
                     .actionType(action.actionType())
                     .actionFqn(action.actionFqn())

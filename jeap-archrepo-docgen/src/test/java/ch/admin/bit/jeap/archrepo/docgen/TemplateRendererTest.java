@@ -9,7 +9,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
@@ -684,7 +684,7 @@ class TemplateRendererTest {
 
     @Test
     void renderSystemComponentPageWithReactions() throws IOException {
-        ActionEntity action = ActionEntity.builder().actionType("actionType1")
+        Action action = Action.builder().actionType("actionType1")
                 .actionFqn("com.example.ActionA")
                 .build();
         ReactionStatistics regularStatistics = ReactionStatistics.builder()
@@ -696,7 +696,7 @@ class TemplateRendererTest {
                 .percentage(50.0)
                 .build();
         regularStatistics.addAction(action);
-        ActionEntity action1 = ActionEntity.builder().actionType("actionType1")
+        Action action1 = Action.builder().actionType("actionType1")
                 .actionFqn("com.example.ActionB")
                 .build();
         ReactionStatistics statisticsForEventTrigger = ReactionStatistics.builder()
@@ -708,7 +708,7 @@ class TemplateRendererTest {
                 .percentage(50.0)
                 .build();
         statisticsForEventTrigger.addAction(action1);
-        ActionEntity action2 = ActionEntity.builder().actionType("command")
+        Action action2 = Action.builder().actionType("command")
                 .actionFqn("com.example.ActionC")
                 .build();
         ReactionStatistics statisticsForCommandAction = ReactionStatistics.builder()
@@ -728,10 +728,10 @@ class TemplateRendererTest {
                 .median(5.0)
                 .percentage(50.0)
                 .build();
-        ActionEntity action3 = ActionEntity.builder().actionType("command")
+        Action action3 = Action.builder().actionType("command")
                 .actionFqn("com.example.ActionB")
                 .build();
-        ActionEntity action4 = ActionEntity.builder().actionType("command")
+        Action action4 = Action.builder().actionType("command")
                 .actionFqn("com.example.ActionC")
                 .build();
         ReactionStatistics statisticsMultipleActionsForCommandAction = ReactionStatistics.builder()
@@ -745,7 +745,7 @@ class TemplateRendererTest {
         statisticsMultipleActionsForCommandAction.addAction(action3);
         statisticsMultipleActionsForCommandAction.addAction(action4);
 
-        ActionEntity action5 = ActionEntity.builder().actionType("command")
+        Action action5 = Action.builder().actionType("command")
                 .actionFqn("com.example.ActionC")
                 .build();
         ReactionStatistics statisticsNoTrigger = ReactionStatistics.builder()

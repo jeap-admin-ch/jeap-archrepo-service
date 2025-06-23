@@ -18,7 +18,7 @@ class ReactionStatisticsTest {
                 .name("TestComponent")
                 .build();
 
-        ActionEntity action = ActionEntity.builder().actionType("actionType").actionFqn("com.example.Action").build();
+        Action action = Action.builder().actionType("actionType").actionFqn("com.example.Action").build();
         ReactionStatistics stats = ReactionStatistics.builder()
                 .component(component)
                 .triggerType("triggerType")
@@ -45,7 +45,7 @@ class ReactionStatisticsTest {
                 .id(UUID.randomUUID())
                 .name("TestComponent")
                 .build();
-        ActionEntity action = ActionEntity.builder().actionType("actionType").actionFqn("com.example.Action").build();
+        Action action = Action.builder().actionType("actionType").actionFqn("com.example.Action").build();
         ReactionStatistics stats = ReactionStatistics.builder()
                 .component(component)
                 .triggerType("triggerType")

@@ -9,6 +9,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Added support for reactions containing 2+ actions
+- Improved rendering of reaction statistics
 - Update parent from 26.63.0 to 26.64.0
 
 ## [1.20.0] - 2025-06-19

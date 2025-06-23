@@ -1,6 +1,6 @@
 package ch.admin.bit.jeap.archrepo.importer.reaction;
 
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ActionDto;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
@@ -75,7 +75,7 @@ class ReactionsObservedStatisticsImporterTest {
         assertThat(capturedStatistics.getTriggerType()).isEqualTo(statisticsDto.triggerType());
         assertThat(capturedStatistics.getTriggerFqn()).isEqualTo(statisticsDto.triggerFqn());
 
-        Action firstAction = statisticsDto.actions().getFirst();
+        ActionDto firstAction = statisticsDto.actions().getFirst();
 
         assertThat(capturedStatistics.getCount()).isEqualTo((int) statisticsDto.count());
         assertThat(capturedStatistics.getMedian()).isEqualTo(statisticsDto.median());
@@ -148,7 +148,7 @@ class ReactionsObservedStatisticsImporterTest {
     }
 
     private ReactionsObservedStatisticsDto createTestStatisticsDto(String componentName) {
-        Action action = new Action(
+        ActionDto action = new ActionDto(
                 "TestActionType",
                 "com.example.TestAction",
                 Collections.emptyMap()

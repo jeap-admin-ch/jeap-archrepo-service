@@ -7,7 +7,7 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ActionDto;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
 import org.junit.jupiter.api.Test;
@@ -82,7 +82,7 @@ public class ReactionObserverServicePactTestBase {
         assertThat(statisticsDto.triggerType()).isEqualTo("command");
         assertThat(statisticsDto.triggerFqn()).isEqualTo("SomeCommand");
         assertThat(statisticsDto.actions()).isNotEmpty();
-        Action action = statisticsDto.actions().getFirst();
+        ActionDto action = statisticsDto.actions().getFirst();
         assertThat(action.actionType()).isEqualTo("event");
         assertThat(action.actionFqn()).isEqualTo("SomeEvent");
         assertThat(statisticsDto.count()).isGreaterThan(0);

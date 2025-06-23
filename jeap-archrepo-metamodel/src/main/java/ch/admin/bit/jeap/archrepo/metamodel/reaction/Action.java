@@ -12,7 +12,7 @@ import java.util.UUID;
 @ToString
 @Entity
 @Getter
-public class ActionEntity extends MutableDomainEntity {
+public class Action extends MutableDomainEntity {
 
     @Id
     @NotNull
@@ -29,12 +29,12 @@ public class ActionEntity extends MutableDomainEntity {
 
     private String actionFqn;
 
-    protected ActionEntity() {super();}
+    protected Action() {super();}
 
     @Builder
-    public ActionEntity(ReactionStatistics reactionStatistics,
-                        String actionType,
-                        String actionFqn) {
+    public Action(ReactionStatistics reactionStatistics,
+                  String actionType,
+                  String actionFqn) {
         this.id = Generators.timeBasedEpochGenerator().generate();
         this.reactionStatistics = reactionStatistics;
         this.actionType = actionType;
