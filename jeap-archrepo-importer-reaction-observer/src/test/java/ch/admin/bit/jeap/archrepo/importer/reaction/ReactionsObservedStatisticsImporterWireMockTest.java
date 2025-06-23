@@ -114,8 +114,8 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         ReactionStatistics stats1 = component1.getReactionStatistics().getFirst();
         assertThat(stats1.getTriggerType()).isEqualTo("TestTriggerType");
         assertThat(stats1.getTriggerFqn()).isEqualTo("com.example.TestTrigger");
-        assertThat(stats1.getActionType()).isEqualTo("TestActionType");
-        assertThat(stats1.getActionFqn()).isEqualTo("com.example.TestAction");
+        assertThat(stats1.getActions().getFirst().getActionType()).isEqualTo("TestActionType");
+        assertThat(stats1.getActions().getFirst().getActionFqn()).isEqualTo("com.example.TestAction");
         assertThat(stats1.getCount()).isEqualTo(100);
         assertThat(stats1.getMedian()).isEqualTo(50.0);
         assertThat(stats1.getPercentage()).isEqualTo(75.0);
@@ -131,8 +131,8 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         ReactionStatistics stats2 = component2.getReactionStatistics().getFirst();
         assertThat(stats2.getTriggerType()).isEqualTo("AnotherTriggerType");
         assertThat(stats2.getTriggerFqn()).isEqualTo("com.example.AnotherTrigger");
-        assertThat(stats2.getActionType()).isEqualTo("AnotherActionType");
-        assertThat(stats2.getActionFqn()).isEqualTo("com.example.AnotherAction");
+        assertThat(stats2.getActions().getFirst().getActionType()).isEqualTo("AnotherActionType");
+        assertThat(stats2.getActions().getFirst().getActionFqn()).isEqualTo("com.example.AnotherAction");
         assertThat(stats2.getCount()).isEqualTo(200);
         assertThat(stats2.getMedian()).isEqualTo(60.0);
         assertThat(stats2.getPercentage()).isEqualTo(85.0);

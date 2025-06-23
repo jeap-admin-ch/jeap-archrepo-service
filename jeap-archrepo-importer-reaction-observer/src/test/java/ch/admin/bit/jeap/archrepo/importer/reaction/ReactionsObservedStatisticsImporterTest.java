@@ -2,7 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.reaction;
 
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsV2Dto;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
@@ -52,7 +52,7 @@ class ReactionsObservedStatisticsImporterTest {
         String systemName = "testSystem";
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(singletonMap(componentName, systemName));
 
-        ReactionsObservedStatisticsV2Dto statisticsDto = createTestStatisticsDto(componentName);
+        ReactionsObservedStatisticsDto statisticsDto = createTestStatisticsDto(componentName);
         when(reactionObserverService.getReactionsObservedStatistics(componentName))
                 .thenReturn(List.of(statisticsDto));
         
@@ -76,8 +76,6 @@ class ReactionsObservedStatisticsImporterTest {
         assertThat(capturedStatistics.getTriggerFqn()).isEqualTo(statisticsDto.triggerFqn());
 
         Action firstAction = statisticsDto.actions().getFirst();
-        assertThat(capturedStatistics.getActionType()).isEqualTo(firstAction.actionType());
-        assertThat(capturedStatistics.getActionFqn()).isEqualTo(firstAction.actionFqn());
 
         assertThat(capturedStatistics.getCount()).isEqualTo((int) statisticsDto.count());
         assertThat(capturedStatistics.getMedian()).isEqualTo(statisticsDto.median());
@@ -123,8 +121,8 @@ class ReactionsObservedStatisticsImporterTest {
         componentMap.put(component2, systemName);
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(componentMap);
 
-        ReactionsObservedStatisticsV2Dto statisticsDto1 = createTestStatisticsDto(component1);
-        ReactionsObservedStatisticsV2Dto statisticsDto2 = createTestStatisticsDto(component2);
+        ReactionsObservedStatisticsDto statisticsDto1 = createTestStatisticsDto(component1);
+        ReactionsObservedStatisticsDto statisticsDto2 = createTestStatisticsDto(component2);
 
         when(reactionObserverService.getReactionsObservedStatistics(component1))
                 .thenReturn(List.of(statisticsDto1));
@@ -149,14 +147,14 @@ class ReactionsObservedStatisticsImporterTest {
         verify(reactionStatisticsRepository, times(2)).save(any());
     }
 
-    private ReactionsObservedStatisticsV2Dto createTestStatisticsDto(String componentName) {
+    private ReactionsObservedStatisticsDto createTestStatisticsDto(String componentName) {
         Action action = new Action(
                 "TestActionType",
                 "com.example.TestAction",
                 Collections.emptyMap()
         );
 
-        return new ReactionsObservedStatisticsV2Dto(
+        return new ReactionsObservedStatisticsDto(
                 componentName,
                 "TestTriggerType",
                 "com.example.TestTrigger",

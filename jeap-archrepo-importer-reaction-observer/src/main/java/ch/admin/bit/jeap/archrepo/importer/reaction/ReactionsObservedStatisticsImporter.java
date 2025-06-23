@@ -2,7 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.reaction;
 
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsV2Dto;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
@@ -30,13 +30,13 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
         reactionStatisticsRepository.deleteAll();
         Map<String, String> allSystemComponentNamesWithSystemName = model.getAllSystemComponentNamesWithSystemName();
         allSystemComponentNamesWithSystemName.forEach((component, system) -> {
-            List<ReactionsObservedStatisticsV2Dto> statistics = reactionObserverService.getReactionsObservedStatistics(component);
+            List<ReactionsObservedStatisticsDto> statistics = reactionObserverService.getReactionsObservedStatistics(component);
 
             if (!statistics.isEmpty()) {
                 log.trace("Found {} observed statistics for component {} in system {}", statistics.size(), component, system);
 
                 model.findSystem(system).flatMap(s -> s.findSystemComponent(component)).ifPresent(systemComponent -> {
-                    for (ReactionsObservedStatisticsV2Dto statisticsDto : statistics) {
+                    for (ReactionsObservedStatisticsDto statisticsDto : statistics) {
                         ReactionStatistics reactionStatistics = toEntity(statisticsDto, systemComponent);
                         systemComponent.addReactionStatistics(reactionStatistics);
                         reactionStatisticsRepository.save(reactionStatistics);
@@ -48,7 +48,7 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
         });
     }
 
-    private ReactionStatistics toEntity(ReactionsObservedStatisticsV2Dto statisticsDto, SystemComponent component) {
+    private ReactionStatistics toEntity(ReactionsObservedStatisticsDto statisticsDto, SystemComponent component) {
         ReactionStatistics reactionStatistics = ReactionStatistics.builder()
                 .component(component)
                 .triggerType(statisticsDto.triggerType())

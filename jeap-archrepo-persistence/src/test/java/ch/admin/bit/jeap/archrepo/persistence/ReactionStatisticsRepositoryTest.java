@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.persistence;
 
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import org.junit.jupiter.api.Test;
@@ -68,49 +69,63 @@ class ReactionStatisticsRepositoryTest {
         systemB.addSystemComponent(componentC);
         systemRepository.save(systemB);
 
-        repository.save(ReactionStatistics.builder()
+        ActionEntity action = ActionEntity.builder().actionType("actionType1")
+                .actionFqn("com.example.ActionA")
+                .build();
+        ReactionStatistics statistics = ReactionStatistics.builder()
                 .component(componentA)
                 .triggerType("triggerType1")
                 .triggerFqn("com.example.TriggerA")
-                .actionType("actionType1")
-                .actionFqn("com.example.ActionA")
                 .count(10)
                 .median(5.0)
                 .percentage(50.0)
-                .build());
+                .build();
+        statistics.addAction(action);
+        repository.save(statistics);
 
-        repository.save(ReactionStatistics.builder()
+        ActionEntity action1 = ActionEntity.builder().actionType("actionType1")
+                .actionFqn("com.example.ActionB")
+                .build();
+        ReactionStatistics statistics1 = ReactionStatistics.builder()
                 .component(componentA)
                 .triggerType("triggerType1")
                 .triggerFqn("com.example.TriggerB")
-                .actionType("actionType1")
-                .actionFqn("com.example.ActionB")
                 .count(20)
                 .median(10.0)
                 .percentage(60.0)
-                .build());
+                .build();
+        statistics1.addAction(action1);
+        repository.save(statistics1);
 
-        repository.save(ReactionStatistics.builder()
+        ActionEntity action2 = ActionEntity.builder()
+                .actionType("actionType1")
+                .actionFqn("com.example.ActionC")
+                .build();
+        ReactionStatistics statistics2 = ReactionStatistics.builder()
                 .component(componentB)
                 .triggerType("triggerType1")
                 .triggerFqn("com.example.TriggerC")
-                .actionType("actionType1")
-                .actionFqn("com.example.ActionC")
                 .count(30)
                 .median(15.0)
                 .percentage(70.0)
-                .build());
+                .build();
+        statistics2.addAction(action2);
+        repository.save(statistics2);
 
-        repository.save(ReactionStatistics.builder()
+        ActionEntity action3 = ActionEntity.builder()
+                .actionType("actionType1")
+                .actionFqn("com.example.ActionD")
+                .build();
+        ReactionStatistics statistics3 = ReactionStatistics.builder()
                 .component(componentC)
                 .triggerType("triggerType1")
                 .triggerFqn("com.example.TriggerD")
-                .actionType("actionType1")
-                .actionFqn("com.example.ActionD")
                 .count(40)
                 .median(20.0)
                 .percentage(80.0)
-                .build());
+                .build();
+        statistics3.addAction(action3);
+        repository.save(statistics3);
 
         List<ReactionStatistics> componentAStats = repository.findByComponent(componentA);
         assertThat(componentAStats).hasSize(2);
@@ -122,8 +137,8 @@ class ReactionStatisticsRepositoryTest {
         assertThat(componentCStats).hasSize(1);
         assertThat(componentCStats.getFirst().getTriggerType()).isEqualTo("triggerType1");
         assertThat(componentCStats.getFirst().getTriggerFqn()).isEqualTo("com.example.TriggerD");
-        assertThat(componentCStats.getFirst().getActionType()).isEqualTo("actionType1");
-        assertThat(componentCStats.getFirst().getActionFqn()).isEqualTo("com.example.ActionD");
+        assertThat(componentCStats.getFirst().getActions().getFirst().getActionType()).isEqualTo("actionType1");
+        assertThat(componentCStats.getFirst().getActions().getFirst().getActionFqn()).isEqualTo("com.example.ActionD");
         assertThat(componentCStats.getFirst().getCount()).isEqualTo(40);
         assertThat(componentCStats.getFirst().getMedian()).isEqualTo(20.0);
         assertThat(componentCStats.getFirst().getPercentage()).isEqualTo(80.0);

@@ -84,12 +84,32 @@ public class ComponentContext {
         List<ReactionStatisticsView> result = new ArrayList<>();
         for (Map.Entry<String, List<ReactionStatistics>> entry : groupedByTrigger.entrySet()) {
             List<ReactionStatistics> reactionStatisticsByTrigger = entry.getValue();
-            for (int i = 0; i < reactionStatisticsByTrigger.size(); i++) {
+            List<ReactionStatistics> lessThanTwoActions = reactionStatisticsByTrigger.stream()
+                .filter(rs -> rs.getActions().size() <= 1)
+                .toList();
+            List<ReactionStatistics> twoOrMoreActions = reactionStatisticsByTrigger.stream()
+                .filter(rs -> rs.getActions().size() > 1)
+                .toList();
+            for (int i = 0; i < lessThanTwoActions.size(); i++) {
+                ReactionStatistics statistics = lessThanTwoActions.get(i);
+                String actionType = statistics.getActions().isEmpty() ? null : statistics.getActions().getFirst().getActionType();
+                String actionFqn = statistics.getActions().isEmpty() ? null : statistics.getActions().getFirst().getActionFqn();
                 if (i == 0) {
                     // For the first item in the group, we use the rowSpan value
-                    result.add(ReactionStatisticsView.of(reactionStatisticsByTrigger.getFirst(), reactionStatisticsByTrigger.size()));
+                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn,  lessThanTwoActions.size(), 1));
                 } else {
-                    result.add(ReactionStatisticsView.of(reactionStatisticsByTrigger.get(i), null));
+                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, null, 1));
+                }
+            }
+            for (int i = 0; i < twoOrMoreActions.size(); i++) {
+                ReactionStatistics statistics = twoOrMoreActions.get(i);
+                String actionType = statistics.getActions().getFirst().getActionType();
+                String actionFqn = statistics.getActions().getFirst().getActionFqn();
+                if (i == 0) {
+                    // For the first item in the group, we use the rowSpan value
+                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, twoOrMoreActions.size(), twoOrMoreActions.size()));
+                } else {
+                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, null, twoOrMoreActions.size()));
                 }
             }
         }

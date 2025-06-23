@@ -18,22 +18,22 @@ class ReactionStatisticsTest {
                 .name("TestComponent")
                 .build();
 
+        ActionEntity action = ActionEntity.builder().actionType("actionType").actionFqn("com.example.Action").build();
         ReactionStatistics stats = ReactionStatistics.builder()
                 .component(component)
                 .triggerType("triggerType")
                 .triggerFqn("com.example.Trigger")
-                .actionType("actionType")
-                .actionFqn("com.example.Action")
                 .count(100)
                 .median(50.0)
                 .percentage(75.0)
                 .build();
+        stats.addAction(action);
 
         assertThat(stats.getComponent()).isEqualTo(component);
         assertThat(stats.getTriggerType()).isEqualTo("triggerType");
         assertThat(stats.getTriggerFqn()).isEqualTo("com.example.Trigger");
-        assertThat(stats.getActionType()).isEqualTo("actionType");
-        assertThat(stats.getActionFqn()).isEqualTo("com.example.Action");
+        assertThat(stats.getActions().getFirst().getActionType()).isEqualTo("actionType");
+        assertThat(stats.getActions().getFirst().getActionFqn()).isEqualTo("com.example.Action");
         assertThat(stats.getCount()).isEqualTo(100);
         assertThat(stats.getMedian()).isEqualTo(50.0);
         assertThat(stats.getPercentage()).isEqualTo(75.0);
@@ -45,17 +45,16 @@ class ReactionStatisticsTest {
                 .id(UUID.randomUUID())
                 .name("TestComponent")
                 .build();
-
+        ActionEntity action = ActionEntity.builder().actionType("actionType").actionFqn("com.example.Action").build();
         ReactionStatistics stats = ReactionStatistics.builder()
                 .component(component)
                 .triggerType("triggerType")
                 .triggerFqn("com.example.Trigger")
-                .actionType("actionType")
-                .actionFqn("com.example.Action")
                 .count(100)
                 .median(50.0)
                 .percentage(75.0)
                 .build();
+        stats.addAction(action);
 
         String toString = stats.toString();
         assertThat(toString).contains("triggerType");

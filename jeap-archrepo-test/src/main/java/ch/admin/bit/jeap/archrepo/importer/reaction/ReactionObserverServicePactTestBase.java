@@ -9,7 +9,7 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.Action;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsV2Dto;
+import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionsObservedStatisticsDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -73,11 +73,11 @@ public class ReactionObserverServicePactTestBase {
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
-        List<ReactionsObservedStatisticsV2Dto> result = reactionObserverService.getReactionsObservedStatistics("c1");
+        List<ReactionsObservedStatisticsDto> result = reactionObserverService.getReactionsObservedStatistics("c1");
 
         // then
         assertThat(result).isNotEmpty();
-        ReactionsObservedStatisticsV2Dto statisticsDto = result.getFirst();
+        ReactionsObservedStatisticsDto statisticsDto = result.getFirst();
         assertThat(statisticsDto.component()).isEqualTo("c1");
         assertThat(statisticsDto.triggerType()).isEqualTo("command");
         assertThat(statisticsDto.triggerFqn()).isEqualTo("SomeCommand");
@@ -118,7 +118,7 @@ public class ReactionObserverServicePactTestBase {
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
-        List<ReactionsObservedStatisticsV2Dto> result = reactionObserverService.getReactionsObservedStatistics("unknown");
+        List<ReactionsObservedStatisticsDto> result = reactionObserverService.getReactionsObservedStatistics("unknown");
 
         // then
         assertThat(result).isEmpty();

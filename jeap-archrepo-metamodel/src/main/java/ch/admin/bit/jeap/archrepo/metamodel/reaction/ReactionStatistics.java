@@ -64,6 +64,8 @@ public class ReactionStatistics extends MutableDomainEntity {
         this.triggerFqn = triggerFqn;
         this.count = count;
         this.median = median;
-        this.percentage = percentage;
+        if (triggerType != null) {
+            this.percentage = percentage;
+        }
     }
 }

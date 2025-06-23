@@ -9,6 +9,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
+import ch.admin.bit.jeap.archrepo.metamodel.reaction.ActionEntity;
 import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
@@ -683,36 +684,42 @@ class TemplateRendererTest {
 
     @Test
     void renderSystemComponentPageWithReactions() throws IOException {
+        ActionEntity action = ActionEntity.builder().actionType("actionType1")
+                .actionFqn("com.example.ActionA")
+                .build();
         ReactionStatistics regularStatistics = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
                 .triggerType("triggerType1")
                 .triggerFqn("com.example.TriggerA")
-                .actionType("actionType1")
-                .actionFqn("com.example.ActionA")
                 .count(10)
                 .median(5.0)
                 .percentage(50.0)
+                .build();
+        regularStatistics.addAction(action);
+        ActionEntity action1 = ActionEntity.builder().actionType("actionType1")
+                .actionFqn("com.example.ActionB")
                 .build();
         ReactionStatistics statisticsForEventTrigger = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
                 .triggerType("event")
                 .triggerFqn("com.example.TriggerA")
-                .actionType("actionType1")
-                .actionFqn("com.example.ActionB")
                 .count(10)
                 .median(5.0)
                 .percentage(50.0)
+                .build();
+        statisticsForEventTrigger.addAction(action1);
+        ActionEntity action2 = ActionEntity.builder().actionType("command")
+                .actionFqn("com.example.ActionB")
                 .build();
         ReactionStatistics statisticsForCommandAction = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
                 .triggerType("event")
                 .triggerFqn("com.example.TriggerA")
-                .actionType("command")
-                .actionFqn("com.example.ActionB")
                 .count(10)
                 .median(5.0)
                 .percentage(50.0)
                 .build();
+        statisticsForCommandAction.addAction(action2);
         ReactionStatistics statisticsForNoAction = ReactionStatistics.builder()
                 .component(BackendService.builder().name("testComponent").build())
                 .triggerType("trigger")

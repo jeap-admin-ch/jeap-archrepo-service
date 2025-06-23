@@ -28,16 +28,19 @@ public class ReactionStatisticsView {
 
     Integer rowSpan;
 
-    static ReactionStatisticsView of(ReactionStatistics statistics, Integer rowSpan) {
+    Integer multipleActionsRowSpan;
+
+    static ReactionStatisticsView of(ReactionStatistics statistics, String actionType, String actionFqn, Integer rowSpan, Integer multipleActionsRowSpan) {
         return ReactionStatisticsView.builder()
                 .triggerType(statistics.getTriggerType())
                 .triggerFqn(statistics.getTriggerFqn())
-                .actionType(statistics.getActionType())
-                .actionFqn(statistics.getActionFqn())
+                .actionType(actionType)
+                .actionFqn(actionFqn)
                 .count(statistics.getCount())
                 .median(statistics.getMedian())
                 .percentage(statistics.getPercentage())
                 .providerName(statistics.getComponent().getName())
+                .multipleActionsRowSpan(multipleActionsRowSpan)
                 .rowSpan(rowSpan)
                 .build();
     }
