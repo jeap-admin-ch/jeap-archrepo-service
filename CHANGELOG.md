@@ -5,13 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.21.0] - 2025-06-23
+## [1.21.0] - 2025-06-24
 
 ### Changed
 
 - Added support for reactions containing 2+ actions
 - Improved rendering of reaction statistics
-- Update parent from 26.63.0 to 26.64.0
+- Update parent from 26.63.0 to 26.64.2
 
 ## [1.20.0] - 2025-06-19
 
