@@ -29,7 +29,8 @@ spring:
     multipart:
       max-request-size: 20MB
       max-file-size: 20MB
-
+  application:
+    name: test-app
 archrepo:
   openapi-base-url: "https://base-url"
   update-schedule: "-"
@@ -53,6 +54,14 @@ prometheus-cf:
 
 pactbroker:
   url: "https://foo.bar"
+
+jeap:
+  security:
+    oauth2:
+      resourceserver:
+        system-name:  "application-platform"
+        authorization-server:
+          issuer: http://localhost:8080/auth-scs
 
 # TLS enabled only for AWS
 jeap.web.tls.enabled: false

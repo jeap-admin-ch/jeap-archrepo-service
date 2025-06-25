@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.metamodel;
 
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.domainevents.CommandRemoved;
 import ch.admin.bit.jeap.archrepo.metamodel.domainevents.EventRemoved;
 import ch.admin.bit.jeap.archrepo.metamodel.domainevents.SystemComponentRemoved;
@@ -75,6 +76,9 @@ public class System extends MutableDomainEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "definingSystem")
     private List<OpenApiSpec> openApiSpecs = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "system")
+    private List<SystemComponentDatabaseSchema> databaseSchemas = new ArrayList<>();
+
     @SuppressWarnings("java:S107")
     private System(String name, String description, String confluenceLink, Team defaultOwner, List<String> aliases,
                    List<SystemComponent> systemComponents,
@@ -129,6 +133,10 @@ public class System extends MutableDomainEntity {
         return unmodifiableList(openApiSpecs);
     }
 
+    public List<SystemComponentDatabaseSchema> getDatabaseSchemas() {
+        return unmodifiableList(databaseSchemas);
+    }
+
     public void addSystemComponent(SystemComponent systemComponent) {
         if (systemComponents.stream().anyMatch(rc -> rc.getName().equalsIgnoreCase(systemComponent.getName()))) {
             throw new IllegalArgumentException("Cannot add duplicate system component " + systemComponent.getName());
@@ -176,6 +184,17 @@ public class System extends MutableDomainEntity {
         }
         openApiSpec.setDefiningSystem(this);
         openApiSpecs.add(openApiSpec);
+    }
+
+    public void addDatabaseSchema(SystemComponentDatabaseSchema databaseSchema) {
+        if (this != databaseSchema.getSystem()) {
+            throw new IllegalArgumentException("Cannot add database schema to different system " +
+                    this.getName() + ": " + databaseSchema);
+        }
+        if (databaseSchemas.contains(databaseSchema)) {
+            throw new IllegalArgumentException("Database schema already present: " + databaseSchema);
+        }
+        databaseSchemas.add(databaseSchema);
     }
 
     public void addRestApi(RestApi restApi) {

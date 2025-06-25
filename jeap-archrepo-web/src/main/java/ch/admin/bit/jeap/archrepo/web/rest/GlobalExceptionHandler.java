@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.web.rest;
 
 import ch.admin.bit.jeap.archrepo.importer.openapi.OpenApiFileParsingException;
+import ch.admin.bit.jeap.archrepo.web.rest.database.DatabaseSchemaException;
 import ch.admin.bit.jeap.archrepo.web.rest.openapi.OpenApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OpenApiException.class)
     public ResponseEntity<String> handleOpenApiException(OpenApiException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DatabaseSchemaException.class)
+    public ResponseEntity<String> handleDatabaseSchemaException(DatabaseSchemaException ex) {
+        return ResponseEntity.status(ex.getResponseStatus()).body(ex.getMessage());
     }
 }

@@ -10,6 +10,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -23,7 +27,11 @@ public class WebSecurityConfig {
     @Bean
     @Order(100) // same as on the deprecated WebSecurityConfigurerAdapter
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/**");
+        RequestMatcher apiExceptDatabaseSchema = new AndRequestMatcher(
+                new AntPathRequestMatcher("/api/**"), // basic auth protected or unprotected
+                new NegatedRequestMatcher(new AntPathRequestMatcher("/api/dbschemas/**")) // OAuth2 protected
+        );
+        http.securityMatcher(apiExceptDatabaseSchema);
         http.authorizeHttpRequests(r -> r
                 .requestMatchers(HttpMethod.GET, "/api/model").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/*/relations").permitAll()
