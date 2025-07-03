@@ -42,7 +42,7 @@ class ExternalDatabaseSchemaController {
             @ApiResponse(responseCode = "404", description = "No database schema found for the specified system component, or queried system or system component don't exist."),
             @ApiResponse(responseCode = "500", description = "Unexpected server error.")
     })
-    @PreAuthorize("hasRole(#systemName,'external-database-schema', 'read')")
+    @PreAuthorize("hasRole('external-database-schema', 'read')")
     public ResponseEntity<DatabaseSchemaDto> getDatabaseSchema(
             @Parameter(description = "Name of the system to retrieve the database schema for", required = true)
             @RequestParam String systemName,
@@ -63,7 +63,7 @@ class ExternalDatabaseSchemaController {
             }
         } catch (Exception e) {
             log.error("Unexpected error while fetching the database schema for the component '{}' in the system '{}'.", systemName, systemName, e);
-            throw DatabaseSchemaException.unexpectedError(systemName, systemComponentName, e);
+            throw DatabaseSchemaException.unexpectedError(systemComponentName, e);
         }
     }
 

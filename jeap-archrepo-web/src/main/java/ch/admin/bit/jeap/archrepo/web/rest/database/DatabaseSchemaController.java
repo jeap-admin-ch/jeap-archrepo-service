@@ -1,9 +1,9 @@
 package ch.admin.bit.jeap.archrepo.web.rest.database;
 
-import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
-import ch.admin.bit.jeap.archrepo.persistence.*;
+import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
+import ch.admin.bit.jeap.archrepo.persistence.SystemComponentRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +21,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -33,7 +36,7 @@ import java.util.function.Supplier;
 @Slf4j
 class DatabaseSchemaController {
 
-    private final SystemRepository systemRepository;
+    private final SystemComponentRepository systemComponentRepository;
     private final SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
     private final PlatformTransactionManager transactionManager;
 
@@ -52,13 +55,11 @@ class DatabaseSchemaController {
             @ApiResponse(responseCode = "400", description = "Invalid input data, e.g. system or system component do not exist or database schema not valid."),
             @ApiResponse(responseCode = "500", description = "Unexpected server error.")
     })
-    @PreAuthorize("hasRole(#schemaDto.systemName,'database-schema', 'write')")
+    @PreAuthorize("hasRole('database-schema', 'write')")
     public ResponseEntity<Void> createOrUpdateDatabaseSchema(@Valid @RequestBody CreateOrUpdateDbSchemaDto schemaDto) {
         try {
-            System system = systemRepository.findByNameContainingIgnoreCase(schemaDto.getSystemName())
-                    .orElseThrow(() -> DatabaseSchemaException.systemDoesNotExist(schemaDto.getSystemName()));
-            SystemComponent systemComponent = system.findSystemComponent(schemaDto.getSystemComponentName())
-                    .orElseThrow(() -> DatabaseSchemaException.systemComponentDoesNotExist(schemaDto.getSystemComponentName(), schemaDto.getSystemName()));
+            SystemComponent systemComponent = systemComponentRepository.findByNameContainingIgnoreCase(schemaDto.getSystemComponentName())
+                    .orElseThrow(() -> DatabaseSchemaException.systemComponentDoesNotExist(schemaDto.getSystemComponentName()));
 
             return updateDatabaseSchema(schemaDto, systemComponent).
                     orElseGet(() -> createDatabaseSchema(schemaDto, systemComponent));

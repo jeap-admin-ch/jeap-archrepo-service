@@ -24,9 +24,9 @@ public class DatabaseSchemaException extends RuntimeException {
         return new DatabaseSchemaException(message, HttpStatus.BAD_REQUEST);
     }
 
-    static DatabaseSchemaException systemComponentDoesNotExist(String systemComponentName, String systemName) {
-        String message = "The system component '%s' does not exist in the architecture model in the system '%s'.".
-                formatted(systemComponentName, systemName);
+    static DatabaseSchemaException systemComponentDoesNotExist(String systemComponentName) {
+        String message = "The system component '%s' does not exist in the architecture model.".
+                formatted(systemComponentName);
         return new DatabaseSchemaException(message, HttpStatus.BAD_REQUEST);
     }
 
@@ -39,13 +39,13 @@ public class DatabaseSchemaException extends RuntimeException {
         return new DatabaseSchemaException(unexpectedErrorMessage(schemaDto, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR, e);
     }
 
-    static DatabaseSchemaException unexpectedError(String system, String systemComponent, Exception e) {
-        return new DatabaseSchemaException(unexpectedErrorMessage(system, systemComponent, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR, e);
+    static DatabaseSchemaException unexpectedError(String systemComponent, Exception e) {
+        return new DatabaseSchemaException(unexpectedErrorMessage(systemComponent, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR, e);
     }
 
     static DatabaseSchemaException schemaSerializationError(CreateOrUpdateDbSchemaDto schemaDto, Exception e) {
-        String message = "Unable to serialize the database schema for the component '%s' and the system '%s': %s".
-                formatted(schemaDto.getSystemComponentName(), schemaDto.getSystemName(), e.getMessage());
+        String message = "Unable to serialize the database schema for the component '%s': %s".
+                formatted(schemaDto.getSystemComponentName(), e.getMessage());
         return new DatabaseSchemaException(message, HttpStatus.INTERNAL_SERVER_ERROR, e);
     }
 
@@ -56,12 +56,12 @@ public class DatabaseSchemaException extends RuntimeException {
     }
 
     private static String unexpectedErrorMessage(CreateOrUpdateDbSchemaDto schemaDto, String message) {
-        return unexpectedErrorMessage(schemaDto.getSystemName(), schemaDto.getSystemComponentName(), message);
+        return unexpectedErrorMessage(schemaDto.getSystemComponentName(), message);
     }
 
-    private static String unexpectedErrorMessage(String system, String systemComponent, String message) {
-        return "An unexpected error happened while processing the database schema for the system '%s' and the component '%s': %s."
-                .formatted(system, systemComponent, message);
+    private static String unexpectedErrorMessage(String systemComponent, String message) {
+        return "An unexpected error happened while processing the database schema for the component '%s': %s."
+                .formatted(systemComponent, message);
     }
 
 }

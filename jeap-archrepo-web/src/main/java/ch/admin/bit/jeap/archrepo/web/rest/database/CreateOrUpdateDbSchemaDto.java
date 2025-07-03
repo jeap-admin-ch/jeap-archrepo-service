@@ -11,8 +11,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class CreateOrUpdateDbSchemaDto{
     @NotEmpty
-    private String systemName;
-    @NotEmpty
     private String systemComponentName;
     @NotNull
     @Valid

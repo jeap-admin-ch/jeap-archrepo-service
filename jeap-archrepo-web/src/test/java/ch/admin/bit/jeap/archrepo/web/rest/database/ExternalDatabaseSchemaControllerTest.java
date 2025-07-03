@@ -49,21 +49,13 @@ class ExternalDatabaseSchemaControllerTest {
     private static final String COMPONENT_NAME = "test-component";
     private static final String EXTERNAL_DB_SCHEMA_API_PATH = "/external-api/dbschemas";
 
-    private static final SemanticApplicationRole EXTERNAL_DB_SCHEMA_READ_ROLE_SYSTEM = SemanticApplicationRole.builder()
+    private static final SemanticApplicationRole EXTERNAL_DB_SCHEMA_READ_ROLE = SemanticApplicationRole.builder()
             .system("application-platform")
-            .tenant(SYSTEM_NAME)
             .resource("external-database-schema")
             .operation("read")
             .build();
-    private static final SemanticApplicationRole EXTERNAL_DB_SCHEMA_READ_ROLE_OTHER_SYSTEM = SemanticApplicationRole.builder()
+    private static final SemanticApplicationRole EXTERNAL_DB_SCHEMA_OTHER_ROLE = SemanticApplicationRole.builder()
             .system("application-platform")
-            .tenant("other-system")
-            .resource("external-database-schema")
-            .operation("read")
-            .build();
-    private static final SemanticApplicationRole EXTERNAL_DB_SCHEMA_OTHER_ROLE_SYSTEM = SemanticApplicationRole.builder()
-            .system("application-platform")
-            .tenant(SYSTEM_NAME)
             .resource("external-database-schema")
             .operation("other")
             .build();
@@ -94,7 +86,7 @@ class ExternalDatabaseSchemaControllerTest {
                 .build();
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).
                 thenReturn(Optional.of(existingSystemComponentDatabaseSchema));
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         String result = mockMvc.perform(
                 get(EXTERNAL_DB_SCHEMA_API_PATH).
@@ -115,7 +107,7 @@ class ExternalDatabaseSchemaControllerTest {
 
     @Test
     void testGetDatabaseSchema_NotFoundSystem() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE_OTHER_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
@@ -130,7 +122,7 @@ class ExternalDatabaseSchemaControllerTest {
     void testGetDatabaseSchema_NotFoundSystemComponent() throws Exception {
         final System system = createSystem();
         when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
@@ -147,7 +139,7 @@ class ExternalDatabaseSchemaControllerTest {
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
         when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).thenReturn(Optional.empty());
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
@@ -159,8 +151,8 @@ class ExternalDatabaseSchemaControllerTest {
     }
 
     @Test
-    void testGetDatabaseSchema_ForbiddenOtherSystem() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE_OTHER_SYSTEM);
+    void testGetDatabaseSchema_OtherSystem() throws Exception {
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
@@ -168,12 +160,12 @@ class ExternalDatabaseSchemaControllerTest {
                                 queryParam("systemName", SYSTEM_NAME).
                                 queryParam("systemComponentName", COMPONENT_NAME).
                                 with(authentication(authentication))).
-                andExpect(status().isForbidden());
+                andExpect(status().isNotFound());
     }
 
     @Test
-    void testGetDatabaseSchema_ForbiddenOtherRole() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_OTHER_ROLE_SYSTEM);
+    void testGetDatabaseSchema_OtherRole() throws Exception {
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_OTHER_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).

@@ -50,19 +50,13 @@ class DatabaseSchemaControllerTest {
     private static final String COMPONENT_NAME = "test-component";
     private static final String DB_SCHEMA_API_PATH = "/api/dbschemas";
 
-    private static final SemanticApplicationRole DB_SCHEMA_WRITE_ROLE_SYSTEM = SemanticApplicationRole.builder()
+    private static final SemanticApplicationRole DB_SCHEMA_WRITE_ROLE = SemanticApplicationRole.builder()
             .system("application-platform")
-            .tenant(SYSTEM_NAME)
             .resource("database-schema")
             .operation("write")
             .build();
-    private static final SemanticApplicationRole DB_SCHEMA_WRITE_ROLE_OTHER_SYSTEM = SemanticApplicationRole.builder()
-            .system("application-platform")
-            .tenant("other-system")
-            .resource("database-schema")
-            .operation("write")
-            .build();
-    private static final SemanticApplicationRole DB_SCHEMA_OTHER_ROLE_SYSTEM = SemanticApplicationRole.builder()
+
+    private static final SemanticApplicationRole DB_SCHEMA_OTHER_ROLE = SemanticApplicationRole.builder()
             .system("application-platform")
             .tenant(SYSTEM_NAME)
             .resource("database-schema")
@@ -82,6 +76,9 @@ class DatabaseSchemaControllerTest {
     SystemRepository systemRepository;
 
     @MockitoBean
+    SystemComponentRepository systemComponentRepository;
+
+    @MockitoBean
     SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
 
     @Captor
@@ -91,13 +88,13 @@ class DatabaseSchemaControllerTest {
     void testCreateOrUpdateDbSchema_CreateValid() throws Exception {
         final System system = createSystem();
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
-        when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
+        when(systemComponentRepository.findByNameContainingIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.of(systemComponent));
         // mocking no db schema to exist yet
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).thenReturn(Optional.empty());
         // capturing the creation of a db schema
         when(systemComponentDatabaseSchemaRepository.saveAndFlush(systemComponentDatabaseSchemaArgumentCaptor.capture())).
                 thenAnswer(invocation -> invocation.getArgument(0));
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE);
         CreateOrUpdateDbSchemaDto createOrUpdateDbSchemaDto = getCreateOrUpdateDbSchemaDto();
         String content = getJsonString(createOrUpdateDbSchemaDto);
 
@@ -111,7 +108,6 @@ class DatabaseSchemaControllerTest {
 
         verify(systemComponentDatabaseSchemaRepository, times(1)).saveAndFlush(any());
         SystemComponentDatabaseSchema systemComponentDatabaseSchema = systemComponentDatabaseSchemaArgumentCaptor.getValue();
-        assertThat(systemComponentDatabaseSchema.getSystem().getName()).isEqualTo(createOrUpdateDbSchemaDto.getSystemName());
         assertThat(systemComponentDatabaseSchema.getSystemComponent().getName()).isEqualTo(createOrUpdateDbSchemaDto.getSystemComponentName());
         assertThat(systemComponentDatabaseSchema.getSchemaVersion()).isEqualTo(createOrUpdateDbSchemaDto.getSchema().version());
         assertThat(systemComponentDatabaseSchema.getSchema()).isEqualTo(createOrUpdateDbSchemaDto.getSchema().toJson());
@@ -119,7 +115,7 @@ class DatabaseSchemaControllerTest {
 
     @Test
     void testCreateOrUpdateDbSchema_CreateInvalid() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE);
         String missingTablesContent = """
                             {
                                 "systemName": "test-system",
@@ -143,7 +139,7 @@ class DatabaseSchemaControllerTest {
     void testCreateOrUpdateDbSchema_Update() throws Exception {
         final System system = createSystem();
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
-        when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
+        when(systemComponentRepository.findByNameContainingIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.of(systemComponent));
         // mocking db schema to exist
         final byte[] dummySerializedSchema = "dummy-schema".getBytes();
         SystemComponentDatabaseSchema existingSchema = SystemComponentDatabaseSchema.builder()
@@ -153,7 +149,7 @@ class DatabaseSchemaControllerTest {
                 .build();
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).
                 thenReturn(Optional.of(existingSchema));
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE);
         CreateOrUpdateDbSchemaDto createOrUpdateDbSchemaDto = getCreateOrUpdateDbSchemaDto();
         String content = getJsonString(createOrUpdateDbSchemaDto);
 
@@ -172,20 +168,8 @@ class DatabaseSchemaControllerTest {
     }
 
     @Test
-    void testCreateOrUpdateDbSchema_CreateForbiddenSystem() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE_OTHER_SYSTEM);
-        mockMvc.perform(
-                        post(DB_SCHEMA_API_PATH).
-                                contentType(MediaType.APPLICATION_JSON).
-                                content(getJsonString(getCreateOrUpdateDbSchemaDto())).
-                                with(authentication(authentication)).
-                                with(csrf())).
-                andExpect(status().isForbidden());
-    }
-
-    @Test
     void testCreateOrUpdateDbSchema_CreateForbiddenRole() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_OTHER_ROLE_SYSTEM);
+        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_OTHER_ROLE);
         mockMvc.perform(
                         post(DB_SCHEMA_API_PATH).
                                 contentType(MediaType.APPLICATION_JSON).
@@ -231,7 +215,7 @@ class DatabaseSchemaControllerTest {
                 .version("1.2.3")
                 .tables(List.of(table1, table2))
                 .build();
-        return new CreateOrUpdateDbSchemaDto(SYSTEM_NAME, COMPONENT_NAME, databaseSchema);
+        return new CreateOrUpdateDbSchemaDto(COMPONENT_NAME, databaseSchema);
     }
 
     @SneakyThrows
