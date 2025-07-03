@@ -15,7 +15,10 @@ import org.springframework.context.annotation.Configuration;
                 description = "Architecture Repository Service API",
                 version = "v1"
         ),
-        security = @SecurityRequirement(name = "basicAuth")
+        security = {
+                @SecurityRequirement(name = "basicAuth"),
+                @SecurityRequirement(name = "OIDC")
+        }
 )
 @SecurityScheme(
         name = "basicAuth",
