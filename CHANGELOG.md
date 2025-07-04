@@ -10,6 +10,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Update parent from 26.64.2 to 26.67.0
+- update org.eclipse.jgit from 7.1.0.202411261347-r to 7.3.0.202506031305-r
+- update wiremock-standalone from com.github.tomakehurst:wiremock-jre8-standalone 2.35.2 to org.wiremock:wiremock-standalone 3.13.1
+- update commons-io from 2.18.0 to 2.19.0
+- update guava from 33.3.1-jre to 33.4.8-jre
 
 ## [1.23.0] - 2025-07-03
 
