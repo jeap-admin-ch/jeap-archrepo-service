@@ -82,7 +82,6 @@ Apache License Version 2.0
  * Apache Commons Codec - [commons-codec:commons-codec](https://commons.apache.org/proper/commons-codec/)
  * Apache Commons Collections - [commons-collections:commons-collections](http://commons.apache.org/collections/)
  * Apache Commons IO - [commons-io:commons-io](https://commons.apache.org/proper/commons-io/)
- * Apache Commons IO - [commons-io:commons-io](https://commons.apache.org/proper/commons-io/)
  * Commons Lang - [commons-lang:commons-lang](http://commons.apache.org/lang/)
  * Apache Commons Logging - [commons-logging:commons-logging](http://commons.apache.org/proper/commons-logging/)
  * Apache Commons Logging - [commons-logging:commons-logging](https://commons.apache.org/proper/commons-logging/)
@@ -353,11 +352,6 @@ BSD License 3
  * Hamcrest - [org.hamcrest:hamcrest](http://hamcrest.org/JavaHamcrest/)
  * asm - [org.ow2.asm:asm](http://asm.ow2.io/)
 
-CC0 1.0 Universal
--------------------------------
-
- * EdDSA-Java - [net.i2p.crypto:eddsa](https://github.com/str4d/ed25519-java)
-
 CDDL
 -------------------------------
 
@@ -444,7 +438,6 @@ MIT License
  * toml4j - [io.hotmoka:toml4j](http://moandjiezana.com/toml/toml4j)
  * core - [io.pact.plugin.driver:core](https://github.com/pact-foundation/pact-plugins)
  * Logstash Logback Encoder - [net.logstash.logback:logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder)
- * Checker Qual - [org.checkerframework:checker-qual](https://checkerframework.org/)
  * Checker Qual - [org.checkerframework:checker-qual](https://checkerframework.org/)
  * Animal Sniffer Annotations - [org.codehaus.mojo:animal-sniffer-annotations](https://www.mojohaus.org/animal-sniffer/animal-sniffer-annotations)
  * mockito-core - [org.mockito:mockito-core](https://github.com/mockito/mockito)
