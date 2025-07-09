@@ -42,7 +42,7 @@ class SystemComponentRepositoryTest {
         system.addSystemComponent(systemComponent);
         systemRepository.save(system);
 
-        Optional<SystemComponent> optionalSystemComponent = systemComponentRepository.findByNameContainingIgnoreCase("ValidSystemComponent");
+        Optional<SystemComponent> optionalSystemComponent = systemComponentRepository.findByNameIgnoreCase("ValidSystemComponent");
 
         assertThat(optionalSystemComponent)
                 .isPresent()
@@ -68,7 +68,7 @@ class SystemComponentRepositoryTest {
 
     @Test
     void findSystemComponent_byNonExistingName_returnsEmptyOptional() {
-        Optional<SystemComponent> optionalSystemComponent = systemComponentRepository.findByNameContainingIgnoreCase("nonExistingName");
+        Optional<SystemComponent> optionalSystemComponent = systemComponentRepository.findByNameIgnoreCase("nonExistingName");
 
         assertThat(optionalSystemComponent).isNotPresent();
     }

@@ -3,6 +3,8 @@ package ch.admin.bit.jeap.archrepo.docgen.plantuml;
 import ch.admin.bit.jeap.archrepo.docgen.ComponentContext;
 import ch.admin.bit.jeap.archrepo.docgen.RelationView;
 import ch.admin.bit.jeap.archrepo.docgen.SystemContext;
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.model.database.DatabaseSchema;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +45,28 @@ public class PlantUmlRenderer {
         componentContext.getConsumedRestApiRelations().forEach(rel -> addOutgoingRelation(componentView, rel, componentName));
 
         return componentView.render();
+    }
+
+    public String renderDatabaseSchema(ComponentContext componentContext) {
+            return componentContext.getSystemComponent().getParent()
+                    .getDatabaseSchema(componentContext.getSystemComponent().getName())
+                    .map(this::renderDatabaseSchema)
+                    .orElse(null);
+    }
+
+    private String renderDatabaseSchema(SystemComponentDatabaseSchema systemComponentDatabaseSchema) {
+        DatabaseSchema dbSchema = getDatabaseSchema(systemComponentDatabaseSchema);
+        PlantUmlDbSchemaRenderer renderer = new PlantUmlDbSchemaRenderer();
+        return renderer.renderDbSchema(dbSchema);
+    }
+
+    private DatabaseSchema getDatabaseSchema(SystemComponentDatabaseSchema systemComponentDatabaseSchema) {
+        try {
+            return DatabaseSchema.fromJson(systemComponentDatabaseSchema.getSchema());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot read the database schema for the system component '"
+                    + systemComponentDatabaseSchema.getSystemComponent().getName() + "'.", e);
+        }
     }
 
     void addIncomingRelation(PlantUmlComponentView view, RelationView relation, String target) {

@@ -10,8 +10,6 @@ import java.util.UUID;
 @Repository
 public interface SystemComponentRepository extends JpaRepository<SystemComponent, UUID> {
 
-    Optional<SystemComponent> findByNameContainingIgnoreCase(String name);
-
     Optional<SystemComponent> findByNameIgnoreCase(String name);
 
 }

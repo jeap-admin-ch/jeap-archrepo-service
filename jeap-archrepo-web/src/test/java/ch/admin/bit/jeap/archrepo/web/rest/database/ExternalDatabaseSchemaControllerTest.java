@@ -8,7 +8,7 @@ import ch.admin.bit.jeap.archrepo.model.database.DatabaseSchema;
 import ch.admin.bit.jeap.archrepo.model.database.Table;
 import ch.admin.bit.jeap.archrepo.model.database.TableColumn;
 import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
-import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
+import ch.admin.bit.jeap.archrepo.persistence.SystemComponentRepository;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
 import ch.admin.bit.jeap.security.resource.configuration.MvcSecurityConfiguration;
@@ -45,7 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ExternalDatabaseSchemaControllerTest {
 
-    private static final String SYSTEM_NAME = "test-system";
     private static final String COMPONENT_NAME = "test-component";
     private static final String EXTERNAL_DB_SCHEMA_API_PATH = "/external-api/dbschemas";
 
@@ -67,16 +66,15 @@ class ExternalDatabaseSchemaControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    SystemRepository systemRepository;
+    SystemComponentRepository systemComponentRepository;
 
     @MockitoBean
     SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
 
     @Test
     void testGetDatabaseSchema_Found() throws Exception {
-        final System system = createSystem();
-        final SystemComponent systemComponent = system.getSystemComponents().getFirst();
-        when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
+        final SystemComponent systemComponent = createSystemComponent();
+        when(systemComponentRepository.findByNameIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.of(systemComponent));
         // mocking db schema to exist
         DatabaseSchema databaseSchema = getDatabaseSchema();
         SystemComponentDatabaseSchema existingSystemComponentDatabaseSchema = SystemComponentDatabaseSchema.builder()
@@ -91,7 +89,6 @@ class ExternalDatabaseSchemaControllerTest {
         String result = mockMvc.perform(
                 get(EXTERNAL_DB_SCHEMA_API_PATH).
                         accept(MediaType.APPLICATION_JSON).
-                        queryParam("systemName", SYSTEM_NAME).
                         queryParam("systemComponentName", COMPONENT_NAME).
                         with(authentication(authentication))).
                 andExpect(status().isOk()).
@@ -100,34 +97,18 @@ class ExternalDatabaseSchemaControllerTest {
                 getContentAsString();
 
         DatabaseSchemaDto resultDto = getDatabaseSchemaDtoFromJsonString(result);
-        assertThat(resultDto.getSystemName()).isEqualTo(SYSTEM_NAME);
         assertThat(resultDto.getSystemComponentName()).isEqualTo(COMPONENT_NAME);
         assertThat(resultDto.getSchema()).isEqualTo(databaseSchema);
     }
 
     @Test
-    void testGetDatabaseSchema_NotFoundSystem() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
-
-        mockMvc.perform(
-                        get(EXTERNAL_DB_SCHEMA_API_PATH).
-                                accept(MediaType.APPLICATION_JSON).
-                                queryParam("systemName", "other-system").
-                                queryParam("systemComponentName", COMPONENT_NAME).
-                                with(authentication(authentication))).
-                andExpect(status().isNotFound());
-    }
-
-    @Test
     void testGetDatabaseSchema_NotFoundSystemComponent() throws Exception {
-        final System system = createSystem();
-        when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
+        when(systemComponentRepository.findByNameIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.empty());
         JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
                                 accept(MediaType.APPLICATION_JSON).
-                                queryParam("systemName", SYSTEM_NAME).
                                 queryParam("systemComponentName", "other-component").
                                 with(authentication(authentication))).
                 andExpect(status().isNotFound());
@@ -135,29 +116,14 @@ class ExternalDatabaseSchemaControllerTest {
 
     @Test
     void testGetDatabaseSchema_NotFoundSchema() throws Exception {
-        final System system = createSystem();
-        final SystemComponent systemComponent = system.getSystemComponents().getFirst();
-        when(systemRepository.findByNameContainingIgnoreCase(SYSTEM_NAME)).thenReturn(Optional.of(system));
+        final SystemComponent systemComponent = createSystemComponent();
+        when(systemComponentRepository.findByNameIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.of(systemComponent));
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).thenReturn(Optional.empty());
         JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
 
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
                                 accept(MediaType.APPLICATION_JSON).
-                                queryParam("systemName", SYSTEM_NAME).
-                                queryParam("systemComponentName", COMPONENT_NAME).
-                                with(authentication(authentication))).
-                andExpect(status().isNotFound());
-    }
-
-    @Test
-    void testGetDatabaseSchema_OtherSystem() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(EXTERNAL_DB_SCHEMA_READ_ROLE);
-
-        mockMvc.perform(
-                        get(EXTERNAL_DB_SCHEMA_API_PATH).
-                                accept(MediaType.APPLICATION_JSON).
-                                queryParam("systemName", SYSTEM_NAME).
                                 queryParam("systemComponentName", COMPONENT_NAME).
                                 with(authentication(authentication))).
                 andExpect(status().isNotFound());
@@ -170,7 +136,6 @@ class ExternalDatabaseSchemaControllerTest {
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
                                 accept(MediaType.APPLICATION_JSON).
-                                queryParam("systemName", SYSTEM_NAME).
                                 queryParam("systemComponentName", COMPONENT_NAME).
                                 with(authentication(authentication))).
                 andExpect(status().isForbidden());
@@ -181,7 +146,6 @@ class ExternalDatabaseSchemaControllerTest {
         mockMvc.perform(
                         get(EXTERNAL_DB_SCHEMA_API_PATH).
                                 accept(MediaType.APPLICATION_JSON).
-                                queryParam("systemName", SYSTEM_NAME).
                                 queryParam("systemComponentName", COMPONENT_NAME)).
                 andExpect(status().isUnauthorized());
     }
@@ -207,15 +171,15 @@ class ExternalDatabaseSchemaControllerTest {
         return JeapAuthenticationTestTokenBuilder.create().withUserRoles(userroles).build();
     }
 
-    private System createSystem() {
+    private SystemComponent createSystemComponent() {
         System system = System.builder()
-                .name(SYSTEM_NAME)
+                .name("test-system")
                 .build();
         BackendService backendService = BackendService.builder()
                 .name(COMPONENT_NAME)
                 .build();
         system.addSystemComponent(backendService);
-        return system;
+        return backendService;
     }
 
 }

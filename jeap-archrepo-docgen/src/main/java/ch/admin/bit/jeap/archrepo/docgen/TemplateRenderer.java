@@ -8,8 +8,6 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.ITemplateEngine;
@@ -96,9 +94,9 @@ class TemplateRenderer {
 
         Context context = new Context(Locale.GERMAN);
         context.setVariable("systemComponent", systemComponent);
-        String plantUmLSource = plantUmlRenderer.renderComponentContextView(componentContext);
-        context.setVariable("contextViewPlantUml", plantUmLSource);
-        context.setVariable("plantUmlMacroId", stableMacroUuid(systemComponent.getName()));
+        String contextViewPlantUml = plantUmlRenderer.renderComponentContextView(componentContext);
+        context.setVariable("contextViewPlantUml", contextViewPlantUml);
+        context.setVariable("contextViewPlantUmlMacroId", stableMacroUuid(systemComponent.getName() + "_context"));
 
         context.setVariable("consumedRestApiRelations", componentContext.getConsumedRestApiRelations());
         context.setVariable("producedEventRelations", componentContext.getProducedEventsGroupedByEvent());
@@ -110,6 +108,11 @@ class TemplateRenderer {
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
         context.setVariable("reactions", componentContext.getReactionStatisticsViews());
+
+        String databaseSchemaPlantUml = plantUmlRenderer.renderDatabaseSchema(componentContext);
+        context.setVariable("databaseSchemaPlantUml", databaseSchemaPlantUml);
+        context.setVariable("databaseSchemaPlantUmlMacroId", stableMacroUuid(systemComponent.getName() + "_database"));
+
         return templateEngine.process("system-component", context).trim();
     }
 

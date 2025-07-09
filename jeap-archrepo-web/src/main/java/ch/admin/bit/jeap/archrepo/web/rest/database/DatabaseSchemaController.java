@@ -52,15 +52,20 @@ class DatabaseSchemaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Database schema created successfully."),
             @ApiResponse(responseCode = "200", description = "Database schema updated successfully."),
-            @ApiResponse(responseCode = "400", description = "Invalid input data, e.g. system or system component do not exist or database schema not valid."),
+            @ApiResponse(responseCode = "400", description = "Invalid input data, e.g. database schema is not valid."),
             @ApiResponse(responseCode = "500", description = "Unexpected server error.")
     })
     @PreAuthorize("hasRole('database-schema', 'write')")
     public ResponseEntity<Void> createOrUpdateDatabaseSchema(@Valid @RequestBody CreateOrUpdateDbSchemaDto schemaDto) {
         try {
             SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(schemaDto.getSystemComponentName());
-            return updateDatabaseSchema(schemaDto, systemComponent).
-                    orElseGet(() -> createDatabaseSchema(schemaDto, systemComponent));
+            var response = updateDatabaseSchema(schemaDto, systemComponent).orElseGet(
+                    () -> createDatabaseSchema(schemaDto, systemComponent));
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Received database schema for the system component '{}' in version '{}'.",
+                        schemaDto.getSystemComponentName(), schemaDto.getSchema().version());
+            }
+            return response;
         } catch (DatabaseSchemaException e) {
             log.error("Updating or creating the database schema '{}' failed.", schemaDto, e);
             throw e;

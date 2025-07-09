@@ -9,6 +9,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
+import ch.admin.bit.jeap.archrepo.model.database.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -53,6 +54,37 @@ class PlantUmlRendererTest {
                 otherSystem -[#green,dashed]-> system : "OtherEvent2"
                 system -[#green,dashed]-> otherSystem : "OtherEvent1"
                 @enduml""", uml);
+    }
+
+    @Test
+    void renderDatabaseSchema() {
+        DatabaseSchema dbSchema = createDatabaseSchema();
+        PlantUmlDbSchemaRenderer dbRenderer = new PlantUmlDbSchemaRenderer();
+
+        String uml = dbRenderer.renderDbSchema(dbSchema);
+
+        assertEquals("""
+                    @startuml
+                    title test-schema (1.2.3)
+                    !theme mars
+                    skinparam linetype curved
+                    
+                    entity "table_foo" {
+                      * col_a : text <<PK>>
+                        --
+                        col_b : bytea
+                      * col_c : text
+                    }
+                    
+                    entity "table_bar" {
+                        ref_col_a : text <<FK>>
+                      * col_d : text
+                    }
+                    
+                    
+                    "table_bar" }o--|| "table_foo" : ref_col_a
+                    @enduml
+                    """, uml);
     }
 
     @BeforeEach
@@ -120,4 +152,34 @@ class PlantUmlRendererTest {
         componentContext = ComponentContext.of(model, component1);
         systemContext = SystemContext.of(model, system);
     }
+
+    private DatabaseSchema createDatabaseSchema() {
+        Table tableA = Table.builder()
+                .name("table_foo")
+                .columns(List.of(
+                        new TableColumn("col_b", "bytea", false),
+                        new TableColumn("col_a", "text", false),
+                        new TableColumn("col_c", "text", true)))
+                .primaryKey(new TablePrimaryKey("pk_foo", List.of("col_a")))
+                .build();
+        Table tableB = Table.builder()
+                .name("table_bar")
+                .columns(List.of(
+                        new TableColumn("ref_col_a", "text", false),
+                        new TableColumn("col_d", "text", true)))
+                .foreignKeys(List.of(
+                        TableForeignKey.builder()
+                                .name("fk_foo_bar")
+                                .columnNames(List.of("ref_col_a"))
+                                .referencedTableName("table_foo")
+                                .referencedColumnNames(List.of("col_a"))
+                                .build()))
+                .build();
+        return DatabaseSchema.builder()
+                .name("test-schema")
+                .version("1.2.3")
+                .tables(List.of(tableA, tableB))
+                .build();
+    }
+
 }

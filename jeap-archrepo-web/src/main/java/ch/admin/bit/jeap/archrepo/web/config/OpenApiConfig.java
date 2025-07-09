@@ -28,11 +28,21 @@ import org.springframework.context.annotation.Configuration;
 @ApiResponse(responseCode = "403", description = "Missing basic auth credentials")
 @Configuration
 public class OpenApiConfig {
+
+    @Bean
+    GroupedOpenApi internalApi() {
+        return GroupedOpenApi.builder()
+                .group("Internal Architecture Repository API")
+                .pathsToMatch("/api/**")
+                .packagesToScan("ch.admin.bit.jeap.archrepo.web.rest")
+                .build();
+    }
+
     @Bean
     GroupedOpenApi externalApi() {
         return GroupedOpenApi.builder()
-                .group("Architecture-Repository-API")
-                .pathsToMatch("/api/**")
+                .group("External Architecture Repository API")
+                .pathsToMatch("/external-api/**")
                 .packagesToScan("ch.admin.bit.jeap.archrepo.web.rest")
                 .build();
     }

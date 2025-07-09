@@ -8,7 +8,6 @@ import lombok.ToString;
 @Data
 @Builder
 public class DatabaseSchemaDto {
-    private String systemName;
     private String systemComponentName;
     @ToString.Exclude
     DatabaseSchema schema;

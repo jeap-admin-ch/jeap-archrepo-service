@@ -5,6 +5,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
@@ -19,6 +20,9 @@ import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.Frontend;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import ch.admin.bit.jeap.archrepo.model.database.DatabaseSchema;
+import ch.admin.bit.jeap.archrepo.model.database.Table;
+import ch.admin.bit.jeap.archrepo.model.database.TableColumn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 class TemplateRendererTest {
 
-    private static final Pattern PLANTUML_SOURCE_PATTERN = Pattern.compile("(@startuml.*@enduml)|( ac:macro-id=\".*?\")", Pattern.DOTALL);
+    private static final Pattern PLANTUML_SOURCE_PATTERN = Pattern.compile("(@startuml.*?@enduml)|( ac:macro-id=\".*?\")", Pattern.DOTALL);
 
     @Autowired
     ApplicationContext applicationContext;
@@ -608,6 +612,44 @@ class TemplateRendererTest {
 
         String content = templateRenderer.renderComponentPage(model, systemComponent);
         assertContent("componentwithOpenApiUrl.expected", content);
+    }
+
+    @Test
+    void renderSystemComponentPageWithDatabaseSchema() throws IOException {
+        BackendService systemComponent = BackendService.builder()
+                .name("systemComponent")
+                .build();
+        System system = System.builder()
+                .name("System")
+                .description("Description")
+                .build();
+        system.addSystemComponent(systemComponent);
+
+        DatabaseSchema schema = DatabaseSchema.builder()
+                .name("foobar")
+                .version("1.2.3")
+                .tables(List.of(
+                        Table.builder()
+                                .name("foo")
+                                .columns(List.of(
+                                        TableColumn.builder()
+                                                .name("bar")
+                                                .type("int")
+                                                .nullable(false)
+                                                .build()))
+                                .build()))
+                .build();
+        SystemComponentDatabaseSchema systemComponentDatabaseSchema = SystemComponentDatabaseSchema.builder()
+                .systemComponent(systemComponent)
+                .schema(schema.toJson())
+                .schemaVersion("1.2.3")
+                .build();
+        system.addDatabaseSchema(systemComponentDatabaseSchema);
+
+        ArchitectureModel model = buildModel(system);
+
+        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        assertContent("componentwithDatabaseSchema.expected", content);
     }
 
     @Test

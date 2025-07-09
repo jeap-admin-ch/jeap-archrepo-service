@@ -46,14 +46,14 @@
 </ac:structured-macro>
 
 <h1>Daten</h1>
-<p>Kein Datenbankschema bekannt.</p>
+<ac:structured-macro ac:name="plantuml" ac:schema-version="1">
+    <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+    <ac:plain-text-body><![CDATA[]]></ac:plain-text-body>
+</ac:structured-macro>
 
 <h1>Rest API</h1>
 
-
-<p>
-    <a href="https://base-url/system/systemcomponent">OpenApi Specification</a>
-</p>
+<p>-</p>
 
 <h1>Ausgehende Beziehungen</h1>
 

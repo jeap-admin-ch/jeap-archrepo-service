@@ -38,15 +38,25 @@
 
     <h1>Kontext</h1>
 
-    <ac:structured-macro ac:name="plantuml" ac:schema-version="1" th:ac:macro-id="${plantUmlMacroId}">
+    <ac:structured-macro ac:name="plantuml" ac:schema-version="1" th:ac:macro-id="${contextViewPlantUmlMacroId}">
         <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
         <ac:plain-text-body
                 th:utext="${'<![CDATA[' + contextViewPlantUml + ']]>'}">
         </ac:plain-text-body>
     </ac:structured-macro>
 
-    <h1>Rest API</h1>
+    <h1>Daten</h1>
+    <p th:if="${databaseSchemaPlantUml == null}">Kein Datenbankschema bekannt.</p>
+    <th:block th:if="${databaseSchemaPlantUml != null}">
+        <ac:structured-macro ac:name="plantuml" ac:schema-version="1" th:ac:macro-id="${databaseSchemaPlantUmlMacroId}">
+            <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>
+            <ac:plain-text-body
+                    th:utext="${'<![CDATA[' + databaseSchemaPlantUml + ']]>'}">
+            </ac:plain-text-body>
+        </ac:structured-macro>
+    </th:block>
 
+    <h1>Rest API</h1>
     <p th:if="${openApiSpecUrl.isEmpty()}">-</p>
     <p th:unless="${openApiSpecUrl.isEmpty()}">
         <a th:href="${openApiSpecUrl}" th:text="'OpenApi Specification'"></a>

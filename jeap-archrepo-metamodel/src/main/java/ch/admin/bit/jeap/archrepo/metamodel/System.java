@@ -137,6 +137,13 @@ public class System extends MutableDomainEntity {
         return unmodifiableList(databaseSchemas);
     }
 
+    public Optional<SystemComponentDatabaseSchema> getDatabaseSchema(String systemComponentName) {
+        return databaseSchemas.stream()
+                .filter(componentSchema  ->
+                        componentSchema.getSystemComponent().getName().equalsIgnoreCase(systemComponentName))
+                .findFirst();
+    }
+
     public void addSystemComponent(SystemComponent systemComponent) {
         if (systemComponents.stream().anyMatch(rc -> rc.getName().equalsIgnoreCase(systemComponent.getName()))) {
             throw new IllegalArgumentException("Cannot add duplicate system component " + systemComponent.getName());
