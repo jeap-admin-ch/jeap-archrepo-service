@@ -12,4 +12,6 @@ public interface SystemRepository extends JpaRepository<System, UUID> {
 
     Optional<System> findByNameContainingIgnoreCase(String name);
 
+    Optional<System> findByNameIgnoreCase(String name);
+
 }

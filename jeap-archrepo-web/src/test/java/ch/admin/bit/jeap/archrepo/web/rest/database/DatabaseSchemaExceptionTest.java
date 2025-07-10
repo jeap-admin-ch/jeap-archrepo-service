@@ -1,15 +1,11 @@
 package ch.admin.bit.jeap.archrepo.web.rest.database;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DatabaseSchemaExceptionTest {
 
@@ -70,24 +66,5 @@ class DatabaseSchemaExceptionTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getResponseStatus());
         assertEquals(cause, exception.getCause());
     }
-
-    @ParameterizedTest
-    @MethodSource("systemComponentDoesNotExistArguments")
-    void systemComponentDoesNotExist_parameterized(String input, String expectedMessage) {
-        DatabaseSchemaException exception = DatabaseSchemaException.systemComponentDoesNotExist(input);
-
-        assertEquals(expectedMessage, exception.getMessage());
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getResponseStatus());
-    }
-
-    private static Stream<Arguments> systemComponentDoesNotExistArguments() {
-        return Stream.of(
-                Arguments.of(null, "The system component 'null' does not exist in the architecture model."),
-                Arguments.of("", "The system component '' does not exist in the architecture model."),
-                Arguments.of("ValidComponent", "The system component 'ValidComponent' does not exist in the architecture model."),
-                Arguments.of("TestComponent", "The system component 'TestComponent' does not exist in the architecture model.")
-        );
-    }
-
 
 }

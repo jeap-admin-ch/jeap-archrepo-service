@@ -12,4 +12,6 @@ public interface SystemComponentRepository extends JpaRepository<SystemComponent
 
     Optional<SystemComponent> findByNameContainingIgnoreCase(String name);
 
+    Optional<SystemComponent> findByNameIgnoreCase(String name);
+
 }

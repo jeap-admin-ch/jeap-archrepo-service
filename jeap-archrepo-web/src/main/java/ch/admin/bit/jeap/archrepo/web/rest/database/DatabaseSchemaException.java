@@ -19,17 +19,6 @@ public class DatabaseSchemaException extends RuntimeException {
         this.responseStatus = responseStatus;
     }
 
-    static DatabaseSchemaException systemDoesNotExist(String systemName) {
-        String message = "The system '%s' does not exist in the architecture model.".formatted(systemName);
-        return new DatabaseSchemaException(message, HttpStatus.BAD_REQUEST);
-    }
-
-    static DatabaseSchemaException systemComponentDoesNotExist(String systemComponentName) {
-        String message = "The system component '%s' does not exist in the architecture model.".
-                formatted(systemComponentName);
-        return new DatabaseSchemaException(message, HttpStatus.BAD_REQUEST);
-    }
-
     @SuppressWarnings("SameParameterValue")
     static DatabaseSchemaException unexpectedError(CreateOrUpdateDbSchemaDto schemaDto, String message) {
         return new DatabaseSchemaException(unexpectedErrorMessage(schemaDto, message), HttpStatus.INTERNAL_SERVER_ERROR);

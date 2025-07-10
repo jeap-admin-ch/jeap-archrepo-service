@@ -8,6 +8,7 @@ import ch.admin.bit.jeap.archrepo.model.database.*;
 import ch.admin.bit.jeap.archrepo.persistence.*;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
+import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
 import ch.admin.bit.jeap.security.resource.configuration.MvcSecurityConfiguration;
 import ch.admin.bit.jeap.security.resource.properties.ResourceServerProperties;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplicationRole;
@@ -76,7 +77,7 @@ class DatabaseSchemaControllerTest {
     SystemRepository systemRepository;
 
     @MockitoBean
-    SystemComponentRepository systemComponentRepository;
+    SystemComponentService systemComponentService;
 
     @MockitoBean
     SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
@@ -88,7 +89,7 @@ class DatabaseSchemaControllerTest {
     void testCreateOrUpdateDbSchema_CreateValid() throws Exception {
         final System system = createSystem();
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
-        when(systemComponentRepository.findByNameContainingIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.of(systemComponent));
+        when(systemComponentService.findOrCreateSystemComponent(COMPONENT_NAME)).thenReturn(systemComponent);
         // mocking no db schema to exist yet
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).thenReturn(Optional.empty());
         // capturing the creation of a db schema
@@ -139,7 +140,7 @@ class DatabaseSchemaControllerTest {
     void testCreateOrUpdateDbSchema_Update() throws Exception {
         final System system = createSystem();
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
-        when(systemComponentRepository.findByNameContainingIgnoreCase(COMPONENT_NAME)).thenReturn(Optional.of(systemComponent));
+        when(systemComponentService.findOrCreateSystemComponent(COMPONENT_NAME)).thenReturn(systemComponent);
         // mocking db schema to exist
         final byte[] dummySerializedSchema = "dummy-schema".getBytes();
         SystemComponentDatabaseSchema existingSchema = SystemComponentDatabaseSchema.builder()

@@ -11,6 +11,7 @@ import ch.admin.bit.jeap.archrepo.persistence.*;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiResultDto;
+import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Value;
@@ -71,6 +72,9 @@ class OpenApiControllerTests {
     RestApiRepository restApiRepository;
 
     @MockitoBean
+    SystemComponentService systemComponentService;
+
+    @MockitoBean
     OpenApiImporter openApiImporter;
 
     @Captor
@@ -86,6 +90,8 @@ class OpenApiControllerTests {
 
     @Test
     void testUploadOpenApiSpecWithoutVersion() throws Exception {
+        mockSystemComponent();
+
         MockMultipartFile file = createMockMultipartFile();
 
         mockMvc.perform(multipart(UPLOAD_PATH)
@@ -101,9 +107,19 @@ class OpenApiControllerTests {
         verify(openApiImporter, times(1)).importIntoModel(any(SystemComponent.class), eq(CONTENT));
     }
 
+    private void mockSystemComponent() {
+        System system = createSystem();
+        SystemComponent systemComponent = mock(SystemComponent.class);
+        when(systemComponent.getParent()).thenReturn(system);
+        when(systemComponent.getName()).thenReturn(SERVICE);
+        when(systemComponentService.findOrCreateSystemComponent(SERVICE)).thenReturn(systemComponent);
+    }
+
     @Test
     void testUploadOpenApiSpecWithVersion() throws Exception {
         MockMultipartFile file = createMockMultipartFile();
+
+        mockSystemComponent();
 
         mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
                 .file(file)

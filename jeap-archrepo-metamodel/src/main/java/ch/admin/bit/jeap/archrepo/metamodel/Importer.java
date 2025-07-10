@@ -5,5 +5,6 @@ public enum Importer {
     DEPLOYMENT_LOG,
     MESSAGE_TYPE_REGISTRY,
     PACT_BROKER,
-    OPEN_API
+    OPEN_API,
+    REST_CONTROLLER
 }

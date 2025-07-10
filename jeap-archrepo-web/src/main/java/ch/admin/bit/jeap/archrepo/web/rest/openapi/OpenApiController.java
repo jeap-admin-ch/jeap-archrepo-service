@@ -8,6 +8,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.*;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiDto;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiResultDto;
+import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -53,6 +54,8 @@ class OpenApiController {
 
     private final OpenApiImporter openApiImporter;
 
+    private final SystemComponentService systemComponentService;
+
     @Transactional
     @PostMapping("/{systemName}/{systemComponentName}")
     @Operation(summary = "Upload an OpenApi Spec")
@@ -62,11 +65,8 @@ class OpenApiController {
             @RequestParam(required = false) @Size(max = VERSION_MAX_LENGTH) String version,
             @RequestParam MultipartFile file) throws IOException {
         try {
-            System system = systemRepository.findByNameContainingIgnoreCase(systemName)
-                    .orElseThrow(() -> OpenApiException.systemNotExists(systemName));
-
-            SystemComponent systemComponent = system.findSystemComponent(systemComponentName)
-                    .orElseThrow(() -> OpenApiException.systemComponentNotExists(systemComponentName, systemName));
+            SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(systemComponentName);
+            System system = systemComponent.getParent();
 
             Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByDefiningSystemAndProvider(system, systemComponent);
 

@@ -3,7 +3,7 @@ package ch.admin.bit.jeap.archrepo.web.rest.database;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
-import ch.admin.bit.jeap.archrepo.persistence.SystemComponentRepository;
+import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 @Slf4j
 class DatabaseSchemaController {
 
-    private final SystemComponentRepository systemComponentRepository;
+    private final SystemComponentService systemComponentService;
     private final SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
     private final PlatformTransactionManager transactionManager;
 
@@ -58,9 +58,7 @@ class DatabaseSchemaController {
     @PreAuthorize("hasRole('database-schema', 'write')")
     public ResponseEntity<Void> createOrUpdateDatabaseSchema(@Valid @RequestBody CreateOrUpdateDbSchemaDto schemaDto) {
         try {
-            SystemComponent systemComponent = systemComponentRepository.findByNameContainingIgnoreCase(schemaDto.getSystemComponentName())
-                    .orElseThrow(() -> DatabaseSchemaException.systemComponentDoesNotExist(schemaDto.getSystemComponentName()));
-
+            SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(schemaDto.getSystemComponentName());
             return updateDatabaseSchema(schemaDto, systemComponent).
                     orElseGet(() -> createDatabaseSchema(schemaDto, systemComponent));
         } catch (DatabaseSchemaException e) {
