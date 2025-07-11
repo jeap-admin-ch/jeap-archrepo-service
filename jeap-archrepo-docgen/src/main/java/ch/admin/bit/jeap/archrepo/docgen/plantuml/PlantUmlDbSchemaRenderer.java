@@ -79,7 +79,7 @@ class PlantUmlDbSchemaRenderer {
 
     private void renderColumn(StringBuilder plantUml, TableColumn column, boolean isPrimaryKey, boolean isForeignKey) {
         plantUml.append("  ");
-        if (column.nullable() || isPrimaryKey) {
+        if (!column.nullable()) {
             plantUml.append("* ");
         } else {
             plantUml.append("  ");

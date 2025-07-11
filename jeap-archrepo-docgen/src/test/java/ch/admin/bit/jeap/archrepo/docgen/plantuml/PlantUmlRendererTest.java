@@ -72,13 +72,13 @@ class PlantUmlRendererTest {
                     entity "table_foo" {
                       * col_a : text <<PK>>
                         --
-                        col_b : bytea
-                      * col_c : text
+                      * col_b : bytea
+                        col_c : text
                     }
                     
                     entity "table_bar" {
-                        ref_col_a : text <<FK>>
-                      * col_d : text
+                      * ref_col_a : text <<FK>>
+                        col_d : text
                     }
                     
                     
