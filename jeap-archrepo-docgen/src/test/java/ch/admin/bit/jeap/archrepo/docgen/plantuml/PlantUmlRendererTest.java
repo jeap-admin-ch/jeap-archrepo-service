@@ -65,7 +65,7 @@ class PlantUmlRendererTest {
 
         assertEquals("""
                     @startuml
-                    title test-schema (1.2.3)
+                    title test-schema in Komponentenversion 1.2.3
                     !theme mars
                     skinparam linetype curved
                     

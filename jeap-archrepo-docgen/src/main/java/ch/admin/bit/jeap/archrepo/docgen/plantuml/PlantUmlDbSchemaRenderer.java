@@ -21,7 +21,7 @@ class PlantUmlDbSchemaRenderer {
         StringBuilder plantUml = new StringBuilder();
 
         plantUml.append("@startuml\n");
-        plantUml.append("title ").append(dbSchema.name()).append(" (").append(dbSchema.version()).append(")\n");
+        plantUml.append("title ").append(dbSchema.name()).append(" in Komponentenversion ").append(dbSchema.version()).append("\n");
         plantUml.append("!theme mars\n");
         plantUml.append("skinparam linetype curved\n\n");
 
