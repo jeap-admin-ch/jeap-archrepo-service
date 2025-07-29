@@ -45,7 +45,7 @@ class OpenApiImporterTest {
         List<RestApi> apis = new ArrayList<>();
         apis.add(new RestApi(mock(SystemComponent.class), "PUT", "/api/contracts/{appName}/{appVersion}", Importer.OPEN_API));
         apis.add(new RestApi(mock(SystemComponent.class), "DELETE", "/api/contracts/{appName}/{appVersion}", Importer.GRAFANA));
-        when(restApiRepository.findByDefiningSystemAndProvider(any(), any())).thenReturn(apis);
+        when(restApiRepository.findByProvider(any())).thenReturn(apis);
         doImportTest("jme-mcs.json", 5);
         verify(restApiRepository).deleteAll(List.of());
     }
@@ -57,7 +57,7 @@ class OpenApiImporterTest {
         apis.add(new RestApi(mock(SystemComponent.class), "POST", "/ui-api/messages/{id}/recreate", Importer.GRAFANA));
         apis.add(new RestApi(mock(SystemComponent.class), "GET", "/api/v2/messages/{id}", Importer.GRAFANA));
         apis.add(new RestApi(mock(SystemComponent.class), "GET", "/api/testsupport/codelists/{code}", Importer.GRAFANA));
-        when(restApiRepository.findByDefiningSystemAndProvider(any(), any())).thenReturn(apis);
+        when(restApiRepository.findByProvider(any())).thenReturn(apis);
         doImportTest("test-communication-scs.json", 10);
         verify(restApiRepository).deleteAll(List.of());
     }
@@ -71,7 +71,7 @@ class OpenApiImporterTest {
         apis.add(new RestApi(mock(SystemComponent.class), "GET", "/foo/foo", Importer.GRAFANA));
         apis.add(new RestApi(mock(SystemComponent.class), "GET", "/bar/bar", Importer.GRAFANA));
         apis.get(2).addImporter(Importer.GRAFANA);
-        when(restApiRepository.findByDefiningSystemAndProvider(any(), any())).thenReturn(apis);
+        when(restApiRepository.findByProvider(any())).thenReturn(apis);
         doImportTest("jme-mcs.json", 7);
         verify(restApiRepository).deleteAll(List.of(apis.get(0), apis.get(1)));
         assertThat(apis.get(2).getImporters()).containsExactly(Importer.GRAFANA);
@@ -86,7 +86,7 @@ class OpenApiImporterTest {
         apis.add(new RestApi(mock(SystemComponent.class), "GET", "/foo/foo", Importer.GRAFANA));
         apis.add(new RestApi(mock(SystemComponent.class), "GET", "/bar/bar", Importer.GRAFANA));
         apis.get(2).addImporter(Importer.GRAFANA);
-        when(restApiRepository.findByDefiningSystemAndProvider(any(), any())).thenReturn(apis);
+        when(restApiRepository.findByProvider(any())).thenReturn(apis);
         doImportTest("test-communication-scs.json", 14);
         verify(restApiRepository).deleteAll(List.of(apis.get(0), apis.get(1)));
         assertThat(apis.get(2).getImporters()).containsExactly(Importer.GRAFANA);

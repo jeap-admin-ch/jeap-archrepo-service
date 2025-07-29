@@ -46,7 +46,7 @@ class OpenApiController {
     @Value("${archrepo.openapi-base-url}")
     private String openApiBaseUrl;
 
-    private final SystemRepository systemRepository;
+    private final SystemComponentRepository systemComponentRepository;
 
     private final OpenApiSpecRepository openApiSpecRepository;
 
@@ -59,16 +59,26 @@ class OpenApiController {
     @Transactional
     @PostMapping("/{systemName}/{systemComponentName}")
     @Operation(summary = "Upload an OpenApi Spec")
+    public ResponseEntity<String> handleFileUploadWithSystemName(
+            @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
+            @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
+            @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,
+            @RequestParam MultipartFile file) throws IOException {
+        return handleFileUpload(systemComponentName, version, file);
+    }
+
+    @Transactional
+    @PostMapping("/{systemComponentName}")
+    @Operation(summary = "Upload an OpenApi Spec")
     public ResponseEntity<String> handleFileUpload(
-            @PathVariable @Size(max = SYSTEM_MAX_LENGTH) String systemName,
-            @PathVariable @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
-            @RequestParam(required = false) @Size(max = VERSION_MAX_LENGTH) String version,
+            @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
+            @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,
             @RequestParam MultipartFile file) throws IOException {
         try {
             SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(systemComponentName);
             System system = systemComponent.getParent();
 
-            Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByDefiningSystemAndProvider(system, systemComponent);
+            Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByProvider(systemComponent);
 
             String serverUrl = openApiImporter.getServerUrl(file.getBytes());
 
@@ -99,21 +109,26 @@ class OpenApiController {
     @Transactional(readOnly = true)
     @GetMapping("/{systemName}/{systemComponentName}")
     @Operation(summary = "Get the OpenApi Spec of a systemComponent")
+    public String getOpenApiJsonWithSystemName(
+            @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
+            @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
+        return getOpenApiJson(systemComponentName);
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping("/{systemComponentName}")
+    @Operation(summary = "Get the OpenApi Spec of a systemComponent")
     public String getOpenApiJson(
-            @PathVariable @Size(max = SYSTEM_MAX_LENGTH) String systemName,
-            @PathVariable @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
-        log.info("Retrieve openApiSpec for system {} and systemComponent {}", systemName, systemComponentName);
+            @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
+        log.info("Retrieve openApiSpec for systemComponent {}", systemComponentName);
 
-        System system = systemRepository.findByNameContainingIgnoreCase(systemName)
-                .orElseThrow(() -> OpenApiException.systemNotExists(systemName));
+        SystemComponent systemComponent = systemComponentRepository.findByNameIgnoreCase(systemComponentName)
+                .orElseThrow(() -> OpenApiException.systemComponentNotExists(systemComponentName));
 
-        SystemComponent systemComponent = system.findSystemComponent(systemComponentName)
-                .orElseThrow(() -> OpenApiException.systemComponentNotExists(systemComponentName, systemName));
-
-        Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByDefiningSystemAndProvider(system, systemComponent);
+        Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByProvider(systemComponent);
 
         if (openApiSpecOptional.isEmpty()) {
-            throw new IllegalStateException("No OpenApiSpec found for system " + systemName + " and systemComponent " + systemComponentName);
+            throw new IllegalStateException("No Open API spec found for system component " + systemComponentName);
         }
 
         log.debug("Found openApiSpec {} ", openApiSpecOptional.get());
@@ -125,7 +140,7 @@ class OpenApiController {
     @Operation(summary = "Get the API documentation versions of all system components.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The API documentation versions of all system components.",
-                        content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     })
     public List<ApiDocVersion> getApiDocVersions() {
         log.debug("Retrieving API documentation versions.");
@@ -140,24 +155,32 @@ class OpenApiController {
             summary = "All rest apis imported from open api spec",
             description = "Get all rest apis imported from open api spec for a certain system and component. Use /api/model to discover available systems and components."
     )
+    public ResponseEntity<RestApiResultDto> getRestApiForServiceWithSystemName(
+            @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
+            @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
+        return getRestApiForService(systemComponentName);
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping("/{systemComponentName}/rest-apis")
+    @Operation(
+            summary = "All rest apis imported from open api spec",
+            description = "Get all rest apis imported from open api spec for a certain system component. Use /api/model to discover available systems and components."
+    )
     public ResponseEntity<RestApiResultDto> getRestApiForService(
-            @PathVariable @Size(max = SYSTEM_MAX_LENGTH) String systemName,
-            @PathVariable @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
-        log.info("Retrieve rest apis for system {} and systemComponent {}", systemName, systemComponentName);
+            @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
+        log.info("Retrieve rest apis for system component {}", systemComponentName);
 
-        System system = systemRepository.findByNameContainingIgnoreCase(systemName)
-                .orElseThrow(() -> OpenApiException.systemNotExists(systemName));
+        SystemComponent systemComponent = systemComponentRepository.findByNameIgnoreCase(systemComponentName)
+                .orElseThrow(() -> OpenApiException.systemComponentNotExists(systemComponentName));
 
-        SystemComponent systemComponent = system.findSystemComponent(systemComponentName)
-                .orElseThrow(() -> OpenApiException.systemComponentNotExists(systemComponentName, systemName));
-
-        Optional<ApiDocDto> apiDocVersion = openApiSpecRepository.getApiDocVersion(system, systemComponent);
+        Optional<ApiDocDto> apiDocVersion = openApiSpecRepository.getApiDocVersion(systemComponent);
 
         if (apiDocVersion.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        List<RestApiDto> restApis = restApiRepository.findByDefiningSystemAndProvider(systemComponent.getParent(), systemComponent)
+        List<RestApiDto> restApis = restApiRepository.findByProvider(systemComponent)
                 .stream().filter(r -> r.getImporters().contains(Importer.OPEN_API)).map(r -> new RestApiDto(r.getMethod(), r.getPath())).toList();
 
         log.info("Found {} rest apis with OPEN_API importer", restApis.size());

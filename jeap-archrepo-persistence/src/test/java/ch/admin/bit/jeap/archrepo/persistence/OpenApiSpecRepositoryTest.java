@@ -43,7 +43,7 @@ class OpenApiSpecRepositoryTest {
         assertThat(openApiSpecRepository.findAll()).hasSize(1);
 
         Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.
-                findByDefiningSystemAndProvider(openApiSpec.getDefiningSystem(), openApiSpec.getProvider());
+                findByProvider(openApiSpec.getProvider());
 
         assertThat(openApiSpecOptional).isPresent();
     }
@@ -69,7 +69,7 @@ class OpenApiSpecRepositoryTest {
         final SystemComponent component = createPersistentSystemComponent();
         openApiSpecRepository.saveAndFlush(createOpenApiSpec(component, version));
 
-        Optional<ApiDocDto> apiDoc = openApiSpecRepository.getApiDocVersion(component.getParent(), component);
+        Optional<ApiDocDto> apiDoc = openApiSpecRepository.getApiDocVersion(component);
 
         assertThat(apiDoc).isPresent();
         assertThat(apiDoc.get().getVersion()).isEqualTo(version);
@@ -84,7 +84,7 @@ class OpenApiSpecRepositoryTest {
         OpenApiSpec openApiSpec = openApiSpecRepository.saveAndFlush(createOpenApiSpec(component, version));
         openApiSpec.update("foo".getBytes(StandardCharsets.UTF_8), "1.2.4", "url2");
 
-        Optional<ApiDocDto> apiDoc = openApiSpecRepository.getApiDocVersion(component.getParent(), component);
+        Optional<ApiDocDto> apiDoc = openApiSpecRepository.getApiDocVersion(component);
         assertThat(apiDoc).isPresent();
         assertThat(apiDoc.get().getVersion()).isEqualTo("1.2.4");
         assertThat(apiDoc.get().getCreatedAt()).isNotNull();
@@ -95,7 +95,7 @@ class OpenApiSpecRepositoryTest {
     @Test
     void testFindApiDocVersion_notFound() {
         final SystemComponent component = createPersistentSystemComponent();
-        Optional<ApiDocDto> apiDoc = openApiSpecRepository.getApiDocVersion(component.getParent(), component);
+        Optional<ApiDocDto> apiDoc = openApiSpecRepository.getApiDocVersion(component);
         assertThat(apiDoc).isEmpty();
     }
 

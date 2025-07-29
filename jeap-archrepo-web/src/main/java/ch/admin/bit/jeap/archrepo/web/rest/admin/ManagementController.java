@@ -76,12 +76,8 @@ public class ManagementController {
     @Transactional
     public ResponseEntity<String> deleteRestApi(@RequestBody @Valid DeleteRestApiDto dto) {
         log.info("Delete RestApi relation: {}", dto);
-        Optional<System> system = systemRepository.findByNameContainingIgnoreCase(dto.getSystemName());
-        if (system.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No such system " + dto.getSystemName());
-        }
 
-        List<RestApiRelation> relations = restApiRelationRepository.findAllByDefiningSystemAndProviderNameAndConsumerNameAndStatus(system.get(), dto.getProviderName(), dto.getConsumerName(), RelationStatus.ACTIVE);
+        List<RestApiRelation> relations = restApiRelationRepository.findAllByProviderNameAndConsumerNameAndStatus(dto.getProviderName(), dto.getConsumerName(), RelationStatus.ACTIVE);
         log.info("Found {} RestApi relations between {} and {}", relations.size(), dto.getProviderName(), dto.getConsumerName());
         Optional<RestApiRelation> relationOptional = relations.stream().filter(relation ->
                         dto.getPath().equalsIgnoreCase(relation.getRestApi().getPath()) &&

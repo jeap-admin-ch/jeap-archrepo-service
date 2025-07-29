@@ -75,13 +75,13 @@ class RestApiRepositoryTest {
         repository.save(new RestApi(providerB, "get", "path2", Importer.GRAFANA));
         repository.save(new RestApi(providerC, "delete", "path3", Importer.GRAFANA));
 
-        List<RestApi> providerAApis = repository.findByDefiningSystemAndProvider(systemA, providerA);
+        List<RestApi> providerAApis = repository.findByProvider(providerA);
         assertThat(providerAApis).hasSize(3);
 
-        List<RestApi> providerBApis = repository.findByDefiningSystemAndProvider(systemA, providerB);
+        List<RestApi> providerBApis = repository.findByProvider(providerB);
         assertThat(providerBApis).hasSize(1);
 
-        List<RestApi> providerCApis = repository.findByDefiningSystemAndProvider(systemB, providerC);
+        List<RestApi> providerCApis = repository.findByProvider(providerC);
         assertThat(providerCApis).hasSize(1);
         assertThat(providerCApis.getFirst().getPath()).isEqualTo("path3");
         assertThat(providerCApis.getFirst().getMethod()).isEqualTo("DELETE");
@@ -89,4 +89,3 @@ class RestApiRepositoryTest {
     }
 
 }
-

@@ -6,8 +6,6 @@ import lombok.Value;
 @Value
 public class DeleteRestApiDto {
     @NotNull
-    String systemName;
-    @NotNull
     String providerName;
     @NotNull
     String consumerName;

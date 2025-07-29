@@ -30,7 +30,7 @@ public class OpenApiImporter {
         log.info("Importing into OpenAPI model");
 
         List<RestApi> restApisFromFile = readEndpointsFromOpenApiFile(systemComponent, openApiSpecFileContent);
-        List<RestApi> currentRestApis = restApiRepository.findByDefiningSystemAndProvider(systemComponent.getParent(), systemComponent);
+        List<RestApi> currentRestApis = restApiRepository.findByProvider(systemComponent);
         List<RestApi> toDelete = filterRestApisToDelete(currentRestApis);
 
         updateOrAddRestApis(restApisFromFile, currentRestApis, toDelete);

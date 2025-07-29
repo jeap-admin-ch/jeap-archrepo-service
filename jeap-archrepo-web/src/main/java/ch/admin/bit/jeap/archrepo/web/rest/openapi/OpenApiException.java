@@ -5,13 +5,8 @@ public class OpenApiException extends RuntimeException {
         super(message);
     }
 
-    static OpenApiException systemNotExists(String systemName) {
-        String message = "System %s does not exists in ArchitectureModel".formatted(systemName);
-        return new OpenApiException(message);
-    }
-
-    static OpenApiException systemComponentNotExists(String systemComponentName, String systemName) {
-        String message = "SystemComponent %s does not exists in ArchitectureModel or in System %s".formatted(systemComponentName, systemName);
+    static OpenApiException systemComponentNotExists(String systemComponentName) {
+        String message = "SystemComponent %s does not exists in architecture model".formatted(systemComponentName);
         return new OpenApiException(message);
     }
 

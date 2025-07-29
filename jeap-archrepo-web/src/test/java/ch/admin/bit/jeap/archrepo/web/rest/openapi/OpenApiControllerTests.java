@@ -63,7 +63,7 @@ class OpenApiControllerTests {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    SystemRepository systemRepository;
+    SystemComponentRepository systemComponentRepository;
 
     @MockitoBean
     OpenApiSpecRepository openApiSpecRepository;
@@ -80,10 +80,11 @@ class OpenApiControllerTests {
     @Captor
     ArgumentCaptor<OpenApiSpec> openApiSpecArgumentCaptor;
 
+    private System system;
+
     @BeforeEach
     void setUp() {
-        System system = createSystem();
-        when(systemRepository.findByNameContainingIgnoreCase(SYSTEM)).thenReturn(Optional.of(system));
+        system = createSystem();
         when(openApiSpecRepository.save(openApiSpecArgumentCaptor.capture())).
                 thenAnswer(invocation -> invocation.getArgument(0));
     }
@@ -163,13 +164,16 @@ class OpenApiControllerTests {
     }
 
     @Test
-    void testGetRestAPis() throws Exception {
+    void testGetRestAPIs() throws Exception {
         ZonedDateTime createdAt = ZonedDateTime.now();
 
-        when(openApiSpecRepository.getApiDocVersion(any(), any())).
+        when(systemComponentRepository.findByNameIgnoreCase(SERVICE))
+                .thenReturn(system.findSystemComponent(SERVICE));
+
+        when(openApiSpecRepository.getApiDocVersion(any())).
                 thenReturn(Optional.of(new ApiDocDtoImpl("serverUrl", VERSION, createdAt, null)));
 
-        when(restApiRepository.findByDefiningSystemAndProvider(any(), any())).thenReturn(
+        when(restApiRepository.findByProvider(any())).thenReturn(
                 List.of(
                         RestApi.builder()
                                 .provider(BackendService.builder().name("test").build())
@@ -200,11 +204,12 @@ class OpenApiControllerTests {
     }
 
     @Test
-    void testGetRestAPis_modifiedAtAsLastUpdated() throws Exception {
+    void testGetRestAPIs_modifiedAtAsLastUpdated() throws Exception {
         ZonedDateTime createdAt = ZonedDateTime.now().minusDays(1);
         ZonedDateTime modifiedAt = ZonedDateTime.now().plusDays(1);
-
-        when(openApiSpecRepository.getApiDocVersion(any(), any())).
+        when(systemComponentRepository.findByNameIgnoreCase(SERVICE))
+                .thenReturn(system.findSystemComponent(SERVICE));
+        when(openApiSpecRepository.getApiDocVersion(any())).
                 thenReturn(Optional.of(new ApiDocDtoImpl("serverUrl", VERSION, createdAt, modifiedAt)));
 
         RestApi restApi = RestApi.builder()
@@ -216,7 +221,7 @@ class OpenApiControllerTests {
 
         restApi.addImporter(Importer.OPEN_API);
 
-        when(restApiRepository.findByDefiningSystemAndProvider(any(), any())).thenReturn(List.of(restApi));
+        when(restApiRepository.findByProvider(any())).thenReturn(List.of(restApi));
 
         String json = mockMvc.perform(get(UPLOAD_PATH + "/rest-apis")
                         .accept(MediaType.APPLICATION_JSON))
@@ -232,21 +237,24 @@ class OpenApiControllerTests {
     }
 
     @Test
-    void testGetRestAPis_notFound() throws Exception {
+    void testGetRestAPIs_notFound() throws Exception {
+        when(systemComponentRepository.findByNameIgnoreCase(SERVICE))
+                .thenReturn(system.findSystemComponent(SERVICE));
+
         mockMvc.perform(get(UPLOAD_PATH + "/rest-apis")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void testGetRestAPis_serviceNotFound_badRequest() throws Exception {
+    void testGetRestAPIs_serviceNotFound_badRequest() throws Exception {
         mockMvc.perform(get("/api/openapi/" + SYSTEM + "/foo/rest-apis")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testGetRestAPis_systemNotFound_badRequest() throws Exception {
+    void testGetRestAPIs_systemNotFound_badRequest() throws Exception {
         mockMvc.perform(get("/api/openapi/foo/" + SERVICE + "/rest-apis")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
