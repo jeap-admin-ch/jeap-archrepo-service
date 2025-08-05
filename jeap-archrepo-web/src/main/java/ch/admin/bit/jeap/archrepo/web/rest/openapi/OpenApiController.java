@@ -58,25 +58,25 @@ class OpenApiController {
     private final SystemComponentService systemComponentService;
 
     @Transactional
-    @PostMapping("/{systemName}/{systemComponentName}")
+    @PostMapping(value = "/{systemName}/{systemComponentName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload an OpenApi Spec",
             requestBody = @RequestBody(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
     public ResponseEntity<String> handleFileUploadWithSystemName(
             @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
             @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,
-            @RequestParam MultipartFile file) throws IOException {
+            @RequestParam(name = "file") MultipartFile file) throws IOException {
         return handleFileUpload(systemComponentName, version, file);
     }
 
     @Transactional
-    @PostMapping("/{systemComponentName}")
+    @PostMapping(value = "/{systemComponentName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload an OpenApi Spec",
             requestBody = @RequestBody(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
     public ResponseEntity<String> handleFileUpload(
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
             @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,
-            @RequestParam MultipartFile file) throws IOException {
+            @RequestParam(name = "file") MultipartFile file) throws IOException {
         try {
             SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(systemComponentName);
             System system = systemComponent.getParent();
