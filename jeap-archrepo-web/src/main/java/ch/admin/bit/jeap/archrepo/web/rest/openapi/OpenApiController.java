@@ -11,6 +11,7 @@ import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiResultDto;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -58,7 +59,8 @@ class OpenApiController {
 
     @Transactional
     @PostMapping("/{systemName}/{systemComponentName}")
-    @Operation(summary = "Upload an OpenApi Spec")
+    @Operation(summary = "Upload an OpenApi Spec",
+            requestBody = @RequestBody(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
     public ResponseEntity<String> handleFileUploadWithSystemName(
             @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
@@ -69,7 +71,8 @@ class OpenApiController {
 
     @Transactional
     @PostMapping("/{systemComponentName}")
-    @Operation(summary = "Upload an OpenApi Spec")
+    @Operation(summary = "Upload an OpenApi Spec",
+            requestBody = @RequestBody(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
     public ResponseEntity<String> handleFileUpload(
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
             @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,

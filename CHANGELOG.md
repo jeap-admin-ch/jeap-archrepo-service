@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.29.1] - 2025-08-05
+
+### Fixed
+
+- Set correct content type annotation for OpenAPI to make the OpenAPI upload work in Swagger UI
+
 ## [1.29.0] - 2025-07-29
 
 ### Changed
