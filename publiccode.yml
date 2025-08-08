@@ -1,0 +1,38 @@
+publiccodeYmlVersion: 0.4.0
+name: jeap-archrepo-service
+applicationSuite: jEAP
+softwareVersion: 1.30.1
+releaseDate: 2025-08-08
+url: "https://github.com/jeap-admin-ch/jeap-archrepo-service.git"
+landingURL: "https://github.com/jeap-admin-ch/jeap"
+platforms:
+  - web
+categories:
+  - application-development
+developmentStatus: stable
+softwareType: library
+description:
+  en:
+    localisedName: jeap-archrepo-service
+    shortDescription: Central repository holding an architecture model for documenting components and their relations in a microservice-based system architecture
+    longDescription: >
+      The jEAP Architecture Repository Service (Arch Repo) is a central architecture repository holding the 
+      architecture model for documenting components and their relations in a microservice-based system architecture.
+      It maintains an up-to-date inventory of microservices, their relationships, events, and interfaces, and 
+      automatically generates architecture documentation from this data. The Arch Repo focuses on system architecture 
+      and integrates information from multiple sources, publishing the resulting architecture model to Confluence.
+    features:
+      - Maintains an up-to-date inventory of microservices, relationships, and interfaces
+      - Integrates multiple data sources to automatically generate architecture documentation
+      - Publishes architecture models to Confluence
+legal:
+  license: Apache-2.0
+maintenance:
+  type: internal
+  contacts:
+    - name: Federal Office of Information Technology, Systems and Telecommunication FOITT
+      email: jeap-community@bit.admin.ch
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
