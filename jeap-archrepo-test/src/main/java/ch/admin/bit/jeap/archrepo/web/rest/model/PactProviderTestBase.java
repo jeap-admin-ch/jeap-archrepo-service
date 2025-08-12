@@ -26,6 +26,8 @@ import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +53,9 @@ public class PactProviderTestBase {
 
     @MockitoBean
     OpenApiSpecRepository openApiSpecRepository;
+
+    @MockitoBean
+    ReactionStatisticsRepository reactionStatisticsRepository;
 
     @MockitoBean
     SystemRepository systemRepository;
@@ -93,6 +98,12 @@ public class PactProviderTestBase {
     void openApiDocumentationVersions() {
         when(openApiSpecRepository.getApiDocVersions()).thenReturn(
                 List.of(new ApiDocVersionImpl("test-system", "test-component", "1.2.3")));
+    }
+
+    @State("A model with one component with observed reactions")
+    void reactionStatistics() {
+        when(reactionStatisticsRepository.getMaxLastModifiedAtList()).thenReturn(
+                List.of(new ReactionStatisticsLastModifiedAtImpl("test-component", ZonedDateTime.of(2025, 8, 1, 14, 0, 0 ,0, ZoneId.of("UTC")))));
     }
 
     @State("A database schema exists for the component 'test-component' in the system 'test-system'")
@@ -156,5 +167,11 @@ public class PactProviderTestBase {
         String system;
         String component;
         String version;
+    }
+
+    @Value
+    private static class ReactionStatisticsLastModifiedAtImpl implements ReactionStatisticsLastModifiedAt {
+        String component;
+        ZonedDateTime lastModifiedAt;
     }
 }

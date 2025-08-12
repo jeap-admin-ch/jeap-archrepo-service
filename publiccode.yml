@@ -2,7 +2,7 @@ publiccodeYmlVersion: 0.4.0
 name: jeap-archrepo-service
 applicationSuite: jEAP
 softwareVersion: 1.31.0
-releaseDate: 2025-08-11
+releaseDate: 2025-08-12
 url: "https://github.com/jeap-admin-ch/jeap-archrepo-service.git"
 landingURL: "https://github.com/jeap-admin-ch/jeap"
 platforms:

@@ -38,7 +38,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/model/rest-api-relation-without-pact").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/system-components-without-open-api-spec").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/openapi/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/reaction/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/reactions/**").permitAll()
                 .anyRequest().hasRole("api"));
         http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(withDefaults());
