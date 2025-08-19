@@ -9,7 +9,10 @@ import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
+import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
+import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.model.database.*;
 import ch.admin.bit.jeap.archrepo.persistence.*;
@@ -30,6 +33,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static ch.admin.bit.jeap.archrepo.test.Pacticipants.ARCHREPO;
 import static org.mockito.Mockito.mock;
@@ -62,6 +66,13 @@ public class PactProviderTestBase {
 
     @MockitoBean
     SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
+
+    @MockitoBean
+    SystemComponentRepository systemComponentRepository;
+
+    @MockitoBean
+    RestApiRepository restApiRepository;
+
 
     @BeforeEach
     void setUp(PactVerificationContext context) {
@@ -125,6 +136,25 @@ public class PactProviderTestBase {
         SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).
                 thenReturn(Optional.empty());
+    }
+
+    @State("A REST API documentation for the component 'test-component' in the system 'test-system' exists")
+    void restApiDocumentationExists() {
+        SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
+        when(systemComponentRepository.findByNameIgnoreCase("component")).thenReturn(Optional.of(systemComponent));
+
+        ApiDocDto apiDocDto = mock(ApiDocDto.class);
+        when(apiDocDto.getServerUrl()).thenReturn("https://api.example.com");
+        when(apiDocDto.getVersion()).thenReturn("1.0.0");
+        when(apiDocDto.getCreatedAt()).thenReturn(ZonedDateTime.of(2025, 8, 1, 14, 0, 0, 0, ZoneId.of("UTC")));
+        when(apiDocDto.getModifiedAt()).thenReturn(ZonedDateTime.of(2025, 8, 2, 12, 0, 0, 0, ZoneId.of("UTC")));
+        when(openApiSpecRepository.getApiDocVersion(systemComponent)).thenReturn(Optional.of(apiDocDto));
+
+        RestApi restApi = mock(RestApi.class);
+        when(restApi.getMethod()).thenReturn("GET");
+        when(restApi.getPath()).thenReturn("/api/foo");
+        when(restApi.getImporters()).thenReturn(Set.of(Importer.OPEN_API));
+        when(restApiRepository.findByProvider(systemComponent)).thenReturn(List.of(restApi));
     }
 
     @SuppressWarnings("SameParameterValue")
