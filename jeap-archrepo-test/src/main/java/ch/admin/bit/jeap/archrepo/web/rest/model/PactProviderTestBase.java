@@ -141,7 +141,7 @@ public class PactProviderTestBase {
     @State("A REST API documentation for the component 'test-component' in the system 'test-system' exists")
     void restApiDocumentationExists() {
         SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
-        when(systemComponentRepository.findByNameIgnoreCase("component")).thenReturn(Optional.of(systemComponent));
+        when(systemComponentRepository.findByNameIgnoreCase("test-system")).thenReturn(Optional.of(systemComponent));
 
         ApiDocDto apiDocDto = mock(ApiDocDto.class);
         when(apiDocDto.getServerUrl()).thenReturn("https://api.example.com");
