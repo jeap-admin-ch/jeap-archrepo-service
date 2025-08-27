@@ -39,8 +39,7 @@ public class DeploymentlogImporterConfiguration {
     }
 
     @Bean
-    DeploymentlogSystemComponentImporter deploymentlogSystemComponentImporter(DeploymentlogProperties properties,
-                                                                              DeploymentlogService service) {
-        return new DeploymentlogSystemComponentImporter(properties, service);
+    DeploymentlogSystemComponentImporter deploymentlogSystemComponentImporter(DeploymentlogService service) {
+        return new DeploymentlogSystemComponentImporter(service);
     }
 }

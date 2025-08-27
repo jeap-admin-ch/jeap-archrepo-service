@@ -19,11 +19,9 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
 
-    private final DeploymentlogProperties properties;
     private final DeploymentlogService deploymentlogService;
 
-    DeploymentlogSystemComponentImporter(DeploymentlogProperties properties, DeploymentlogService deploymentlogService) {
-        this.properties = properties;
+    DeploymentlogSystemComponentImporter(DeploymentlogService deploymentlogService) {
         this.deploymentlogService = deploymentlogService;
     }
 
@@ -35,9 +33,9 @@ class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
     }
 
     @Override
-    public void importIntoModel(ArchitectureModel architectureModel) {
+    public void importIntoModel(ArchitectureModel architectureModel, String environment) {
         log.info("Getting components from the deployment log...");
-        List<ComponentVersionSummaryDto> components = deploymentlogService.getDeployedComponents(properties.getEnvironment());
+        List<ComponentVersionSummaryDto> components = deploymentlogService.getDeployedComponents(environment);
         components.forEach(component -> importComponent(architectureModel, component));
         removeDeletedComponentsFromArchitectureModel(architectureModel, components);
     }

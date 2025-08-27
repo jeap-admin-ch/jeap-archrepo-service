@@ -34,6 +34,7 @@ class RhosGrafanaClientTest {
         List<RhosGrafanaQueryResponseData> resultRef = List.of(
                 createJeapRelationResult("/ref"));
         List<RhosGrafanaQueryResponseData>  resultAbn = List.of(
+                createJeapRelationResult("/abnFoo"),
                 createJeapRelationResult("/abn"),
                 createJeapRelationResult("/abnAndProd"));
         List<RhosGrafanaQueryResponseData>  resultProd = List.of(
@@ -44,25 +45,28 @@ class RhosGrafanaClientTest {
         when(grafanaAccess.queryRange(eq("jeap_relation_total"), eq("p"), anyInt())).thenReturn(resultProd);
 
         //when
-        Collection<JeapRelation> jeapRelations = grafanaClient.apiRelations();
+        Collection<JeapRelation> jeapRelationsOnRef = grafanaClient.apiRelations("ref");
+        Collection<JeapRelation> jeapRelationsOnAbn = grafanaClient.apiRelations("abn");
+        Collection<JeapRelation> jeapRelationsOnProd = grafanaClient.apiRelations("prod");
 
         //then
-        assertEquals(4, jeapRelations.size());
+        assertEquals(1, jeapRelationsOnRef.size());
+        assertEquals(3, jeapRelationsOnAbn.size());
+        assertEquals(2, jeapRelationsOnProd.size());
     }
 
     @Test
-    void serrvices_relationsFound_returnList() {
+    void services_relationsFound_returnList() {
         //given
         List<RhosGrafanaQueryResponseData> resultRef = List.of(
                 createServiceResult("my_service1"),
                 createServiceResult("my_service2"),
                 createServiceResult("my_service3")
                 );
-        when(grafanaAccess.queryRange(eq("group by(name) (jeap_spring_app{namespace=\\\"bit-jme-d\\\"})"), eq("d"), anyInt())).thenReturn(resultRef);
+        when(grafanaAccess.queryRange(eq("group by(name) (jeap_spring_app{namespace=\"bit-jme-d\"})"), eq("r"), anyInt())).thenReturn(resultRef);
 
-        NamespaceStagePair namespaceStagePair = new NamespaceStagePair("bit-jme-d", "d");
         //when
-        Set<String> services = grafanaClient.services(namespaceStagePair);
+        Set<String> services = grafanaClient.services("ref", "bit-jme-d");
 
         //then
         assertEquals(3, services.size());

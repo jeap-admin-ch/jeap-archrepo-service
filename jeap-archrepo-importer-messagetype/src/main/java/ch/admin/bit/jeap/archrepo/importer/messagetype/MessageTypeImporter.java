@@ -17,14 +17,14 @@ class MessageTypeImporter implements ArchRepoImporter {
     private final MessageContractImporter messageContractImporter;
 
     @Override
-    public void importIntoModel(ArchitectureModel architectureModel) {
+    public void importIntoModel(ArchitectureModel architectureModel, String environment) {
         //Replace all events/commands and event/command relations
         architectureModel.removeAllByImporter(Importer.MESSAGE_TYPE_REGISTRY);
 
         MessageDescriptorImporter messageDescriptorImporter = new MessageDescriptorImporter(messageTypeRepositoryFactory);
         messageDescriptorImporter.importDescriptors(architectureModel);
 
-        messageContractImporter.importMessageContracts(architectureModel);
+        messageContractImporter.importMessageContracts(architectureModel, environment);
 
         MessageContractRelationImporter.createRelations(architectureModel);
     }

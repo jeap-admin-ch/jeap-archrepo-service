@@ -1,6 +1,5 @@
 package ch.admin.bit.jeap.archrepo.importer.prometheus.rhos;
 
-import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.NamespaceStagePair;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.RhosGrafanaClient;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
@@ -21,7 +20,7 @@ import java.util.Set;
  * Imports applications (SystemComponent) defined in RHOS into the architecture model.
  * <p>
  * This importer reads data published as metrics by services from Grafana.
- * {@link RhosGrafanaClient#services(NamespaceStagePair)}
+ * {@link RhosGrafanaClient#services(String, String)}
  * <p>
  * If the system is not found, the service is not imported in the architecture model.
  */
@@ -30,7 +29,6 @@ import java.util.Set;
 @AllArgsConstructor
 class RhosSystemComponentImporter implements ArchRepoImporter {
 
-    private final RhosSystemComponentImporterProperties importerProperties;
     private final RhosGrafanaClient grafanaClient;
     private final RhosSystemNameExtractor systemNameExtractor;
 
@@ -43,22 +41,22 @@ class RhosSystemComponentImporter implements ArchRepoImporter {
     }
 
     @Override
-    public void importIntoModel(ArchitectureModel architectureModel) {
-        log.info("Reading available matching namespaceStagePairs from Prometheus...");
-        Set<NamespaceStagePair> namespaceStagePairs = grafanaClient.namespaces(importerProperties.getImportedStages());
-        log.info("Found namespaceStagePairs {}", namespaceStagePairs);
+    public void importIntoModel(ArchitectureModel architectureModel, String environment) {
+        log.info("Reading available matching namespaces from Prometheus...");
+        Set<String> namespaces = grafanaClient.namespaces(environment);
+        log.info("Found namespaces {} on stage {}", namespaces, environment);
 
-        for (NamespaceStagePair namespaceStagePair : namespaceStagePairs) {
-            Optional<String> systemNameOptional = systemNameExtractor.extractSystemName(namespaceStagePair.getNamespaceName()); // a namespaceStagePair belongs to exactly one system and exactly one stage
+        for (String namespace : namespaces) {
+            Optional<String> systemNameOptional = systemNameExtractor.extractSystemName(namespace);
             if (systemNameOptional.isEmpty()) {
-                log.warn("Could not extract system name from namespaceStagePair {}", namespaceStagePair);
+                log.warn("Could not extract system name from namespace {}", namespace);
                 continue;
             }
             String systemName = systemNameOptional.get();
             Optional<System> system = architectureModel.findSystem(systemName);
             if (system.isPresent()) {
                 log.info("Importing SystemComponents from system {}", systemName);
-                importSystemComponent(architectureModel, systemName, namespaceStagePair);
+                importSystemComponent(architectureModel, systemName, environment, namespace);
             } else {
                 log.warn("Skipped System {} (not found in model)", systemName);
             }
@@ -80,9 +78,9 @@ class RhosSystemComponentImporter implements ArchRepoImporter {
         }
     }
 
-    private void importSystemComponent(ArchitectureModel architectureModel, String systemName, NamespaceStagePair namespaceStagePair) {
-        log.info("Importing SystemComponents from {} from namespace {}", systemName, namespaceStagePair.getNamespaceName());
-        Set<String> serviceNames = grafanaClient.services(namespaceStagePair);
+    private void importSystemComponent(ArchitectureModel architectureModel, String systemName, String environment, String namespace) {
+        log.info("Importing SystemComponents from {} from namespace {}", systemName, namespace);
+        Set<String> serviceNames = grafanaClient.services(environment, namespace);
         serviceNames.forEach(serviceName -> importSystemComponentIntoSystem(architectureModel, systemName, serviceName));
     }
 

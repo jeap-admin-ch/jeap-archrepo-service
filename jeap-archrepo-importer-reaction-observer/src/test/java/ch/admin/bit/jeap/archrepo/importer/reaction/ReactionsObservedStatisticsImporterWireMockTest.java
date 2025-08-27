@@ -105,7 +105,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         ArchitectureModel testModel = createTestModel();
 
         // Act
-        importer.importIntoModel(testModel);
+        importer.importIntoModel(testModel, "ref");
 
         // Assert
         // Verify that the components have the correct statistics

@@ -34,6 +34,7 @@ class CloudFoundryPrometheusClientTest {
         List<PrometheusQueryResponseResult> resultRef = List.of(
                 createPrometheusResult("/ref"));
         List<PrometheusQueryResponseResult> resultAbn = List.of(
+                createPrometheusResult("/abnFoo"),
                 createPrometheusResult("/abn"),
                 createPrometheusResult("/abnAndProd"));
         List<PrometheusQueryResponseResult> resultProd = List.of(
@@ -44,10 +45,14 @@ class CloudFoundryPrometheusClientTest {
         when(cloudFoundryPrometheusProxy.queryRange(eq("jeap_relation_total{space_name=\"prod\"}"), anyInt())).thenReturn(resultProd);
 
         //when
-        Collection<JeapRelation> jeapRelations = cloudFoundryPrometheusClient.apiRelations();
+        Collection<JeapRelation> jeapRelationsOnRef = cloudFoundryPrometheusClient.apiRelations("ref");
+        Collection<JeapRelation> jeapRelationsOnAbn = cloudFoundryPrometheusClient.apiRelations("abn");
+        Collection<JeapRelation> jeapRelationsOnProd = cloudFoundryPrometheusClient.apiRelations("prod");
 
         //then
-        assertEquals(4, jeapRelations.size());
+        assertEquals(1, jeapRelationsOnRef.size());
+        assertEquals(3, jeapRelationsOnAbn.size());
+        assertEquals(2, jeapRelationsOnProd.size());
     }
 
     private static PrometheusQueryResponseResult createPrometheusResult(String datapoint) {

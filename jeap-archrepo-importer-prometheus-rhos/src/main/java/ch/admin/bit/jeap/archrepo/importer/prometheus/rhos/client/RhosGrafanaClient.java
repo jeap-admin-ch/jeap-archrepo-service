@@ -23,13 +23,11 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class RhosGrafanaClient {
 
-    private static final List<String> STAGES = List.of("r", "a", "p");
-
     private static final String JEAP_RELATION_TOTAL_QUERY = "jeap_relation_total";
 
     private static final String JEAP_SPRING_APP_BY_NAMESPACE_QUERY = "group by (namespace) (jeap_spring_app)";
 
-    private static final String PROMETHEUS_JEAP_SPRING_APP_BY_SERVICE_NAME_TEMPLATE = "group by(name) (jeap_spring_app{namespace=\\\"%s\\\"})";
+    private static final String PROMETHEUS_JEAP_SPRING_APP_BY_SERVICE_NAME_TEMPLATE = "group by(name) (jeap_spring_app{namespace=\"%s\"})";
 
     /**
      * Import relations from a sliding window of 4 days back until now
@@ -38,52 +36,38 @@ public class RhosGrafanaClient {
 
     private final RhosGrafanaAccess rhosGrafanaAccess;
 
-    public Collection<JeapRelation> apiRelations() {
-        return STAGES.stream().flatMap(this::apiRelationsForStage)
-                .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public Set<NamespaceStagePair> namespaces(Set<String> stageNames) {
-        return stageNames.stream()
-                .flatMap(stageName -> namespaces(stageName))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<String> services(NamespaceStagePair namespaceStagePair) {
-        final Set<String> result = new HashSet<>();
-        final String query = PROMETHEUS_JEAP_SPRING_APP_BY_SERVICE_NAME_TEMPLATE.formatted(namespaceStagePair.getNamespaceName());
-
-        executeQuery(query, namespaceStagePair.getStageName(), DAYS_TO_IMPORT,
-                labels -> result.add(labels.get("name")));
-        log.info("Found {} relations for namespace {}", result.size(), namespaceStagePair.getNamespaceName());
-
-        return result;
-    }
-
-    private Stream<JeapRelation> apiRelationsForStage(String stageName) {
+    public Collection<JeapRelation> apiRelations(String environment) {
+        final String stageName = getStageName(environment);
         final List<JeapRelation> result = new ArrayList<>();
 
-        executeQuery(JEAP_RELATION_TOTAL_QUERY, stageName, DAYS_TO_IMPORT, labels -> {
+        executeQuery(JEAP_RELATION_TOTAL_QUERY, stageName, labels -> {
             PrometheusQueryResponseResult prometheusQueryResponseResult = new PrometheusQueryResponseResult(labels);
             result.add(JeapRelation.fromPrometheusQueryResponseResult(prometheusQueryResponseResult));
         });
         log.info("Found {} relations for stage {}", result.size(), stageName);
-
-        return result.stream();
+        return new TreeSet<>(result);
     }
 
-    private Stream<NamespaceStagePair> namespaces(String stageName) {
-        final Set<NamespaceStagePair> result = new HashSet<>();
-
-        executeQuery(JEAP_SPRING_APP_BY_NAMESPACE_QUERY, stageName, DAYS_TO_IMPORT,
-                labels -> result.add(new NamespaceStagePair(labels.get("namespace"), stageName))
-        );
-
-        return result.stream();
+    public Set<String> namespaces(String environment) {
+        final String stageName = getStageName(environment);
+        final Set<String> result = new HashSet<>();
+        executeQuery(JEAP_SPRING_APP_BY_NAMESPACE_QUERY, stageName,labels -> result.add(labels.get("namespace")));
+        log.info("Found namespaces {} for stage {}", result, stageName);
+        return result;
     }
 
-    private void executeQuery(String query, String stageName, int rangeDays, Consumer<Map<String, String>> labelConsumer) {
-        final List<RhosGrafanaQueryResponseData> dataResults = rhosGrafanaAccess.queryRange(query, stageName, rangeDays);
+    public Set<String> services(String environment, String namespace) {
+        final String stageName = getStageName(environment);
+        final Set<String> result = new HashSet<>();
+        final String query = PROMETHEUS_JEAP_SPRING_APP_BY_SERVICE_NAME_TEMPLATE.formatted(namespace);
+        executeQuery(query, stageName,labels -> result.add(labels.get("name")));
+        log.info("Found {} services for stage {} and namespace {}", result.size(), stageName, namespace);
+        return result;
+    }
+
+
+    private void executeQuery(String query, String stageName, Consumer<Map<String, String>> labelConsumer) {
+        final List<RhosGrafanaQueryResponseData> dataResults = rhosGrafanaAccess.queryRange(query, stageName, DAYS_TO_IMPORT);
 
         for (RhosGrafanaQueryResponseData data : dataResults) {
             Map<String, RhosGrafanaQueryResult> queryResults = data.getResults();
@@ -106,5 +90,13 @@ public class RhosGrafanaClient {
         }
     }
 
+    private static String getStageName(String environment) {
+        if ("prod".equalsIgnoreCase(environment)) {
+            return "p";
+        } else if ("abn".equalsIgnoreCase(environment)) {
+            return "a";
+        }
+        return "r";
+    }
 
 }

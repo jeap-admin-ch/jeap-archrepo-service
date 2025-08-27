@@ -25,7 +25,7 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
     private final ReactionStatisticsRepository reactionStatisticsRepository;
 
     @Override
-    public void importIntoModel(ArchitectureModel model) {
+    public void importIntoModel(ArchitectureModel model, String environment) {
         log.info("Getting statistics from Reaction Observer Service...");
         reactionStatisticsRepository.deleteAll();
         Map<String, String> allSystemComponentNamesWithSystemName = model.getAllSystemComponentNamesWithSystemName();

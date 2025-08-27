@@ -33,6 +33,7 @@ archrepo:
       password: "PASSWORD"
       mock-confluence-client: true
 
+
 prometheus-cf:
   hosts:
     - host: "host"
@@ -40,5 +41,6 @@ prometheus-cf:
 
 pactbroker:
   url: "https://foo.bar"
-
+archrepo-config:
+  environment: dev
 

@@ -15,10 +15,6 @@ public class DeploymentlogProperties {
      */
     private String url;
     /**
-     * Environment name from which to import components
-     */
-    private String environment = "ref";
-    /**
      * Deploymentlog user name
      */
     private String username;

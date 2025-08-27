@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 @Import(RhosGrafanaClientRetryTest.TestConfig.class)
 class RhosGrafanaClientRetryTest {
 
-    @MockBean
+    @MockitoBean
     private RhosGrafanaAccess grafanaAccess;
 
     @Autowired
@@ -54,12 +54,11 @@ class RhosGrafanaClientRetryTest {
                 // Third call succeeds
                 .thenReturn(List.of(responseData));
 
-        Set<NamespaceStagePair> namespaceStagePairs = grafanaClient.namespaces(Set.of("d"));
+        Set<String> namespaces = grafanaClient.namespaces("ref");
 
-        assertEquals(1, namespaceStagePairs.size());
-        NamespaceStagePair namespaceStagePair = namespaceStagePairs.iterator().next();
-        assertEquals(namespaceName, namespaceStagePair.getNamespaceName());
-        assertEquals("d", namespaceStagePair.getStageName());
+        assertEquals(1, namespaces.size());
+        String namespace = namespaces.iterator().next();
+        assertEquals(namespaceName, namespace);
 
         verify(grafanaAccess, times(3)).queryRange(anyString(), anyString(), anyInt());
     }

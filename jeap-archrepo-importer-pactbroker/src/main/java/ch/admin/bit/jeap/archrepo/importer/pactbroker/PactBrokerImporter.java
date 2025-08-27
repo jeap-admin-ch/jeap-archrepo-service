@@ -29,7 +29,7 @@ class PactBrokerImporter implements ArchRepoImporter {
     private final PactBrokerClient pactBrokerClient;
 
     @Override
-    public void importIntoModel(ArchitectureModel model) {
+    public void importIntoModel(ArchitectureModel model, String environment) {
         // Full import, remove and re-import all Pact relations
         model.removeAllByImporter(Importer.PACT_BROKER);
 

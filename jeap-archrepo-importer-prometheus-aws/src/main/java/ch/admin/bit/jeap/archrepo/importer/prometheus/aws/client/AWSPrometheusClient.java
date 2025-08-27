@@ -24,14 +24,9 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class AWSPrometheusClient {
 
-    private static final List<String> STAGES = List.of("ref", "abn", "prod");
     private static final String PROMETHEUS_QUERY_TEMPLATE = "jeap_relation_total{stage=\"%s\"}";
 
-    private static final String PROMETHEUS_QUERY_APP_TEMPLATE = "group by (application) (jeap_spring_app)";
-
-    private static final String PROMETHEUS_JEAP_SPRING_APP_STAGE_TEMPLATE = """
-            group by(stage) (jeap_spring_app{application="%s"})
-            """;
+    private static final String PROMETHEUS_QUERY_APP_TEMPLATE = "group by (application) (jeap_spring_app{stage=\"%s\"})";
 
     private static final String PROMETHEUS_JEAP_SPRING_APP_SERVICES_TEMPLATE = """
             group by(service) (jeap_spring_app{application="%s", stage="%s"})
@@ -44,30 +39,22 @@ public class AWSPrometheusClient {
 
     private final AWSPrometheusProxy prometheusProxy;
 
-    public Collection<JeapRelation> apiRelations() {
-        return STAGES.stream().flatMap(this::apiRelationsForStage)
-                .collect(Collectors.toCollection(TreeSet::new));
+    public Collection<JeapRelation> apiRelations(String stage) {
+        return apiRelationsForStage(stage).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private Stream<JeapRelation> apiRelationsForStage(String stage) {
         final List<PrometheusQueryResponseResult> results = prometheusProxy.queryRange(PROMETHEUS_QUERY_TEMPLATE.formatted(stage), DAYS_TO_IMPORT);
         log.info("Found {} relations for stage {}", results.size(), stage);
-        return results.stream()
-                .map(JeapRelation::fromPrometheusQueryResponseResult);
+        return results.stream().map(JeapRelation::fromPrometheusQueryResponseResult);
     }
 
-    public Set<String> listApplications() {
-        final List<PrometheusQueryResponseResult> results = prometheusProxy.queryRange(PROMETHEUS_QUERY_APP_TEMPLATE, DAYS_TO_IMPORT);
-        log.info("Found {} applications", results.size());
+    public Set<String> listApplications(String stage) {
+        final List<PrometheusQueryResponseResult> results = prometheusProxy.queryRange(PROMETHEUS_QUERY_APP_TEMPLATE.formatted(stage), DAYS_TO_IMPORT);
+        log.info("Found {} applications on stage {}", results.size(), stage);
         return results.stream()
                 .map(metric -> metric.getMetric().get("application"))
                 .collect(Collectors.toSet());
-    }
-
-    public Set<String> listStages(String application) {
-        final List<PrometheusQueryResponseResult> results = prometheusProxy.queryRange(PROMETHEUS_JEAP_SPRING_APP_STAGE_TEMPLATE.formatted(application), DAYS_TO_IMPORT);
-        log.info("Found {} stages for application {}", results.size(), application);
-        return results.stream().map(metric -> metric.getMetric().get("stage")).collect(Collectors.toSet());
     }
 
     public Set<String> listServices(String application, String stage) {

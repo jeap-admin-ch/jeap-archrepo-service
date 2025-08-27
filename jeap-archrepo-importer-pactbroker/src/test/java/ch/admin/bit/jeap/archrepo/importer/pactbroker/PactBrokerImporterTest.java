@@ -23,7 +23,7 @@ class PactBrokerImporterTest {
     void importIntoModel(PactBrokerClient pactBrokerClient) {
         PactBrokerImporter importer = new PactBrokerImporter(pactBrokerClient);
 
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         assertEquals(3, shared.getRestApis().size());
         assertEquals("/api/tasks/748fda55-7411-44ba-b8f1-f84f8fc5d50e", shared.getRestApis().get(0).getPath());

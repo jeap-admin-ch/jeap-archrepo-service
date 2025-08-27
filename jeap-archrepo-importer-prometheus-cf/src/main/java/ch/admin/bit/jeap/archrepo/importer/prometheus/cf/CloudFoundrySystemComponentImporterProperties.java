@@ -17,10 +17,6 @@ public class CloudFoundrySystemComponentImporterProperties {
      * Organizations are only imported if they match one of these prefixes
      */
     private List<String> orgPrefixes;
-    /**
-     * Name of CF spaces to use to import apps from
-     */
-    private List<String> importedSpaces;
 
     @PostConstruct
     void init() {

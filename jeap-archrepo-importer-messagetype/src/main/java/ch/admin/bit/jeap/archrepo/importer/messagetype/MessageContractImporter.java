@@ -17,8 +17,8 @@ public class MessageContractImporter {
 
     private final ContractServiceClient contractServiceClient;
 
-    public void importMessageContracts(ArchitectureModel architectureModel) {
-        contractServiceClient.getMessageContracts().forEach(mc -> {
+    public void importMessageContracts(ArchitectureModel architectureModel, String environment) {
+        contractServiceClient.getMessageContracts(environment).forEach(mc -> {
             String messageTypeName = mc.messageType();
             architectureModel.findMessageType(messageTypeName).ifPresent(messageType ->
                     importMessageContract(mc, messageType));

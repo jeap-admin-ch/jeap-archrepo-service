@@ -64,7 +64,7 @@ class ReactionsObservedStatisticsImporterTest {
                 reactionObserverService, reactionStatisticsRepository);
         
         // Act
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
         
         // Assert
         verify(reactionStatisticsRepository).deleteAll();
@@ -102,7 +102,7 @@ class ReactionsObservedStatisticsImporterTest {
                 reactionObserverService, reactionStatisticsRepository);
 
         // Act
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         // Assert
         verify(reactionStatisticsRepository).deleteAll();
@@ -140,7 +140,7 @@ class ReactionsObservedStatisticsImporterTest {
                 reactionObserverService, reactionStatisticsRepository);
 
         // Act
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         // Assert
         verify(reactionStatisticsRepository).deleteAll();

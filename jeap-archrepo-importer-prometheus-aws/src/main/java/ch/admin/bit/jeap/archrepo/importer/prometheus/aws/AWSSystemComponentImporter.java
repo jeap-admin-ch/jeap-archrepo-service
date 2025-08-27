@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,7 +19,7 @@ import java.util.Set;
  * Imports applications (SystemComponent) defined in AWS into the architecture model.
  * <p>
  * This importer reads data published as metrics by applications from prometheus.
- * {@link AWSPrometheusClient#listApplications() (String, String)})
+ * {@link AWSPrometheusClient#listApplications(String)})
  * <p>
  * If the system is not found, the service is not imported in the architecture model.
  */
@@ -28,11 +27,9 @@ import java.util.Set;
 @Slf4j
 class AWSSystemComponentImporter implements ArchRepoImporter {
 
-    private final AWSSystemComponentImporterProperties importerProperties;
     private final AWSPrometheusClient awsPrometheusClient;
 
-    AWSSystemComponentImporter(AWSSystemComponentImporterProperties importerProperties, AWSPrometheusClient awsPrometheusClient) {
-        this.importerProperties = importerProperties;
+    AWSSystemComponentImporter(AWSPrometheusClient awsPrometheusClient) {
         this.awsPrometheusClient = awsPrometheusClient;
     }
 
@@ -45,16 +42,16 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
     }
 
     @Override
-    public void importIntoModel(ArchitectureModel architectureModel) {
+    public void importIntoModel(ArchitectureModel architectureModel, String environment) {
         log.info("Reading available matching applications from Prometheus...");
-        Set<String> applications = awsPrometheusClient.listApplications();
+        Set<String> applications = awsPrometheusClient.listApplications(environment);
         log.info("Found applications {}", applications);
 
         for (String application : applications) {
             Optional<System> system = architectureModel.findSystem(application);
             if (system.isPresent()) {
                 log.info("Importing SystemComponents from application {}", application);
-                importSystemComponent(architectureModel, application);
+                importSystemComponent(architectureModel, application, environment);
             } else {
                 log.warn("Skipped Application {} (not found in model)", application);
             }
@@ -76,18 +73,9 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
         }
     }
 
-    private void importSystemComponent(ArchitectureModel architectureModel, String application) {
-        Set<String> availableStages;
-        try {
-            availableStages = awsPrometheusClient.listStages(application);
-        } catch (IllegalArgumentException ex) {
-            log.warn("Application {} does not exist on AWS", application);
-            return;
-        }
-        Set<String> importedStages = new HashSet<>(importerProperties.getImportedStages());
-        importedStages.retainAll(availableStages);
-        log.info("Importing SystemComponents from {} from stages {}", application, importedStages);
-        importedStages.forEach(stage -> importSystemComponentFromApplicationAndStage(architectureModel, application, stage));
+    private void importSystemComponent(ArchitectureModel architectureModel, String application, String stage) {
+        log.info("Importing SystemComponents from {} from stage {}", application, stage);
+        importSystemComponentFromApplicationAndStage(architectureModel, application, stage);
     }
 
     private void importSystemComponentFromApplicationAndStage(ArchitectureModel architectureModel, String application, String stage) {

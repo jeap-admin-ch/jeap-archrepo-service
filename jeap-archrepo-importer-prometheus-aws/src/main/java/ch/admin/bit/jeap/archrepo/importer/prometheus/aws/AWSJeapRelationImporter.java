@@ -26,9 +26,9 @@ class AWSJeapRelationImporter implements ArchRepoImporter {
     }
 
     @Override
-    public void importIntoModel(ArchitectureModel model) {
+    public void importIntoModel(ArchitectureModel model, String environment) {
         try {
-            awsPrometheusClient.apiRelations()
+            awsPrometheusClient.apiRelations(environment)
                     .forEach(jeapRelation -> jeapRelationImporter.importJeapRelationFromPrometheus(model, jeapRelation));
         } catch (Exception ex) {
             log.warn("Failed to retrieve API relations from prometheus", ex);

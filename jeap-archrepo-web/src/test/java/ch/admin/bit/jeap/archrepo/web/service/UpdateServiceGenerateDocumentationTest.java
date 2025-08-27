@@ -12,30 +12,30 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
+@SpringBootTest(properties = {"archrepo-config.environment=dev"})
 @Import(ArchRepoTestConfiguration.class)
 @ActiveProfiles("test")
 class UpdateServiceGenerateDocumentationTest {
     @Autowired
     UpdateService generatorService;
-    @MockBean
+    @MockitoBean
     ArchRepoImporter importer;
-    @MockBean
+    @MockitoBean
     DocumentationGenerator generator;
     @Mock
     ArchitectureModelRepository repository;
-    @MockBean
+    @MockitoBean
     TeamRepository teamRepository;
-    @MockBean
+    @MockitoBean
     SystemRepository systemRepository;
-    @MockBean
+    @MockitoBean
     OpenApiSpecRepository openApiSpecRepository;
 
     @Test

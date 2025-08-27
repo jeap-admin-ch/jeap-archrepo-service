@@ -45,7 +45,7 @@ class DeploymentlogSystemComponentImporterTest {
                                 ]""")));
         ArchitectureModel testModel = createTestModel();
 
-        importer.importIntoModel(testModel);
+        importer.importIntoModel(testModel, "ref");
 
         System system = testModel.findSystem("SYSTEM").orElseThrow();
         Set<String> componentNames = system.getSystemComponents().stream().map(SystemComponent::getName).collect(toSet());

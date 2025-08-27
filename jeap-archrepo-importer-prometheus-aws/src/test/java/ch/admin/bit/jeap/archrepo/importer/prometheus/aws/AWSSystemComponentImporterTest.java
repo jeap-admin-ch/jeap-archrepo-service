@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +27,7 @@ class AWSSystemComponentImporterTest {
     public static final String EXISTING_APP = "existingsystem-app1-service";
     public static final String DEPRECATED_APP = "existingsystem-deprecated-service";
     public static final String NOT_YET_DEPRECATED_APP = "existingsystem-notyetdeprecated-service";
-    private static final String SPACE = "space";
+    private static final String SPACE = "ref";
     @Mock
     private AWSPrometheusClient awsPrometheusClient;
     private ArchitectureModel model;
@@ -37,14 +36,13 @@ class AWSSystemComponentImporterTest {
 
     @Test
     void importIntoModel() {
-        doReturn(Set.of(SYSTEM)).when(awsPrometheusClient).listApplications();
-        doReturn(Set.of(SPACE)).when(awsPrometheusClient).listStages(anyString());
+        doReturn(Set.of(SYSTEM)).when(awsPrometheusClient).listApplications("ref");
         doReturn(Set.of(EXISTING_APP, NEW_APP)).when(awsPrometheusClient).listServices(SYSTEM, SPACE);
         assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
                 .contains(EXISTING_APP, DEPRECATED_APP, NOT_YET_DEPRECATED_APP);
 
-        awsSystemComponentImporter.importIntoModel(model);
+        awsSystemComponentImporter.importIntoModel(model, "ref");
 
         assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
@@ -79,9 +77,6 @@ class AWSSystemComponentImporterTest {
                 .systems(List.of(system))
                 .build();
 
-        AWSSystemComponentImporterProperties props = new AWSSystemComponentImporterProperties();
-        props.setImportedStages(List.of(SPACE));
-
-        awsSystemComponentImporter = new AWSSystemComponentImporter(props, awsPrometheusClient);
+        awsSystemComponentImporter = new AWSSystemComponentImporter(awsPrometheusClient);
     }
 }

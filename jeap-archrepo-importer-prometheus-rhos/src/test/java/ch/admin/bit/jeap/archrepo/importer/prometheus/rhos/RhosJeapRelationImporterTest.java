@@ -41,10 +41,10 @@ class RhosJeapRelationImporterTest {
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/api/tasks/{param}/state"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "POST", "http", "/api/tasks/{param}/state"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/api/task/{param}/content"));
-        when(grafanaClient.apiRelations()).thenReturn(jeapRelations);
+        when(grafanaClient.apiRelations("ref")).thenReturn(jeapRelations);
 
         //when
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         //then
         assertEquals(4, shared.getRestApis().size());
@@ -79,10 +79,10 @@ class RhosJeapRelationImporterTest {
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/foo/;zapscan"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/foo/%22"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", null, "other", "MyEvent"));
-        when(grafanaClient.apiRelations()).thenReturn(jeapRelations);
+        when(grafanaClient.apiRelations("ref")).thenReturn(jeapRelations);
 
         //when
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         //then
         assertEquals(1, shared.getRelations().size());
@@ -97,10 +97,10 @@ class RhosJeapRelationImporterTest {
         //given
         List<JeapRelation> jeapRelations = List.of(
                 new JeapRelation(provider, consumer, "PUT", "http", datapoint));
-        when(grafanaClient.apiRelations()).thenReturn(jeapRelations);
+        when(grafanaClient.apiRelations("ref")).thenReturn(jeapRelations);
 
         //when
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         //then
         assertTrue(shared.getRestApis().isEmpty());

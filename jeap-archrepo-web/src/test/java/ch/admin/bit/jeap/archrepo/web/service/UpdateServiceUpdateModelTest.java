@@ -12,9 +12,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 
@@ -22,22 +22,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(properties = {"archrepo-config.environment=dev"})
 @Import(ArchRepoTestConfiguration.class)
 @ActiveProfiles("test")
 class UpdateServiceUpdateModelTest {
     private static final String SYSTEM_NAME = "test";
     @Autowired
     UpdateService service;
-    @MockBean
+    @MockitoBean
     ArchRepoImporter importer;
-    @MockBean
+    @MockitoBean
     DocumentationGenerator documentationGenerator;
-    @MockBean
+    @MockitoBean
     TeamRepository teamRepository;
-    @MockBean
+    @MockitoBean
     SystemRepository systemRepository;
-    @MockBean
+    @MockitoBean
     OpenApiSpecRepository openApiSpecRepository;
 
     @Captor

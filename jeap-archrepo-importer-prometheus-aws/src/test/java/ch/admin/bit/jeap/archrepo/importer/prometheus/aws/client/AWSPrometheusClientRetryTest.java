@@ -38,9 +38,9 @@ class AWSPrometheusClientRetryTest {
     }
 
     @Test
-    void listStages_successAfterRetry() {
+    void listApplications_successAfterRetry() {
 
-        PrometheusQueryResponseResult result = new PrometheusQueryResponseResult(Map.of("stage", "test"));
+        PrometheusQueryResponseResult result = new PrometheusQueryResponseResult(Map.of("application", "test"));
         when(awsPrometheusProxy.queryRange(anyString(), anyInt()))
                 // First two call fail
                 .thenThrow(PrometheusException.class)
@@ -48,7 +48,7 @@ class AWSPrometheusClientRetryTest {
                 // Third call succeeds
                 .thenReturn(List.of(result));
 
-        Set<String> organizations = awsPrometheusClient.listStages("myOrg");
+        Set<String> organizations = awsPrometheusClient.listApplications("myOrg");
 
         assertThat(organizations).contains("test");
 

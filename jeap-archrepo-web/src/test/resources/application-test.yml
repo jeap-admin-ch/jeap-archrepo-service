@@ -47,6 +47,8 @@ archrepo:
       username: "ezv-archrepo-techuser"
       password: "PASSWORD"
       mock-confluence-client: true
+
+
 prometheus-cf:
   hosts:
     - host: "host"
@@ -65,3 +67,5 @@ jeap:
 
 # TLS enabled only for AWS
 jeap.web.tls.enabled: false
+archrepo-config:
+  environment: dev

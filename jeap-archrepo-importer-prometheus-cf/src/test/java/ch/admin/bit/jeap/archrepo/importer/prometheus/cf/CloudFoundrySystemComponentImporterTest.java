@@ -32,7 +32,7 @@ class CloudFoundrySystemComponentImporterTest {
     public static final String DEPRECATED_APP = "existingsystem-deprecated-service";
     public static final String VENERABLE_APP = "existingsystem-app-service-venerable";
     public static final String NOT_YET_DEPRECATED_APP = "existingsystem-notyetdeprecated-service";
-    private static final String SPACE = "space";
+    private static final String SPACE = "ref";
     @Mock
     private CloudFoundryPrometheusClient cloudFoundryPrometheusClient;
     private ArchitectureModel model;
@@ -41,14 +41,13 @@ class CloudFoundrySystemComponentImporterTest {
 
     @Test
     void importIntoModel() {
-        doReturn(Set.of(EXISTING_ORG)).when(cloudFoundryPrometheusClient).listOrganisationWithMatchingPrefix(any());
-        doReturn(Set.of(SPACE)).when(cloudFoundryPrometheusClient).listSpaces(anyString());
+        doReturn(Set.of(EXISTING_ORG)).when(cloudFoundryPrometheusClient).listOrganisationWithMatchingPrefix(any(), anyString());
         doReturn(Set.of(EXISTING_APP, NEW_APP, VENERABLE_APP)).when(cloudFoundryPrometheusClient).listApps(EXISTING_ORG, SPACE);
         assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
                 .contains(EXISTING_APP, DEPRECATED_APP, NOT_YET_DEPRECATED_APP);
 
-        cloudFoundrySystemComponentImporter.importIntoModel(model);
+        cloudFoundrySystemComponentImporter.importIntoModel(model, "ref");
 
         assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
@@ -84,7 +83,6 @@ class CloudFoundrySystemComponentImporterTest {
                 .build();
 
         CloudFoundrySystemComponentImporterProperties props = new CloudFoundrySystemComponentImporterProperties();
-        props.setImportedSpaces(List.of(SPACE));
         props.setOrgPrefixes(List.of(PREFIX));
 
         cloudFoundrySystemComponentImporter = new CloudFoundrySystemComponentImporter(props, cloudFoundryPrometheusClient);

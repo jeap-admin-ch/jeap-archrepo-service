@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
         })
 @Import(CloudFoundryPrometheusClientRetryTest.TestConfig.class)
 class CloudFoundryPrometheusClientRetryTest {
-    @MockBean
+    @MockitoBean
     private CloudFoundryPrometheusProxy cloudFoundryPrometheusProxyMock;
 
     @Autowired
@@ -40,9 +40,9 @@ class CloudFoundryPrometheusClientRetryTest {
     }
 
     @Test
-    void listSpaces_successAfterRetry() {
+    void listApps_successAfterRetry() {
 
-        PrometheusQueryResponseResult result = new PrometheusQueryResponseResult(Map.of("space_name", "space"));
+        PrometheusQueryResponseResult result = new PrometheusQueryResponseResult(Map.of("app_name", "space"));
         when(cloudFoundryPrometheusProxyMock.queryRange(anyString(), anyInt()))
                 // First two call fail
                 .thenThrow(PrometheusException.class)
@@ -50,7 +50,7 @@ class CloudFoundryPrometheusClientRetryTest {
                 // Third call succeeds
                 .thenReturn(List.of(result));
 
-        Set<String> organizations = cloudFoundryPrometheusClient.listSpaces("myOrg");
+        Set<String> organizations = cloudFoundryPrometheusClient.listApps("myOrg", "ref");
 
         assertThat(organizations).contains("space");
 

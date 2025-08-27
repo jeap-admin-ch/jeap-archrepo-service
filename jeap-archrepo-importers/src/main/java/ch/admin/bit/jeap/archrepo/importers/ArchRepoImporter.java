@@ -8,5 +8,5 @@ public interface ArchRepoImporter {
         return Integer.MAX_VALUE;
     }
 
-    void importIntoModel(ArchitectureModel architectureModel);
+    void importIntoModel(ArchitectureModel architectureModel, String environment);
 }

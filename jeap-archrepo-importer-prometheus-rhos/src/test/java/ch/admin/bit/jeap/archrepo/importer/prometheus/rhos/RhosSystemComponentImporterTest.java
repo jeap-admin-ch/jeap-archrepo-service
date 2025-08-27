@@ -1,6 +1,5 @@
 package ch.admin.bit.jeap.archrepo.importer.prometheus.rhos;
 
-import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.NamespaceStagePair;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.RhosGrafanaClient;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
@@ -29,7 +28,6 @@ class RhosSystemComponentImporterTest {
     public static final String EXISTING_APP = "existingsystem-app1-service";
     public static final String DEPRECATED_APP = "existingsystem-deprecated-service";
     public static final String NOT_YET_DEPRECATED_APP = "existingsystem-notyetdeprecated-service";
-    private static final String STAGE = "r";
     @Mock
     private RhosGrafanaClient grafanaClient;
     private ArchitectureModel model;
@@ -38,11 +36,10 @@ class RhosSystemComponentImporterTest {
 
     @Test
     void importIntoModel() {
-        NamespaceStagePair namespaceStagePair = new NamespaceStagePair("bit-jme-r", "r");
-        doReturn(Set.of(namespaceStagePair)).when(grafanaClient).namespaces(Set.of(STAGE));
-        doReturn(Set.of(NEW_APP, EXISTING_APP)).when(grafanaClient).services(namespaceStagePair);
+        doReturn(Set.of("bit-jme-r")).when(grafanaClient).namespaces("ref");
+        doReturn(Set.of(NEW_APP, EXISTING_APP)).when(grafanaClient).services("ref", "bit-jme-r");
 
-        systemComponentImporter.importIntoModel(model);
+        systemComponentImporter.importIntoModel(model, "ref");
 
         assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
@@ -77,9 +74,6 @@ class RhosSystemComponentImporterTest {
                 .systems(List.of(system))
                 .build();
 
-        RhosSystemComponentImporterProperties props = new RhosSystemComponentImporterProperties();
-        props.setImportedStages(Set.of(STAGE));
-
-        systemComponentImporter = new RhosSystemComponentImporter(props, grafanaClient, new RhosSystemNameExtractor());
+        systemComponentImporter = new RhosSystemComponentImporter(grafanaClient, new RhosSystemNameExtractor());
     }
 }

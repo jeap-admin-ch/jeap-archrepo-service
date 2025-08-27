@@ -79,11 +79,11 @@ public class MessageContractServicePactTestBase {
         // given
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties(
                 List.of(dummyGitRepoUrl),
-                "http://localhost:8888/api/contracts?env=ref");
+                "http://localhost:8888/api/contracts");
         ContractServiceClient contractServiceClient = new ContractServiceClient(properties, RestClient.builder());
 
         // when
-        List<MessageContractDto> result = contractServiceClient.getMessageContracts();
+        List<MessageContractDto> result = contractServiceClient.getMessageContracts("ref");
 
         // then
         assertThat(result).isNotEmpty();
@@ -119,11 +119,11 @@ public class MessageContractServicePactTestBase {
         // given
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties(
                 List.of(dummyGitRepoUrl),
-                "http://localhost:8888/api/contracts?env=ref");
+                "http://localhost:8888/api/contracts");
         ContractServiceClient contractServiceClient = new ContractServiceClient(properties, RestClient.builder());
 
         // when
-        List<MessageContractDto> result = contractServiceClient.getMessageContracts();
+        List<MessageContractDto> result = contractServiceClient.getMessageContracts("ref");
 
         // then
         assertThat(result)

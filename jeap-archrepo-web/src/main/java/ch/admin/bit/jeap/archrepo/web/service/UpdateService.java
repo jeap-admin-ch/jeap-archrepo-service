@@ -4,6 +4,7 @@ import ch.admin.bit.jeap.archrepo.docgen.DocumentationGenerator;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.persistence.ArchitectureModelRepository;
+import ch.admin.bit.jeap.archrepo.web.ArchRepoConfigProperties;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -32,6 +33,7 @@ public class UpdateService {
     private final DocumentationGenerator documentationGenerator;
     private final List<ArchRepoImporter> importers;
     private final MeterRegistry meterRegistry;
+    private final ArchRepoConfigProperties archRepoConfigProperties;
 
     @Timed("archrepo_generate_documentation")
     @Scheduled(cron = "${archrepo.documentation-generator.update-schedule}")
@@ -56,7 +58,7 @@ public class UpdateService {
         ArchitectureModel architectureModel = repository.load();
         importers.stream()
                 .sorted(comparing(ArchRepoImporter::getOrder))
-                .forEach(importer -> importer.importIntoModel(architectureModel));
+                .forEach(importer -> importer.importIntoModel(architectureModel, archRepoConfigProperties.getEnvironment().name().toLowerCase()));
         architectureModel.cleanup();
         repository.save(architectureModel);
         lastRunUpdateModel = LocalDateTime.now();
@@ -72,7 +74,7 @@ public class UpdateService {
 
         log.info("Running importer {}", importer);
         ArchitectureModel architectureModel = repository.load();
-        importer.importIntoModel(architectureModel);
+        importer.importIntoModel(architectureModel, archRepoConfigProperties.getEnvironment().name().toLowerCase());
         repository.save(architectureModel);
         log.info("Import done");
     }

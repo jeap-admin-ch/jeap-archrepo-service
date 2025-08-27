@@ -42,10 +42,10 @@ class AWSJeapRelationImporterTest {
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/api/tasks/{param}/state"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "POST", "http", "/api/tasks/{param}/state"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/api/task/{param}/content"));
-        when(awsPrometheusClient.apiRelations()).thenReturn(jeapRelations);
+        when(awsPrometheusClient.apiRelations("ref")).thenReturn(jeapRelations);
 
         //when
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         //then
         assertEquals(4, shared.getRestApis().size());
@@ -66,7 +66,7 @@ class AWSJeapRelationImporterTest {
     }
 
     @Test
-    void importIntoModel_newRelations_shouldIgnoreUninteresingDataPoints() {
+    void importIntoModel_newRelations_shouldIgnoreUninterestingDataPoints() {
 
         //given
         List<JeapRelation> jeapRelations = List.of(
@@ -80,10 +80,10 @@ class AWSJeapRelationImporterTest {
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/foo/;zapscan"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", "GET", "http", "/foo/%22"),
                 new JeapRelation("shared-agir-service", "jeap-error-handling-service", null, "other", "MyEvent"));
-        when(awsPrometheusClient.apiRelations()).thenReturn(jeapRelations);
+        when(awsPrometheusClient.apiRelations("ref")).thenReturn(jeapRelations);
 
         //when
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         //then
         assertEquals(1, shared.getRelations().size());
@@ -98,10 +98,10 @@ class AWSJeapRelationImporterTest {
         //given
         List<JeapRelation> jeapRelations = List.of(
                 new JeapRelation(provider, consumer, "PUT", "http", datapoint));
-        when(awsPrometheusClient.apiRelations()).thenReturn(jeapRelations);
+        when(awsPrometheusClient.apiRelations("ref")).thenReturn(jeapRelations);
 
         //when
-        importer.importIntoModel(model);
+        importer.importIntoModel(model, "ref");
 
         //then
         assertTrue(shared.getRestApis().isEmpty());

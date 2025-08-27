@@ -50,11 +50,11 @@ class CloudFoundrySystemComponentImporter implements ArchRepoImporter {
     }
 
     @Override
-    public void importIntoModel(ArchitectureModel architectureModel) {
+    public void importIntoModel(ArchitectureModel architectureModel, String environment) {
         log.info("Reading available matching organisations from Grafana...");
-        Set<String> organisations = cloudFoundryPrometheusClient.listOrganisationWithMatchingPrefix(systemComponentImporterProperties.getOrgPrefixes());
+        Set<String> organisations = cloudFoundryPrometheusClient.listOrganisationWithMatchingPrefix(systemComponentImporterProperties.getOrgPrefixes(), environment);
         log.info("Importing SystemComponents from organisations {}", organisations);
-        organisations.forEach(orgName -> importSystemComponentFromOrg(architectureModel, orgName));
+        organisations.forEach(orgName -> importSystemComponentFromOrg(architectureModel, orgName, environment));
         removeFromArchitectureModel(architectureModel);
     }
 
@@ -71,18 +71,9 @@ class CloudFoundrySystemComponentImporter implements ArchRepoImporter {
         }
     }
 
-    private void importSystemComponentFromOrg(ArchitectureModel architectureModel, String orgName) {
-        Set<String> availableSpaces;
-        try {
-            availableSpaces = cloudFoundryPrometheusClient.listSpaces(orgName);
-        } catch (IllegalArgumentException ex) {
-            log.warn("Organisation {} does not exist on CF", orgName);
-            return;
-        }
-        Set<String> importedSpaces = new HashSet<>(systemComponentImporterProperties.getImportedSpaces());
-        importedSpaces.retainAll(availableSpaces);
-        log.info("Importing SystemComponents from {} from spaces {}", orgName, importedSpaces);
-        importedSpaces.forEach(space -> importSystemComponentFromOrgAndSpace(architectureModel, orgName, space));
+    private void importSystemComponentFromOrg(ArchitectureModel architectureModel, String orgName, String space) {
+        log.info("Importing SystemComponents from {} from space {}", orgName, space);
+        importSystemComponentFromOrgAndSpace(architectureModel, orgName, space);
     }
 
     private void importSystemComponentFromOrgAndSpace(ArchitectureModel architectureModel, String orgName, String space) {

@@ -65,7 +65,7 @@ class MessageTypeImporterTest extends CreateLocalGitRepoBaseTest {
         ArchitectureModel model = createTestModel();
 
         // when
-        messageTypeImporter.importIntoModel(model);
+        messageTypeImporter.importIntoModel(model, "ref");
 
         // then
         assertThat(model.getAllMessageTypes()).hasSize(2);

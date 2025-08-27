@@ -8,7 +8,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(classes = ArchRepoApplication.class)
+@SpringBootTest(classes = ArchRepoApplication.class, properties = {
+        "archrepo-config.environment=dev"
+})
 @ActiveProfiles("test")
 class ContextLoadsTest {
 

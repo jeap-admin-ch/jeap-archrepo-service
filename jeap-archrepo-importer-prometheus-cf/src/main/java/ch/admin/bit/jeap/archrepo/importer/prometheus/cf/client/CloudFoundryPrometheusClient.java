@@ -24,15 +24,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class CloudFoundryPrometheusClient {
 
-    private static final List<String> SPACES = List.of("ref", "abn", "prod");
     private static final String PROMETHEUS_QUERY_TEMPLATE = "jeap_relation_total{space_name=\"%s\"}";
 
     private static final String PROMETHEUS_JEAP_SPRING_APP_ORG_NAME_TEMPLATE = """
-            group by(org_name) (jeap_spring_app)
-            """;
-
-    private static final String PROMETHEUS_JEAP_SPRING_APP_SPACE_NAME_TEMPLATE = """
-            group by(space_name) (jeap_spring_app{org_name="%s"})
+            group by(org_name) (jeap_spring_app{space_name="%s"})
             """;
 
     private static final String PROMETHEUS_JEAP_SPRING_APP_APPS_TEMPLATE = """
@@ -42,8 +37,6 @@ public class CloudFoundryPrometheusClient {
 
     private static final String CF_ORG_NAME_LABEL = "org_name";
 
-    private static final String CF_SPACE_NAME_LABEL = "space_name";
-
     /**
      * Import relations from a sliding window of 4 days back until now
      */
@@ -51,9 +44,8 @@ public class CloudFoundryPrometheusClient {
 
     private final CloudFoundryPrometheusProxy cloudFoundryPrometheusProxy;
 
-    public Collection<JeapRelation> apiRelations() {
-        return SPACES.stream().flatMap(this::apiRelationsForSpace)
-                .collect(Collectors.toCollection(TreeSet::new));
+    public Collection<JeapRelation> apiRelations(String space) {
+        return apiRelationsForSpace(space).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private Stream<JeapRelation> apiRelationsForSpace(String space) {
@@ -64,9 +56,9 @@ public class CloudFoundryPrometheusClient {
                 .map(JeapRelation::fromPrometheusQueryResponseResult);
     }
 
-    public Set<String> listOrganisationWithMatchingPrefix(Collection<String> prefixes) {
-        final List<PrometheusQueryResponseResult> results = cloudFoundryPrometheusProxy.queryRange(PROMETHEUS_JEAP_SPRING_APP_ORG_NAME_TEMPLATE, DAYS_TO_IMPORT);
-        log.info("Found {} organisations", results.size());
+    public Set<String> listOrganisationWithMatchingPrefix(Collection<String> prefixes, String space) {
+        final List<PrometheusQueryResponseResult> results = cloudFoundryPrometheusProxy.queryRange(PROMETHEUS_JEAP_SPRING_APP_ORG_NAME_TEMPLATE.formatted(space), DAYS_TO_IMPORT);
+        log.info("Found {} organisations in space {}", results.size(), space);
 
         return results.stream()
                 .map(metric -> metric.getMetric().get(CF_ORG_NAME_LABEL))
@@ -76,13 +68,6 @@ public class CloudFoundryPrometheusClient {
 
     private boolean prefixMatch(String org, Collection<String> prefixes) {
         return prefixes.stream().anyMatch(prefix -> org != null && org.startsWith(prefix));
-    }
-
-    public Set<String> listSpaces(String org) {
-        String query = PROMETHEUS_JEAP_SPRING_APP_SPACE_NAME_TEMPLATE.formatted(org);
-        final List<PrometheusQueryResponseResult> results = cloudFoundryPrometheusProxy.queryRange(query, DAYS_TO_IMPORT);
-        log.info("Found {} spaces for org {}", results.size(), org);
-        return results.stream().map(metric -> metric.getMetric().get(CF_SPACE_NAME_LABEL)).collect(Collectors.toSet());
     }
 
     public Set<String> listApps(String org, String space) {
