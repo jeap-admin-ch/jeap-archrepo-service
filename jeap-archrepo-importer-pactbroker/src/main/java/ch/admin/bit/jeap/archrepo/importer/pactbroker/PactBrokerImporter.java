@@ -28,6 +28,11 @@ class PactBrokerImporter implements ArchRepoImporter {
 
     private final PactBrokerClient pactBrokerClient;
 
+    /**
+     * Import pacts from the pact broker into the model.
+     * @param model current model
+     * @param environment current environment (not used as the pact broker lists the pacts for all stages)
+     */
     @Override
     public void importIntoModel(ArchitectureModel model, String environment) {
         // Full import, remove and re-import all Pact relations

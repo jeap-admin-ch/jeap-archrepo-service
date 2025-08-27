@@ -24,6 +24,11 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
     private final ReactionObserverService reactionObserverService;
     private final ReactionStatisticsRepository reactionStatisticsRepository;
 
+    /**
+     * Import observed reactions into the model.
+     * @param model current model
+     * @param environment current environment (not used as the reactions observer server contains only reactions of the current stage)
+     */
     @Override
     public void importIntoModel(ArchitectureModel model, String environment) {
         log.info("Getting statistics from Reaction Observer Service...");

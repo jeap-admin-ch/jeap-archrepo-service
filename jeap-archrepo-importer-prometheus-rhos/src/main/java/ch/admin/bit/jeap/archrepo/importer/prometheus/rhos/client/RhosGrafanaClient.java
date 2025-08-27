@@ -27,7 +27,10 @@ public class RhosGrafanaClient {
 
     private static final String JEAP_SPRING_APP_BY_NAMESPACE_QUERY = "group by (namespace) (jeap_spring_app)";
 
-    private static final String PROMETHEUS_JEAP_SPRING_APP_BY_SERVICE_NAME_TEMPLATE = "group by(name) (jeap_spring_app{namespace=\"%s\"})";
+    /**
+     * The parameters in the Prometheus query must be double-escaped, otherwise Grafana returns a bad request.
+     */
+    private static final String PROMETHEUS_JEAP_SPRING_APP_BY_SERVICE_NAME_TEMPLATE = "group by(name) (jeap_spring_app{namespace=\\\"%s\\\"})";
 
     /**
      * Import relations from a sliding window of 4 days back until now

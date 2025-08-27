@@ -63,7 +63,7 @@ class RhosGrafanaClientTest {
                 createServiceResult("my_service2"),
                 createServiceResult("my_service3")
                 );
-        when(grafanaAccess.queryRange(eq("group by(name) (jeap_spring_app{namespace=\"bit-jme-d\"})"), eq("r"), anyInt())).thenReturn(resultRef);
+        when(grafanaAccess.queryRange(eq("group by(name) (jeap_spring_app{namespace=\\\"bit-jme-d\\\"})"), eq("r"), anyInt())).thenReturn(resultRef);
 
         //when
         Set<String> services = grafanaClient.services("ref", "bit-jme-d");
