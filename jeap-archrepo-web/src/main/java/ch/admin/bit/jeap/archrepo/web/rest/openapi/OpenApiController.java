@@ -2,13 +2,14 @@ package ch.admin.bit.jeap.archrepo.web.rest.openapi;
 
 import ch.admin.bit.jeap.archrepo.importer.openapi.OpenApiImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
-import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.*;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiDto;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiResultDto;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
+import ch.admin.bit.jeap.security.resource.semanticAuthentication.ServletSemanticAuthorization;
+import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -23,6 +24,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,6 +60,8 @@ class OpenApiController {
 
     private final SystemComponentService systemComponentService;
 
+    private final ServletSemanticAuthorization semanticAuthorization;
+
     @Transactional
     @PostMapping(value = "/{systemName}/{systemComponentName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload an OpenApi Spec",
@@ -65,48 +70,63 @@ class OpenApiController {
             @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
             @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,
-            @RequestParam(name = "file") MultipartFile file) throws IOException {
-        return handleFileUpload(systemComponentName, version, file);
+            @RequestParam(name = "file") MultipartFile file,
+            Authentication authentication) {
+        return handleFileUpload(systemComponentName, version, file, authentication);
     }
 
     @Transactional
     @PostMapping(value = "/{systemComponentName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload an OpenApi Spec",
+    @Operation(summary = "Upload an OpenAPI documentation for a system component.",
             requestBody = @RequestBody(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "The system component's OpenAPI documentation has been created."),
+            @ApiResponse(responseCode = "200", description = "The system component's OpenAPI documentation has been updated.")
+    })
     public ResponseEntity<String> handleFileUpload(
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
             @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,
-            @RequestParam(name = "file") MultipartFile file) throws IOException {
+            @RequestParam(name = "file") MultipartFile file,
+            Authentication authentication) {
         try {
+            // This method can be reached either authenticated with basic auth or authenticated with a
+            // bearer token processed by jeap security. In such cases the annotation-based jeap security
+            // roles checks cannot be used -> we have to check the roles programmatically.
+            if ((authentication instanceof JeapAuthenticationToken) &&
+                !semanticAuthorization.hasRole("openapidoc", "write")) {
+                throw new AccessDeniedException("Missing authorization to upload an OpenAPI documentation.");
+            }
+
             SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(systemComponentName);
-            System system = systemComponent.getParent();
-
             Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByProvider(systemComponent);
-
             String serverUrl = openApiImporter.getServerUrl(file.getBytes());
+            byte[] content = file.getBytes();
 
             if (openApiSpecOptional.isEmpty()) {
-                OpenApiSpec openApiSpec = OpenApiSpec.builder()
-                        .provider(systemComponent)
-                        .version(version)
-                        .content(file.getBytes())
-                        .serverUrl(serverUrl)
-                        .build();
-                log.info("Save new openApiSpec for system {} and systemComponent {} as {}",
-                        system.getName(), systemComponent.getName(), openApiSpec);
-                openApiSpecRepository.save(openApiSpec);
+                saveNewOpenApiDocumentation(systemComponent, version, content);
+                openApiImporter.importIntoModel(systemComponent, content);
+                return ResponseEntity.status(HttpStatus.CREATED).build();
             } else {
                 OpenApiSpec openApiSpec = openApiSpecOptional.get();
-                openApiSpec.update(file.getBytes(), version, serverUrl);
-                log.info("Update openApiSpec for system {} and systemComponent {} with new content as {}",
-                        system.getName(), systemComponent.getName(), openApiSpec);
+                log.debug("Updating OpenAPI documentation for component '{}' with: {}", systemComponent.getName(), openApiSpec);
+                openApiSpec.update(content, version, serverUrl);
+                openApiImporter.importIntoModel(systemComponent, content);
+                return ResponseEntity.status(HttpStatus.OK).build();
             }
-            openApiImporter.importIntoModel(systemComponent, file.getBytes());
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (OpenApiException openApiException) {
-            log.warn("Error in OpenApi upload: {}", openApiException.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OpenApi upload failed", openApiException);
+        } catch (IOException ioe) {
+            log.error("OpenAPI documentation upload failed due to an IO error.", ioe);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAPI documentation upload failed due to an IO error.", ioe);
         }
+    }
+
+    private void saveNewOpenApiDocumentation(SystemComponent systemComponent, String version, byte[] content) {
+        OpenApiSpec openApiSpec = OpenApiSpec.builder()
+                .provider(systemComponent)
+                .version(version)
+                .content(content)
+                .build();
+        log.debug("Saving new OpenAPI documentation for component '{}': {}", systemComponent.getName(), openApiSpec);
+        openApiSpecRepository.save(openApiSpec);
     }
 
     @Transactional(readOnly = true)

@@ -1,5 +1,14 @@
+server:
+  servlet:
+    context-path: /${spring.application.name}
+    multipart:
+      # Allow larger upload file sizes than 1MB
+      max-request-size: 20MB
+      max-file-size: 20MB
 # Persistence
 spring:
+  application:
+    name: test-app
   thymeleaf:
     check-template-location: false
   flyway:
@@ -24,13 +33,6 @@ spring:
     password:
     hikari:
       schema: data
-  # Open API spec uploads may fail otherwise if the spec is too large, the default file size limit is 1MB
-  servlet:
-    multipart:
-      max-request-size: 20MB
-      max-file-size: 20MB
-  application:
-    name: test-app
 archrepo:
   openapi-base-url: "https://base-url"
   update-schedule: "-"

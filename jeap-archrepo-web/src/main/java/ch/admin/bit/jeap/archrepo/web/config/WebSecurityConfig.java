@@ -1,17 +1,19 @@
 package ch.admin.bit.jeap.archrepo.web.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -27,11 +29,13 @@ public class WebSecurityConfig {
     @Bean
     @Order(100) // same as on the deprecated WebSecurityConfigurerAdapter
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        RequestMatcher apiExceptDatabaseSchema = new AndRequestMatcher(
-                new AntPathRequestMatcher("/api/**"), // basic auth protected or unprotected
-                new NegatedRequestMatcher(new AntPathRequestMatcher("/api/dbschemas/**")) // OAuth2 protected
+        PathPatternRequestMatcher.Builder api = PathPatternRequestMatcher.withDefaults().basePath("/api");
+        RequestMatcher apiExcludedDatabaseSchemaExcludedOpenApiPostWithBearerAuth = new AndRequestMatcher(
+                api.matcher("/**"),
+                new NegatedRequestMatcher(api.matcher("/dbschemas/**")), // OAuth2 protected
+                new NegatedRequestMatcher(postToOpenApiWithBearerTokenRequestMatcher(api)) // OAuth2 protected
         );
-        http.securityMatcher(apiExceptDatabaseSchema);
+        http.securityMatcher(apiExcludedDatabaseSchemaExcludedOpenApiPostWithBearerAuth);
         http.authorizeHttpRequests(r -> r
                 .requestMatchers(HttpMethod.GET, "/api/model").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/*/relations").permitAll()
@@ -46,6 +50,17 @@ public class WebSecurityConfig {
         return http.build();
     }
     //@formatter:on
+
+    private RequestMatcher postToOpenApiWithBearerTokenRequestMatcher(PathPatternRequestMatcher.Builder api) {
+        return new AndRequestMatcher(api.matcher("/openapi/**"), this::isPostWithBearerAuth);
+    }
+
+    private boolean isPostWithBearerAuth(HttpServletRequest request) {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        boolean isBearerAuth = authHeader != null && authHeader.startsWith("Bearer ");
+        boolean isPost = HttpMethod.POST.matches(request.getMethod());
+        return isPost && isBearerAuth;
+    }
 
     private AuthenticationManager createApiAuthManager(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().

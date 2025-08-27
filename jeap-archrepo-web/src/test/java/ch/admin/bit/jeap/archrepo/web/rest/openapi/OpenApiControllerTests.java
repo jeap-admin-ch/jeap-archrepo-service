@@ -8,10 +8,14 @@ import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.*;
-import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
-import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
+import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiResultDto;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
+import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplicationRole;
+import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationContext;
+import ch.admin.bit.jeap.security.test.jws.JwsBuilder;
+import ch.admin.bit.jeap.security.test.jws.JwsBuilderFactory;
+import ch.admin.bit.jeap.security.test.resource.configuration.JeapOAuth2IntegrationTestResourceConfiguration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Value;
@@ -21,8 +25,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -38,26 +43,51 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {OpenApiController.class, WebSecurityConfig.class})
-@Import(ArchRepoWebTestConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+        classes = ArchRepoApplication.class,
+        properties = {  "server.port=8901",
+                "jeap.security.oauth2.resourceserver.authorization-server.issuer=" + JwsBuilder.DEFAULT_ISSUER,
+                "jeap.security.oauth2.resourceserver.authorization-server.jwk-set-uri=http://localhost:${server.port}/test-app/.well-known/jwks.json"})
+@Import(JeapOAuth2IntegrationTestResourceConfiguration.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class OpenApiControllerTests {
 
     private static final String SYSTEM = "system";
     private static final String SERVICE = "system-context-service";
-    private static final String UPLOAD_PATH = "/api/openapi/" + SYSTEM + "/" + SERVICE;
+    private static final String UPLOAD_BASE_PATH = "/api/openapi/";
+    private static final String UPLOAD_PATH = UPLOAD_BASE_PATH + SERVICE;
     private static final String VERSION = "1.2.3";
+    private static final String VERSION_V2 = "2.0.0";
     private static final byte[] CONTENT = "some content".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] CONTENT_V2 = "some updated content".getBytes(StandardCharsets.UTF_8);
     private static final String GET_VERSIONS_PATH = "/api/openapi/versions";
     private static final RequestPostProcessor BASIC_AUTH = SecurityMockMvcRequestPostProcessors.httpBasic("api", "secret");
 
+    private static final String SUBJECT = "69368608-D736-43C8-5F76-55B7BF168299";
+    private static final JeapAuthenticationContext CONTEXT = JeapAuthenticationContext.SYS;
+
+    private static final SemanticApplicationRole OPEN_API_DOC_READ_ROLE = SemanticApplicationRole.builder()
+            .system("application-platform")
+            .resource("openapidoc")
+            .operation("read")
+            .build();
+    private static final SemanticApplicationRole OPEN_API_DOC_WRITE_ROLE = SemanticApplicationRole.builder()
+            .system("application-platform")
+            .resource("openapidoc")
+            .operation("write")
+            .build();
+
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JwsBuilderFactory jwsBuilderFactory;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -90,6 +120,103 @@ class OpenApiControllerTests {
     }
 
     @Test
+    void testUploadOpenApiDocumentation_WhenCreatedWithCorrectBearerAuth_ThenRespondsWithCreated() throws Exception {
+        mockSystemComponent();
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        MockMultipartFile file = createMockMultipartFile();
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isCreated());
+
+        OpenApiSpec openApiSpec = openApiSpecArgumentCaptor.getValue();
+        assertThat(openApiSpec.getDefiningSystem().getName()).isEqualTo(SYSTEM);
+        assertThat(openApiSpec.getProvider().getName()).isEqualTo(SERVICE);
+        assertThat(openApiSpec.getContent()).isEqualTo(CONTENT);
+        assertThat(openApiSpec.getVersion()).isEqualTo(VERSION);
+        verify(openApiImporter, times(1)).importIntoModel(any(SystemComponent.class), eq(CONTENT));
+    }
+
+    @Test
+    void testUploadOpenApiDocumentation_WhenUpdatedWithCorrectBearerAuth_ThenRespondsWithOK() throws Exception {
+        SystemComponent systemComponent = mockSystemComponent();
+        OpenApiSpec openApiSpec = mock(OpenApiSpec.class);
+        when(openApiSpecRepository.findByProvider(systemComponent)).thenReturn(Optional.of(openApiSpec));
+        when(openApiImporter.getServerUrl(CONTENT_V2)).thenReturn("test-server-url");
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        MockMultipartFile fileV2 = createMockMultipartFile(CONTENT_V2);
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION_V2)
+                .file(fileV2)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+
+        ).andExpect(status().isOk());
+
+        verify(openApiSpec, times(1)).update(CONTENT_V2, VERSION_V2, "test-server-url");
+        verify(openApiImporter, times(1)).importIntoModel(any(SystemComponent.class), eq(CONTENT_V2));
+    }
+
+    @Test
+    void testUploadOpenApiSpec_WhenVersionTooLong_ThenRespondsWithBadRequest() throws Exception {
+        MockMultipartFile file = createMockMultipartFile();
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        final String tooLongVersion = "v".repeat(201);
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + tooLongVersion)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isBadRequest());
+        verify(openApiImporter, never()).importIntoModel(any(), any());
+    }
+
+    @Test
+    void testUploadOpenApiSpec_WhenComponentNameTooLong_ThenRespondsWithBadRequest() throws Exception {
+        MockMultipartFile file = createMockMultipartFile();
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        final String tooLongComponentName = "n".repeat(201);
+
+        mockMvc.perform(multipart(UPLOAD_BASE_PATH + tooLongComponentName + "?version=" + VERSION)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isBadRequest());
+        verify(openApiImporter, never()).importIntoModel(any(), any());
+    }
+
+    @Test
+    void testUploadOpenApi_WhenHasOnlyReadRoleInBearerAuth_ThenRespondsWithForbidden() throws Exception {
+        MockMultipartFile file = createMockMultipartFile();
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_READ_ROLE);
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testUploadOpenApi_WhenHasCorrectBasicAuth_ThenOK() throws Exception {
+        MockMultipartFile file = createMockMultipartFile();
+
+        mockSystemComponent();
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .with(BASIC_AUTH)
+        ).andExpect(status().isCreated());
+    }
+
+    @Test
+    void testUploadOpenApi_WhenHasNoAuthentication_ThenRespondsWithUnauthorized() throws Exception {
+        MockMultipartFile file = createMockMultipartFile();
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .with(csrf())
+        ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void testUploadOpenApiSpecWithoutVersion() throws Exception {
         mockSystemComponent();
 
@@ -106,45 +233,6 @@ class OpenApiControllerTests {
         assertThat(openApiSpec.getContent()).isEqualTo(CONTENT);
         assertThat(openApiSpec.getVersion()).isNull();
         verify(openApiImporter, times(1)).importIntoModel(any(SystemComponent.class), eq(CONTENT));
-    }
-
-    private void mockSystemComponent() {
-        System system = createSystem();
-        SystemComponent systemComponent = mock(SystemComponent.class);
-        when(systemComponent.getParent()).thenReturn(system);
-        when(systemComponent.getName()).thenReturn(SERVICE);
-        when(systemComponentService.findOrCreateSystemComponent(SERVICE)).thenReturn(systemComponent);
-    }
-
-    @Test
-    void testUploadOpenApiSpecWithVersion() throws Exception {
-        MockMultipartFile file = createMockMultipartFile();
-
-        mockSystemComponent();
-
-        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
-                .file(file)
-                .with(BASIC_AUTH)
-        ).andExpect(status().isCreated());
-
-        OpenApiSpec openApiSpec = openApiSpecArgumentCaptor.getValue();
-        assertThat(openApiSpec.getDefiningSystem().getName()).isEqualTo(SYSTEM);
-        assertThat(openApiSpec.getProvider().getName()).isEqualTo(SERVICE);
-        assertThat(openApiSpec.getContent()).isEqualTo(CONTENT);
-        assertThat(openApiSpec.getVersion()).isEqualTo(VERSION);
-        verify(openApiImporter, times(1)).importIntoModel(any(SystemComponent.class), eq(CONTENT));
-    }
-
-    @Test
-    void testUploadOpenApiSpecWithTooLongVersionFails() throws Exception {
-        MockMultipartFile file = createMockMultipartFile();
-        final String tooLongVersion = "v".repeat(201);
-
-        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + tooLongVersion)
-                .file(file)
-                .with(BASIC_AUTH)
-        ).andExpect(status().is4xxClientError());
-        verify(openApiImporter, never()).importIntoModel(any(), any());
     }
 
     @Test
@@ -261,11 +349,15 @@ class OpenApiControllerTests {
     }
 
     private MockMultipartFile createMockMultipartFile() {
+        return createMockMultipartFile(CONTENT);
+    }
+
+    private MockMultipartFile createMockMultipartFile(byte[] content) {
         return new MockMultipartFile(
                 "file",
                 "openapi.json",
                 MediaType.APPLICATION_JSON.toString(),
-                CONTENT
+                content
         );
     }
 
@@ -278,6 +370,21 @@ class OpenApiControllerTests {
                 .build();
         system.addSystemComponent(backendService);
         return system;
+    }
+
+    private SystemComponent mockSystemComponent() {
+        System system = createSystem();
+        SystemComponent systemComponent = mock(SystemComponent.class);
+        when(systemComponent.getParent()).thenReturn(system);
+        when(systemComponent.getName()).thenReturn(SERVICE);
+        when(systemComponentService.findOrCreateSystemComponent(SERVICE)).thenReturn(systemComponent);
+        return systemComponent;
+    }
+
+    private String createBearerAuthForUserRoles(SemanticApplicationRole... userroles) {
+        return "Bearer " + jwsBuilderFactory.createValidForFixedLongPeriodBuilder(SUBJECT, CONTEXT).
+                withUserRoles(userroles).
+                build().serialize();
     }
 
     @Value
