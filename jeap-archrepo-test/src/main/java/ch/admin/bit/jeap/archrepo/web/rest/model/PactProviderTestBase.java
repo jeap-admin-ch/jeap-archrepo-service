@@ -11,11 +11,11 @@ import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
-import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.model.database.*;
 import ch.admin.bit.jeap.archrepo.persistence.*;
+import ch.admin.bit.jeap.security.resource.semanticAuthentication.ServletSemanticAuthorization;
 import lombok.SneakyThrows;
 import lombok.Value;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +73,8 @@ public class PactProviderTestBase {
     @MockitoBean
     RestApiRepository restApiRepository;
 
+    @MockitoBean
+    ServletSemanticAuthorization semanticAuthorization;
 
     @BeforeEach
     void setUp(PactVerificationContext context) {
@@ -155,6 +157,16 @@ public class PactProviderTestBase {
         when(restApi.getPath()).thenReturn("/api/foo");
         when(restApi.getImporters()).thenReturn(Set.of(Importer.OPEN_API));
         when(restApiRepository.findByProvider(systemComponent)).thenReturn(List.of(restApi));
+    }
+
+    @State("User is authorized for OpenAPI document upload")
+    void userIsAuthorizedForOpenApiDocUpload() {
+        when(semanticAuthorization.hasRole("openapidoc", "write")).thenReturn(true);
+    }
+
+    @State("User is not authorized for OpenAPI document upload")
+    void userIsNotAuthorizedForOpenApiDocUpload() {
+        when(semanticAuthorization.hasRole("openapidoc", "write")).thenReturn(false);
     }
 
     @SuppressWarnings("SameParameterValue")
