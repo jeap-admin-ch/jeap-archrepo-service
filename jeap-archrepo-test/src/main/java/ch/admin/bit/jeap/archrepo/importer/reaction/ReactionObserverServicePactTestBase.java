@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @PactTestFor(port = "8888", pactVersion = PactSpecVersion.V3)
 public class ReactionObserverServicePactTestBase {
 
-    private static final String API_PATH = "/api/statisticsV2";
+    private static final String API_PATH = "/api/statistics";
 
     @SuppressWarnings("DataFlowIssue")
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)

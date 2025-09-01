@@ -46,7 +46,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
 
         // Stub for first component with statistics
-        stubFor(get(urlEqualTo("/reaction-observer-service/api/statisticsV2/system-existing-component"))
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-existing-component"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -71,7 +71,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
                                 ]""")));
 
         // Stub for second component with statistics
-        stubFor(get(urlEqualTo("/reaction-observer-service/api/statisticsV2/system-new-component"))
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-new-component"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -96,7 +96,7 @@ class ReactionsObservedStatisticsImporterWireMockTest {
                                 ]""")));
 
         // Stub for third component with no statistics
-        stubFor(get(urlEqualTo("/reaction-observer-service/api/statisticsV2/system-component-no-statistics"))
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/statistics/system-component-no-statistics"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
