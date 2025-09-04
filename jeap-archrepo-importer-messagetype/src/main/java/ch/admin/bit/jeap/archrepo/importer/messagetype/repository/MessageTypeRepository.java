@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -31,12 +32,18 @@ public class MessageTypeRepository implements Closeable {
     private final String gitUri;
     private final File gitRepoPath;
     private final String repoLinkHttpBaseUri;
+    private final CredentialsProvider credentialsProvider;
 
     MessageTypeRepository(String gitUri) {
+        this(gitUri, null);
+    }
+
+    MessageTypeRepository(String gitUri, CredentialsProvider credentialsProvider) {
         this.gitUri = gitUri;
-        this.repoLinkHttpBaseUri = httpBaseUriForBitbucketRepo(gitUri);
+        this.repoLinkHttpBaseUri = processBaseUri(gitUri);
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.credentialsProvider = credentialsProvider;
         this.gitRepoPath = cloneGitRepo();
         try {
             FileUtils.forceDeleteOnExit(gitRepoPath);
@@ -45,17 +52,20 @@ public class MessageTypeRepository implements Closeable {
         }
     }
 
-    static String httpBaseUriForBitbucketRepo(String gitUri) {
+    static String processBaseUri(String gitUri) {
         if (gitUri.startsWith("file:")) {
             return ""; // local file repositories are only used in integration tests
         }
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(gitUri)
-                .build();
-        String projectName = uriComponents.getPathSegments().get(1).toUpperCase();
-        String repoName = uriComponents.getPathSegments().get(2).replace(".git", "");
-        return UriComponentsBuilder.fromUriString(gitUri)
-                .replacePath("projects/%s/repos/%s/".formatted(projectName, repoName))
-                .toUriString();
+        if (gitUri.contains("bitbucket")) {
+            UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(gitUri)
+                    .build();
+            String projectName = uriComponents.getPathSegments().get(1).toUpperCase();
+            String repoName = uriComponents.getPathSegments().get(2).replace(".git", "");
+            return UriComponentsBuilder.fromUriString(gitUri)
+                    .replacePath("projects/%s/repos/%s/".formatted(projectName, repoName))
+                    .toUriString();
+        }
+        return gitUri;
     }
 
     @Override
@@ -91,6 +101,7 @@ public class MessageTypeRepository implements Closeable {
             Git.cloneRepository()
                     .setURI(gitUri)
                     .setDirectory(tempDir)
+                    .setCredentialsProvider(credentialsProvider)
                     .call();
             return tempDir;
         } catch (IOException | GitAPIException e) {

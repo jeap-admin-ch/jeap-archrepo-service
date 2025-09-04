@@ -54,8 +54,8 @@ class MessageTypeRepositoryTest extends CreateLocalGitRepoBaseTest {
     }
 
     @Test
-    void httpBaseUriForBitbucketRepo() {
-        String httpLinkUri = MessageTypeRepository.httpBaseUriForBitbucketRepo(
+    void processBaseUri() {
+        String httpLinkUri = MessageTypeRepository.processBaseUri(
                 "https://some-bitbucket-repo.com/scm/projectname/message-type-registry.git");
 
         assertEquals("https://some-bitbucket-repo.com/projects/PROJECTNAME/repos/message-type-registry/", httpLinkUri);

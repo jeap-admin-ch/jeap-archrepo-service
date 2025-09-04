@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MessageDescriptorImporterIT extends CreateLocalGitRepoBaseTest {
@@ -19,7 +20,7 @@ class MessageDescriptorImporterIT extends CreateLocalGitRepoBaseTest {
                 List.of(repoUrl),
                 null);
 
-        MessageTypeRepositoryFactory factory = new MessageTypeRepositoryFactory(props);
+        MessageTypeRepositoryFactory factory = new MessageTypeRepositoryFactory(props, emptyList());
         MessageDescriptorImporter importer = new MessageDescriptorImporter(factory);
 
         ArchitectureModel model = ArchitectureModel.builder()
