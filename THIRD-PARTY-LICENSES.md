@@ -352,6 +352,11 @@ BSD License 3
  * Hamcrest - [org.hamcrest:hamcrest](http://hamcrest.org/JavaHamcrest/)
  * asm - [org.ow2.asm:asm](http://asm.ow2.io/)
 
+Bouncy Castle Licence
+-------------------------------
+
+ * Bouncy Castle Provider - [org.bouncycastle:bcprov-jdk18on](https://www.bouncycastle.org/download/bouncy-castle-java/)
+
 CDDL
 -------------------------------
 
