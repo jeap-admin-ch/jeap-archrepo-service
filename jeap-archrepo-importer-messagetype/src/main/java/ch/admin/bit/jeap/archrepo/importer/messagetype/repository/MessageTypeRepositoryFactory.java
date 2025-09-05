@@ -1,34 +1,47 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype.repository;
 
 import ch.admin.bit.jeap.archrepo.importer.messagetype.MessageTypeImporterProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import ch.admin.bit.jeap.archrepo.importer.messagetype.RepositoryProperties;
+import ch.admin.bit.jeap.archrepo.importer.messagetype.repository.github.GitHubMessageTypeRepository;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class MessageTypeRepositoryFactory {
 
-    private final MessageTypeImporterProperties messageTypeImporterProperties;
-    private final List<UrlBasedCredentialsProvider> urlBasedCredentialsProviders = new ArrayList<>();
+    @Getter
+    private final List<MessageTypeRepository> repositories;
 
-    @Autowired
-    public MessageTypeRepositoryFactory(MessageTypeImporterProperties messageTypeImporterProperties, List<UrlBasedCredentialsProvider> urlBasedCredentialsProviders) {
-        this.messageTypeImporterProperties = messageTypeImporterProperties;
-        this.urlBasedCredentialsProviders.addAll(urlBasedCredentialsProviders);
+    public MessageTypeRepositoryFactory(MessageTypeImporterProperties messageTypeImporterProperties) {
+        List<RepositoryProperties> repositoryPropertiesList = messageTypeImporterProperties.getRepositories();
+        if (repositoryPropertiesList == null || repositoryPropertiesList.isEmpty()) {
+            // Fallback to deprecated gitUris property
+            repositoryPropertiesList = messageTypeImporterProperties.getGitUris().stream()
+                    .map(uri -> new RepositoryProperties(uri, RepositoryProperties.RepositoryType.BITBUCKET))
+                    .toList();
+        }
+        repositories = repositoryPropertiesList.stream()
+                .map(repository -> {
+                    switch (repository.getType()) {
+                        case LOCAL -> {
+                            return new LocalFolderMessageTypeRepository(repository.getUri());
+                        }
+                        case GITHUB -> {
+                            return new GitHubMessageTypeRepository(repository.getUri(), repository.getParameters());
+                        }
+                        default -> {
+                            return new BitbucketMessageTypeRepository(repository.getUri());
+                        }
+                    }
+                })
+                .toList();
     }
 
     public List<MessageTypeRepository> cloneRepositories() {
-        return messageTypeImporterProperties.getGitUris().stream()
-                .map(uri -> {
-                    UrlBasedCredentialsProvider provider = urlBasedCredentialsProviders.stream()
-                            .filter(p -> p.supports(uri))
-                            .findFirst()
-                            .orElse(null);
-                    return new MessageTypeRepository(uri, provider);
-                })
-                .toList();
+        repositories.forEach(MessageTypeRepository::cloneGitRepo);
+        return repositories;
     }
 
 }

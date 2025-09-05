@@ -12,19 +12,21 @@ class MessageTypeRepositoryTest extends CreateLocalGitRepoBaseTest {
 
     @Test
     void cannotConnectToRepo() {
-        assertThrows(RuntimeException.class, () -> new MessageTypeRepository("https://someurl.com"));
+        LocalFolderMessageTypeRepository localFolderMessageTypeRepository = new LocalFolderMessageTypeRepository("https://someurl.com");
+        assertThrows(RuntimeException.class, localFolderMessageTypeRepository::cloneGitRepo);
     }
 
     @Test
     void connectToValidRepo() {
-        MessageTypeRepository messageTypeRepository = new MessageTypeRepository(repoUrl);
+        MessageTypeRepository messageTypeRepository = new LocalFolderMessageTypeRepository(repoUrl);
+        messageTypeRepository.cloneGitRepo();
         assertDoesNotThrow(messageTypeRepository::getAllEventDescriptors);
     }
 
     @Test
     void testGetAllEventDescriptors() {
-        MessageTypeRepository messageTypeRepository = new MessageTypeRepository(repoUrl);
-
+        MessageTypeRepository messageTypeRepository = new LocalFolderMessageTypeRepository(repoUrl);
+        messageTypeRepository.cloneGitRepo();
         List<EventDescriptor> results = messageTypeRepository.getAllEventDescriptors();
 
         assertFalse(results.isEmpty(), "No events found");
@@ -38,8 +40,8 @@ class MessageTypeRepositoryTest extends CreateLocalGitRepoBaseTest {
 
     @Test
     void testGetAllCommandDescriptors() {
-        MessageTypeRepository messageTypeRepository = new MessageTypeRepository(repoUrl);
-
+        MessageTypeRepository messageTypeRepository = new LocalFolderMessageTypeRepository(repoUrl);
+        messageTypeRepository.cloneGitRepo();
         List<CommandDescriptor> results = messageTypeRepository.getAllCommandDescriptors();
 
         assertFalse(results.isEmpty(), "No commands found");
@@ -55,7 +57,8 @@ class MessageTypeRepositoryTest extends CreateLocalGitRepoBaseTest {
 
     @Test
     void processBaseUri() {
-        String httpLinkUri = MessageTypeRepository.processBaseUri(
+        MessageTypeRepository messageTypeRepository = new BitbucketMessageTypeRepository("https://some-bitbucket-repo.com/scm/projectname/message-type-registry.git");
+        String httpLinkUri = messageTypeRepository.processBaseUri(
                 "https://some-bitbucket-repo.com/scm/projectname/message-type-registry.git");
 
         assertEquals("https://some-bitbucket-repo.com/projects/PROJECTNAME/repos/message-type-registry/", httpLinkUri);

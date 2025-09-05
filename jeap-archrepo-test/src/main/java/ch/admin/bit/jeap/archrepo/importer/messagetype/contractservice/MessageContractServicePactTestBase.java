@@ -79,7 +79,8 @@ public class MessageContractServicePactTestBase {
         // given
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties(
                 List.of(dummyGitRepoUrl),
-                "http://localhost:8888/api/contracts");
+                "http://localhost:8888/api/contracts",
+                List.of());
         ContractServiceClient contractServiceClient = new ContractServiceClient(properties, RestClient.builder());
 
         // when
@@ -119,7 +120,8 @@ public class MessageContractServicePactTestBase {
         // given
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties(
                 List.of(dummyGitRepoUrl),
-                "http://localhost:8888/api/contracts");
+                "http://localhost:8888/api/contracts",
+                List.of());
         ContractServiceClient contractServiceClient = new ContractServiceClient(properties, RestClient.builder());
 
         // when

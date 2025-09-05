@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.CredentialsProvider;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Closeable;
 import java.io.File;
@@ -24,47 +23,25 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("findbugs:NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 @Slf4j
-public class MessageTypeRepository implements Closeable {
+public abstract class MessageTypeRepository implements Closeable {
     private static final String COMMON = "_common";
 
     private final JsonFactory jsonFactory = new JsonFactory();
     private final ObjectMapper objectMapper;
     private final String gitUri;
-    private final File gitRepoPath;
+    private File gitRepoPath;
     private final String repoLinkHttpBaseUri;
-    private final CredentialsProvider credentialsProvider;
+    @Setter
+    private CredentialsProvider credentialsProvider;
 
-    MessageTypeRepository(String gitUri) {
-        this(gitUri, null);
-    }
-
-    MessageTypeRepository(String gitUri, CredentialsProvider credentialsProvider) {
+    protected MessageTypeRepository(String gitUri) {
         this.gitUri = gitUri;
         this.repoLinkHttpBaseUri = processBaseUri(gitUri);
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        this.credentialsProvider = credentialsProvider;
-        this.gitRepoPath = cloneGitRepo();
-        try {
-            FileUtils.forceDeleteOnExit(gitRepoPath);
-        } catch (IOException e) {
-            log.warn("Failed to schedule git repo path for deletion on exit", e);
-        }
     }
 
-    static String processBaseUri(String gitUri) {
-        if (gitUri.startsWith("file:")) {
-            return ""; // local file repositories are only used in integration tests
-        }
-        if (gitUri.contains("bitbucket")) {
-            UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(gitUri)
-                    .build();
-            String projectName = uriComponents.getPathSegments().get(1).toUpperCase();
-            String repoName = uriComponents.getPathSegments().get(2).replace(".git", "");
-            return UriComponentsBuilder.fromUriString(gitUri)
-                    .replacePath("projects/%s/repos/%s/".formatted(projectName, repoName))
-                    .toUriString();
-        }
+    protected String processBaseUri(String gitUri) {
         return gitUri;
     }
 
@@ -94,16 +71,16 @@ public class MessageTypeRepository implements Closeable {
                 .toList();
     }
 
-    private File cloneGitRepo() {
+    public File cloneGitRepo() {
         try {
-            File tempDir = Files.createTempDirectory("messageTypeRepo").toFile();
-            tempDir.deleteOnExit();
+            this.gitRepoPath = Files.createTempDirectory("messageTypeRepo").toFile();
+            this.gitRepoPath.deleteOnExit();
             Git.cloneRepository()
                     .setURI(gitUri)
-                    .setDirectory(tempDir)
+                    .setDirectory(this.gitRepoPath)
                     .setCredentialsProvider(credentialsProvider)
                     .call();
-            return tempDir;
+            return this.gitRepoPath;
         } catch (IOException | GitAPIException e) {
             throw MessageTypeRepoException.cloneFailed(gitUri, e);
         }

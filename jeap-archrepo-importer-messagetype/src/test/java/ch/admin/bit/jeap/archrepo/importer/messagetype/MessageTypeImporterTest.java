@@ -19,7 +19,6 @@ import java.util.Objects;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -38,8 +37,9 @@ class MessageTypeImporterTest extends CreateLocalGitRepoBaseTest {
 
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties(
                 List.of(repoUrl),
-                "http://localhost:" + messageContractServicePort + "/contracts");
-        MessageTypeRepositoryFactory repositoryFactory = new MessageTypeRepositoryFactory(properties, emptyList());
+                "http://localhost:" + messageContractServicePort + "/contracts",
+                List.of(new RepositoryProperties(repoUrl, RepositoryProperties.RepositoryType.BITBUCKET)));
+        MessageTypeRepositoryFactory repositoryFactory = new MessageTypeRepositoryFactory(properties);
         ContractServiceClient contractServiceClient = new ContractServiceClient(properties, RestClient.builder());
         MessageContractImporter messageContractImporter = new MessageContractImporter(contractServiceClient);
         messageTypeImporter = new MessageTypeImporter(repositoryFactory, messageContractImporter);

@@ -17,6 +17,7 @@ import java.util.List;
 public class MessageTypeImporterProperties {
     private List<String> gitUris;
     private String messageContractServiceUri;
+    private List<RepositoryProperties> repositories;
 
     @PostConstruct
     void init() {
