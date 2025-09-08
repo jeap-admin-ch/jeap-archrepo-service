@@ -2,16 +2,18 @@ package ch.admin.bit.jeap.archrepo.importer.messagetype;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Map;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class RepositoryProperties {
 
-    private final String uri;
-    private final RepositoryType type;
+    private String uri;
+    private RepositoryType type;
     @ToString.Exclude
     private Map<String, String> parameters = Map.of();
 

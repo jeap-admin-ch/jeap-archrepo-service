@@ -1,6 +1,5 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype.repository.github;
 
-import ch.admin.bit.jeap.archrepo.importer.messagetype.MessageTypeImporterProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
