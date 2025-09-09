@@ -101,10 +101,10 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
 
             // Set credentials
             for (CredentialItem item : items) {
-                if (item instanceof CredentialItem.Username) {
-                    ((CredentialItem.Username) item).setValue("x-access-token");
-                } else if (item instanceof CredentialItem.Password) {
-                    ((CredentialItem.Password) item).setValue(accessToken.toCharArray());
+                if (item instanceof CredentialItem.Username username) {
+                    username.setValue("x-access-token");
+                } else if (item instanceof CredentialItem.Password password) {
+                    password.setValue(accessToken.toCharArray());
                 } else {
                     throw new UnsupportedCredentialItem(uri, item.getPromptText());
                 }
@@ -137,6 +137,8 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
         if (response.statusCode() == 200) {
             JsonNode jsonNode = objectMapper.readTree(response.body());
             return jsonNode.get("id").asLong();
+        } else {
+            log.warn("Failed to get installation ID: {} - {}", response.statusCode(), response.body());
         }
 
         return null;
@@ -157,6 +159,8 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
         if (response.statusCode() == 201) {
             JsonNode jsonNode = objectMapper.readTree(response.body());
             return jsonNode.get("token").asText();
+        } else {
+            log.warn("Failed to get installation access token: {} - {}", response.statusCode(), response.body());
         }
         return null;
     }

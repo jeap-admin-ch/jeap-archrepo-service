@@ -11,8 +11,7 @@ public class BitbucketMessageTypeRepository extends MessageTypeRepository {
 
     @Override
     protected String processBaseUri(String gitUri) {
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(gitUri)
-                .build();
+        UriComponents uriComponents = UriComponentsBuilder.fromUriString(gitUri).build();
         String projectName = uriComponents.getPathSegments().get(1).toUpperCase();
         String repoName = uriComponents.getPathSegments().get(2).replace(".git", "");
         return UriComponentsBuilder.fromUriString(gitUri)
