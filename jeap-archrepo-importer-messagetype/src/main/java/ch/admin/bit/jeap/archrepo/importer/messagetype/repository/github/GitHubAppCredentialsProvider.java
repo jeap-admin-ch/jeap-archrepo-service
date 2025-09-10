@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.messagetype.repository.github;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -165,7 +166,7 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
         return null;
     }
 
-    private String createAppJWT() throws Exception {
+    private String createAppJWT() {
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
                 .type(JOSEObjectType.JWT)
                 .build();
@@ -179,7 +180,11 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
 
         SignedJWT signedJWT = new SignedJWT(header, claimsSet);
         RSASSASigner signer = new RSASSASigner(privateKey);
-        signedJWT.sign(signer);
+        try {
+            signedJWT.sign(signer);
+        } catch (JOSEException e) {
+            throw new IllegalStateException(e);
+        }
 
         return signedJWT.serialize();
     }
@@ -197,8 +202,10 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePrivate(spec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
