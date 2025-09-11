@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @RequestMapping("/api/management")
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class ManagementController {
 
     private final TeamRepository teamRepository;
@@ -31,17 +33,25 @@ public class ManagementController {
     private final RestApiRelationRepository restApiRelationRepository;
 
     @PostMapping("/system")
-    public void createSystem(@RequestBody CreateSystemDto createSystemDto) {
-        log.info("Store new System with name '{}'", createSystemDto.getName());
+    public ResponseEntity<Void> createSystem(@RequestBody CreateSystemDto createSystemDto) {
+        String systemName = createSystemDto.getName();
+        log.info("Store new System with name '{}'", systemName);
+
+        if (systemRepository.findByNameOrAliasIgnoreCase(systemName).isPresent()) {
+            log.error("System with name or alias '{}' already exists. Did not create a new system.", systemName);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "System with name or alias already exists.");
+        }
 
         System system = System.builder()
-                .name(createSystemDto.getName())
+                .name(systemName)
                 .description(createSystemDto.getDescription())
                 .confluenceLink(createSystemDto.getConfluenceLink())
                 .defaultOwner(getOrCreateTeam(createSystemDto.getTeamName()))
                 .aliases(createSystemDto.getAliases())
                 .build();
         systemRepository.save(system);
+        log.info("Created a new system with name '{}'.", systemName);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     private Team getOrCreateTeam(String teamName) {
@@ -73,7 +83,6 @@ public class ManagementController {
     }
 
     @DeleteMapping("/rest-api")
-    @Transactional
     public ResponseEntity<String> deleteRestApi(@RequestBody @Valid DeleteRestApiDto dto) {
         log.info("Delete RestApi relation: {}", dto);
 
