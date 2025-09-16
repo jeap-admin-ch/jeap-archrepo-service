@@ -1,0 +1,43 @@
+package ch.admin.bit.jeap.archrepo.metamodel.system;
+
+import ch.admin.bit.jeap.archrepo.metamodel.MutableDomainEntity;
+import com.fasterxml.uuid.Generators;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+import java.util.UUID;
+
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Entity
+@Getter
+@Table(name = "system_graph")
+public class SystemGraph extends MutableDomainEntity {
+
+    @Id
+    @NotNull
+    private UUID id;
+
+    @NotNull
+    @Column(name = "system_name")
+    private String systemName;
+
+    @Lob
+    @Column(name = "graph_data")
+    private byte[] graphData;
+
+    private String fingerprint;
+
+    protected SystemGraph() {
+        super();
+    }
+
+    @Builder
+    public SystemGraph(String systemName, byte[] graphData, String fingerprint) {
+        this.id = Generators.timeBasedEpochGenerator().generate();
+        this.systemName = systemName;
+        this.graphData = graphData;
+        this.fingerprint = fingerprint;
+    }
+}
