@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.docgen.plantuml.PlantUmlRenderer;
+import ch.admin.bit.jeap.archrepo.docgen.plantuml.RenderedDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
@@ -40,6 +41,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("SpringJavaAutowiredMembersInspection")
 @ExtendWith(SpringExtension.class)
@@ -612,6 +616,53 @@ class TemplateRendererTest {
 
         String content = templateRenderer.renderComponentPage(model, systemComponent);
         assertContent("componentwithOpenApiUrl.expected", content);
+    }
+
+    @Test
+    void renderSystemComponentPageWithoutDatabaseSchema_assertNoSchema() {
+        BackendService systemComponent = BackendService.builder()
+                .name("systemComponent")
+                .build();
+        System system = System.builder()
+                .name("System")
+                .description("Description")
+                .build();
+        system.addSystemComponent(systemComponent);
+
+        ArchitectureModel model = buildModel(system);
+
+        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        assertThat(content).contains("Kein Datenbankschema bekannt.");
+    }
+
+    @Test
+    void renderSystemComponentPageWithDatabaseSchemaTooBig_assertNoSchema() throws IOException {
+        DocumentationGeneratorConfiguration generatorConfig = new DocumentationGeneratorConfiguration();
+        PlantUmlRenderer mockPlantUmlRenderer = mock(PlantUmlRenderer.class);
+        RenderedDatabaseSchema mockSchema = mock(RenderedDatabaseSchema.class);
+        when(mockSchema.length()).thenReturn(50001);
+        when(mockPlantUmlRenderer.renderDatabaseSchema(any())).thenReturn(mockSchema);
+        TemplateRenderer templateRendererWithMock = new TemplateRenderer(generatorConfig.templateEngine(applicationContext), mockPlantUmlRenderer);
+        BackendService systemComponent = BackendService.builder()
+                .name("systemComponent")
+                .build();
+        System system = System.builder()
+                .name("System")
+                .description("Description")
+                .build();
+        system.addSystemComponent(systemComponent);
+
+        SystemComponentDatabaseSchema systemComponentDatabaseSchema = SystemComponentDatabaseSchema.builder()
+                .systemComponent(systemComponent)
+                .schema("mock".getBytes())
+                .schemaVersion("1.2.3")
+                .build();
+        system.addDatabaseSchema(systemComponentDatabaseSchema);
+
+        ArchitectureModel model = buildModel(system);
+
+        String content = templateRendererWithMock.renderComponentPage(model, systemComponent);
+        assertThat(content).contains("Datenbankschema zu gross (50001). Dokumentation wird nicht generiert.");
     }
 
     @Test

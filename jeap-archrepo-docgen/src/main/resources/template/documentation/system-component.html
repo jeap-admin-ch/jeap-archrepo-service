@@ -46,7 +46,8 @@
     </ac:structured-macro>
 
     <h1>Datenmodell</h1>
-    <p th:if="${databaseSchemaPlantUml == null}">Kein Datenbankschema bekannt.</p>
+    <p th:if="${databaseSchemaPlantUmlNoSchema != null}">Kein Datenbankschema bekannt.</p>
+    <p th:if="${databaseSchemaPlantUmlTooBig != null}" th:text="'Datenbankschema zu gross (' + ${databaseSchemaPlantUmlTooBig + '). Dokumentation wird nicht generiert.'}"></p>
     <th:block th:if="${databaseSchemaPlantUml != null}">
         <ac:structured-macro ac:name="plantuml" ac:schema-version="1" th:ac:macro-id="${databaseSchemaPlantUmlMacroId}">
             <ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>

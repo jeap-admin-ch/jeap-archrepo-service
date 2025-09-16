@@ -47,17 +47,12 @@ public class PlantUmlRenderer {
         return componentView.render();
     }
 
-    public String renderDatabaseSchema(ComponentContext componentContext) {
-            return componentContext.getSystemComponent().getParent()
-                    .getDatabaseSchema(componentContext.getSystemComponent().getName())
-                    .map(this::renderDatabaseSchema)
-                    .orElse(null);
-    }
-
-    private String renderDatabaseSchema(SystemComponentDatabaseSchema systemComponentDatabaseSchema) {
+    public RenderedDatabaseSchema renderDatabaseSchema(SystemComponentDatabaseSchema systemComponentDatabaseSchema) {
         DatabaseSchema dbSchema = getDatabaseSchema(systemComponentDatabaseSchema);
         PlantUmlDbSchemaRenderer renderer = new PlantUmlDbSchemaRenderer();
-        return renderer.renderDbSchema(dbSchema);
+        String renderDbSchema = renderer.renderDbSchema(dbSchema);
+        return new RenderedDatabaseSchema(renderDbSchema, renderDbSchema.length());
+
     }
 
     private DatabaseSchema getDatabaseSchema(SystemComponentDatabaseSchema systemComponentDatabaseSchema) {

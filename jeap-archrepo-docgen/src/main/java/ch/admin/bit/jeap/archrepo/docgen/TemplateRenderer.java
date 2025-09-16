@@ -1,14 +1,17 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.docgen.plantuml.PlantUmlRenderer;
+import ch.admin.bit.jeap.archrepo.docgen.plantuml.RenderedDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
@@ -22,6 +25,7 @@ import static java.util.stream.Collectors.toSet;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 class TemplateRenderer {
 
     private final ITemplateEngine templateEngine;
@@ -109,12 +113,30 @@ class TemplateRenderer {
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
         context.setVariable("reactions", componentContext.getReactionStatisticsViews());
 
-        String databaseSchemaPlantUml = plantUmlRenderer.renderDatabaseSchema(componentContext);
-        context.setVariable("databaseSchemaPlantUml", databaseSchemaPlantUml);
-        context.setVariable("databaseSchemaPlantUmlMacroId", stableMacroUuid(systemComponent.getName() + "_database"));
+        Optional<SystemComponentDatabaseSchema> databaseSchema = getDatabaseSchema(componentContext);
+
+        if (databaseSchema.isPresent()) {
+            RenderedDatabaseSchema renderedDatabaseSchema = plantUmlRenderer.renderDatabaseSchema(databaseSchema.get());
+
+            if (renderedDatabaseSchema.length() > 50000) {
+                log.warn("The PlantUML source for the database schema of system component '{}' is too long ({} characters). It will not be included in the documentation to avoid exceeding Confluence's page size limit.",
+                        systemComponent.getName(), renderedDatabaseSchema.length());
+                context.setVariable("databaseSchemaPlantUmlTooBig", renderedDatabaseSchema.length());
+            } else {
+                context.setVariable("databaseSchemaPlantUml", renderedDatabaseSchema.content());
+                context.setVariable("databaseSchemaPlantUmlMacroId", stableMacroUuid(systemComponent.getName() + "_database"));
+            }
+        } else {
+            context.setVariable("databaseSchemaPlantUmlNoSchema", "no_schema");
+        }
 
         return templateEngine.process("system-component", context).trim();
     }
+
+    private Optional<SystemComponentDatabaseSchema> getDatabaseSchema(ComponentContext componentContext) {
+        return componentContext.getSystemComponent().getParent().getDatabaseSchema(componentContext.getSystemComponent().getName());
+    }
+
 
     private String stableMacroUuid(String plantUmLSource) {
         return UUID.nameUUIDFromBytes(plantUmLSource.getBytes(StandardCharsets.UTF_8)).toString();
