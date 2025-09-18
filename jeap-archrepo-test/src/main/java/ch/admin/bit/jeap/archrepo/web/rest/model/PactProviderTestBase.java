@@ -10,11 +10,13 @@ import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
+import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.model.database.*;
 import ch.admin.bit.jeap.archrepo.persistence.*;
+import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.ServletSemanticAuthorization;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -24,9 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
-import ch.admin.bit.jeap.archrepo.metamodel.System;
-
-import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.ZoneId;
@@ -143,7 +142,7 @@ public class PactProviderTestBase {
     @State("A REST API documentation for the component 'test-component' in the system 'test-system' exists")
     void restApiDocumentationExists() {
         SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
-        when(systemComponentRepository.findByNameIgnoreCase("test-system")).thenReturn(Optional.of(systemComponent));
+        when(systemComponentRepository.findByNameIgnoreCase("test-component")).thenReturn(Optional.of(systemComponent));
 
         ApiDocDto apiDocDto = mock(ApiDocDto.class);
         when(apiDocDto.getServerUrl()).thenReturn("https://api.example.com");
