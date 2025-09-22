@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import static ch.admin.bit.jeap.archrepo.test.Pacticipants.ARCHREPO;
 import static ch.admin.bit.jeap.archrepo.test.Pacticipants.REACTION_OBSERVER_SERVICE;
@@ -378,7 +379,7 @@ public class ReactionObserverServicePactTestBase {
                                   "edgeType": "ACTION",
                                   "sourceReactionId": 77,
                                   "targetId": 123,
-                                  "targetNodeType": "REACTION"
+                                  "targetNodeType": "MESSAGE"
                                 }
                               ]
                             },
@@ -414,24 +415,30 @@ public class ReactionObserverServicePactTestBase {
             String jsonValue = objectMapper.writeValueAsString(graph.graph());
             assertThat(jsonValue).isNotEmpty();
 
-            // JsonPath checks for graph structure
+            // Check that there are exactly 2 nodes
             assertThat(JsonPath.<List<Object>>read(jsonValue, "$.nodes")).hasSize(2);
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].nodeType")).isEqualTo("MESSAGE");
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].variant")).isEqualTo("default");
-            assertThat(JsonPath.<Integer>read(jsonValue, "$.nodes[0].id")).isEqualTo(123);
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].messageType")).isEqualTo("ExistingEvent");
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[1].nodeType")).isEqualTo("REACTION");
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[1].component")).isEqualTo("notification-service");
 
+            // Find the MESSAGE node with id 123
+            List<Map<String, Object>> messageNodes = JsonPath.read(jsonValue, "$.nodes[?(@.nodeType == 'MESSAGE' && @.id == 123)]");
+            assertThat(messageNodes).hasSize(1);
+            assertThat(messageNodes.getFirst().get("variant")).isEqualTo("default");
+            assertThat(messageNodes.getFirst().get("messageType")).isEqualTo("ExistingEvent");
+
+            // Find the REACTION node with component 'notification-service'
+            List<Map<String, Object>> reactionNodes = JsonPath.read(jsonValue, "$.nodes[?(@.nodeType == 'REACTION' && @.component == 'notification-service')]");
+            assertThat(reactionNodes).hasSize(1);
+
+            // Check that there are exactly 2 edges
             assertThat(JsonPath.<List<Object>>read(jsonValue, "$.edges")).hasSize(2);
-            assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].edgeType")).isEqualTo("TRIGGER");
-            assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].sourceId")).isEqualTo(123);
-            assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo("MESSAGE");
-            assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].targetReactionId")).isEqualTo(77);
-            assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].median")).isEqualTo(10);
+
+            // Find the TRIGGER edge with specific source and target
+            List<Map<String, Object>> triggerEdges = JsonPath.read(jsonValue, "$.edges[?(@.edgeType == 'TRIGGER' && @.sourceId == 123 && @.targetReactionId == 77)]");
+            assertThat(triggerEdges).hasSize(1);
+            assertThat(triggerEdges.getFirst().get("sourceNodeType")).isEqualTo("MESSAGE");
+            assertThat(triggerEdges.getFirst().get("median")).isEqualTo(10);
+
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
     }
-
 }
