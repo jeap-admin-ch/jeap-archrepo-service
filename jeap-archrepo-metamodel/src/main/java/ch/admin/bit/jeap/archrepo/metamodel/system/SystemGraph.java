@@ -5,6 +5,7 @@ import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import java.util.UUID;
 
@@ -24,7 +25,8 @@ public class SystemGraph extends MutableDomainEntity {
     private String systemName;
 
     @Lob
-    @Column(name = "graph_data")
+    @JdbcTypeCode(java.sql.Types.BINARY)
+    @Column(name = "graph_data", columnDefinition = "BYTEA")
     private byte[] graphData;
 
     private String fingerprint;
