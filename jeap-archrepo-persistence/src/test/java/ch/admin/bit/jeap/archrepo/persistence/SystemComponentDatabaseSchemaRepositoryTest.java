@@ -67,6 +67,27 @@ class SystemComponentDatabaseSchemaRepositoryTest {
         assertThat(dbSchemaRead.get()).isEqualTo(dbSchema);
     }
 
+    @Test
+    void testGetDatabaseSchemaVersions() {
+        final String version1 = "1.2.3";
+        final String version2 = "2.3.4";
+        final String name1 = "name1";
+        final  String name2 = "name2";
+        repository.saveAndFlush(createSystemComponentDatabaseSchema(createPersistentSystemComponent("sys1", name1), version1, SERIALIZED_SCHEMA));
+        repository.saveAndFlush(createSystemComponentDatabaseSchema(createPersistentSystemComponent("sys2", name2), version2, SERIALIZED_SCHEMA));
+
+        List<DatabaseSchemaVersion> apiDocVersions = repository.getDatabaseSchemaVersions();
+        assertThat(apiDocVersions).hasSize(2);
+        assertDatabaseSchemaVersion(apiDocVersions.stream().filter(v -> v.getComponent().equalsIgnoreCase(name1)).findFirst().get(), "sys1", name1, version1);
+        assertDatabaseSchemaVersion(apiDocVersions.stream().filter(v -> v.getComponent().equalsIgnoreCase(name2)).findFirst().get(), "sys2", name2, version2);
+    }
+
+    private void assertDatabaseSchemaVersion(DatabaseSchemaVersion databaseSchemaVersion, String system, String name, String version) {
+        assertThat(databaseSchemaVersion.getSystem()).isEqualTo(system);
+        assertThat(databaseSchemaVersion.getComponent()).isEqualTo(name);
+        assertThat(databaseSchemaVersion.getVersion()).isEqualTo(version);
+    }
+
     @SuppressWarnings("SameParameterValue")
     private SystemComponentDatabaseSchema createSystemComponentDatabaseSchema(SystemComponent component, String version, byte[] schema) {
         return SystemComponentDatabaseSchema.builder()
@@ -77,11 +98,15 @@ class SystemComponentDatabaseSchemaRepositoryTest {
     }
 
     private SystemComponent createPersistentSystemComponent() {
-        Team team = teamRepository.save(Team.builder().name("team").build());
-        System system = System.builder().name(SYSTEM_NAME).defaultOwner(team).build();
+        return createPersistentSystemComponent(SYSTEM_NAME, COMPONENT_NAME);
+    }
+
+    private SystemComponent createPersistentSystemComponent(String systemName, String componentName) {
+        Team team = teamRepository.save(Team.builder().name(componentName + "_team").build());
+        System system = System.builder().name(systemName).defaultOwner(team).build();
         SystemComponent systemComponent = BackendService.builder()
                 .id(UUID.randomUUID())
-                .name(COMPONENT_NAME)
+                .name(componentName)
                 .ownedBy(team)
                 .build();
         ReflectionTestUtils.setField(systemComponent, "createdAt", ZonedDateTime.now());

@@ -51,6 +51,17 @@ public class WebSecurityConfig {
     }
     //@formatter:on
 
+    @Bean
+    @Order(90) // Higher priority than the main apiSecurityFilterChain
+    SecurityFilterChain dbSchemaVersionsChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/dbschemas/versions") // only match this path
+                .authorizeHttpRequests(r -> r
+                        .requestMatchers(HttpMethod.GET, "/api/dbschemas/versions").permitAll() // allow all requests
+                        .anyRequest().denyAll() // defensive: deny anything else accidentally falling here
+                );
+        return http.build();
+    }
+
     private RequestMatcher postToOpenApiWithBearerTokenRequestMatcher(PathPatternRequestMatcher.Builder api) {
         return new AndRequestMatcher(api.matcher("/openapi/**"), this::isPostWithBearerAuth);
     }

@@ -112,6 +112,12 @@ public class PactProviderTestBase {
                 List.of(new ApiDocVersionImpl("test-system", "test-component", "1.2.3")));
     }
 
+    @State("A model with one component with a database schema")
+    void databaseSchemaVersions() {
+        when(systemComponentDatabaseSchemaRepository.getDatabaseSchemaVersions()).thenReturn(
+                List.of(new DatabaseSchemaVersionImpl("test-system", "test-component", "1.2.3")));
+    }
+
     @State("A model with one component with observed reactions")
     void reactionStatistics() {
         when(reactionStatisticsRepository.getMaxLastModifiedAtList()).thenReturn(
@@ -205,6 +211,13 @@ public class PactProviderTestBase {
     
     @Value
     private static class ApiDocVersionImpl implements ApiDocVersion {
+        String system;
+        String component;
+        String version;
+    }
+
+    @Value
+    private static class DatabaseSchemaVersionImpl implements DatabaseSchemaVersion {
         String system;
         String component;
         String version;

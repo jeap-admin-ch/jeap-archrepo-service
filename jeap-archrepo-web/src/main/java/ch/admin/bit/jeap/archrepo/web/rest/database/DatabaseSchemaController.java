@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.web.rest.database;
 
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import ch.admin.bit.jeap.archrepo.persistence.DatabaseSchemaVersion;
 import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,17 +16,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -73,6 +73,20 @@ class DatabaseSchemaController {
             log.error("Unexpected error while updating or creating the database schema '{}'.", schemaDto, e);
             throw DatabaseSchemaException.unexpectedError(schemaDto, e);
         }
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping(value = "/versions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the database schema versions of all system components.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The database schema versions of all system components.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    })
+    public List<DatabaseSchemaVersion> getDatabaseSchemaVersions() {
+        log.debug("Retrieving database schema versions.");
+        List<DatabaseSchemaVersion> versions = systemComponentDatabaseSchemaRepository.getDatabaseSchemaVersions();
+        log.debug("Returning database schema versions for '{}' system components", versions.size());
+        return versions;
     }
 
     private Optional<ResponseEntity<Void>> updateDatabaseSchema(CreateOrUpdateDbSchemaDto schemaDto, SystemComponent systemComponent) {

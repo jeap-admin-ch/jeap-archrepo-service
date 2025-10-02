@@ -1,11 +1,13 @@
 package ch.admin.bit.jeap.archrepo.web.rest.database;
 
 import ch.admin.bit.jeap.archrepo.metamodel.System;
-import ch.admin.bit.jeap.archrepo.metamodel.database.*;
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.model.database.*;
-import ch.admin.bit.jeap.archrepo.persistence.*;
+import ch.admin.bit.jeap.archrepo.persistence.DatabaseSchemaVersion;
+import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
+import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
@@ -15,8 +17,11 @@ import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplic
 import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationToken;
 import ch.admin.bit.jeap.security.resource.token.TokenConfiguration;
 import ch.admin.bit.jeap.security.test.resource.JeapAuthenticationTestTokenBuilder;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import lombok.Value;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,7 +42,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = DatabaseSchemaController.class)
@@ -169,6 +175,26 @@ class DatabaseSchemaControllerTest {
     }
 
     @Test
+    void testGetDatabaseVersions() throws Exception {
+        DatabaseSchemaVersionImpl databaseSchemaVersion1 = new DatabaseSchemaVersionImpl(SYSTEM_NAME, "component1", "1.0.0");
+        DatabaseSchemaVersionImpl databaseSchemaVersion2 = new DatabaseSchemaVersionImpl(SYSTEM_NAME, "component2", "2.0.0");
+        List<DatabaseSchemaVersion> versions = List.of(
+                databaseSchemaVersion1,
+                databaseSchemaVersion2
+        );
+        when(systemComponentDatabaseSchemaRepository.getDatabaseSchemaVersions()).
+                thenReturn(versions);
+
+        String json = mockMvc.perform(
+                        get(DB_SCHEMA_API_PATH + "/versions").
+                                contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        List<DatabaseSchemaVersionImpl> databaseSchemaVersions = objectMapper.readValue(json, new TypeReference<>() {});
+        Assertions.assertThat(databaseSchemaVersions).containsExactly(databaseSchemaVersion1, databaseSchemaVersion2);
+    }
+
+    @Test
     void testCreateOrUpdateDbSchema_CreateForbiddenRole() throws Exception {
         JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_OTHER_ROLE);
         mockMvc.perform(
@@ -237,6 +263,13 @@ class DatabaseSchemaControllerTest {
                 .build();
         system.addSystemComponent(backendService);
         return system;
+    }
+
+    @Value
+    private static class DatabaseSchemaVersionImpl implements DatabaseSchemaVersion {
+        String system;
+        String component;
+        String version;
     }
 
 }
