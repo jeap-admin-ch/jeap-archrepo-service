@@ -8,15 +8,13 @@ import ch.admin.bit.jeap.archrepo.model.database.*;
 import ch.admin.bit.jeap.archrepo.persistence.DatabaseSchemaVersion;
 import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
 import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
-import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
-import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
+import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
-import ch.admin.bit.jeap.security.resource.configuration.MvcSecurityConfiguration;
-import ch.admin.bit.jeap.security.resource.properties.ResourceServerProperties;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplicationRole;
-import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationToken;
-import ch.admin.bit.jeap.security.resource.token.TokenConfiguration;
-import ch.admin.bit.jeap.security.test.resource.JeapAuthenticationTestTokenBuilder;
+import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationContext;
+import ch.admin.bit.jeap.security.test.jws.JwsBuilder;
+import ch.admin.bit.jeap.security.test.jws.JwsBuilderFactory;
+import ch.admin.bit.jeap.security.test.resource.configuration.JeapOAuth2IntegrationTestResourceConfiguration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -27,8 +25,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,15 +39,17 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = DatabaseSchemaController.class)
-@Import({ArchRepoWebTestConfiguration.class, WebSecurityConfig.class,
-        MvcSecurityConfiguration.class, ResourceServerProperties.class, TokenConfiguration.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+        classes = ArchRepoApplication.class,
+        properties = {  "server.port=8901",
+                "jeap.security.oauth2.resourceserver.authorization-server.issuer=" + JwsBuilder.DEFAULT_ISSUER,
+                "jeap.security.oauth2.resourceserver.authorization-server.jwk-set-uri=http://localhost:${server.port}/test-app/.well-known/jwks.json"})
+@Import(JeapOAuth2IntegrationTestResourceConfiguration.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class DatabaseSchemaControllerTest {
@@ -69,6 +70,12 @@ class DatabaseSchemaControllerTest {
             .resource("database-schema")
             .operation("other")
             .build();
+
+    private static final String SUBJECT = "69368608-D736-43C8-5F76-55B7BF168299";
+    private static final JeapAuthenticationContext CONTEXT = JeapAuthenticationContext.SYS;
+
+    @Autowired
+    private JwsBuilderFactory jwsBuilderFactory;
 
     @Autowired
     private MockMvc mockMvc;
@@ -93,6 +100,7 @@ class DatabaseSchemaControllerTest {
 
     @Test
     void testCreateOrUpdateDbSchema_CreateValid() throws Exception {
+        final String bearerAuth = createBearerAuthForUserRoles(DB_SCHEMA_WRITE_ROLE);
         final System system = createSystem();
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
         when(systemComponentService.findOrCreateSystemComponent(COMPONENT_NAME)).thenReturn(systemComponent);
@@ -101,15 +109,14 @@ class DatabaseSchemaControllerTest {
         // capturing the creation of a db schema
         when(systemComponentDatabaseSchemaRepository.saveAndFlush(systemComponentDatabaseSchemaArgumentCaptor.capture())).
                 thenAnswer(invocation -> invocation.getArgument(0));
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE);
         CreateOrUpdateDbSchemaDto createOrUpdateDbSchemaDto = getCreateOrUpdateDbSchemaDto();
         String content = getJsonString(createOrUpdateDbSchemaDto);
 
         mockMvc.perform(
                 post(DB_SCHEMA_API_PATH).
+                        header(HttpHeaders.AUTHORIZATION, bearerAuth).
                         contentType(MediaType.APPLICATION_JSON).
                         content(content).
-                        with(authentication(authentication)).
                         with(csrf())).
                 andExpect(status().isCreated());
 
@@ -122,7 +129,7 @@ class DatabaseSchemaControllerTest {
 
     @Test
     void testCreateOrUpdateDbSchema_CreateInvalid() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE);
+        final String bearerAuth = createBearerAuthForUserRoles(DB_SCHEMA_WRITE_ROLE);
         String missingTablesContent = """
                             {
                                 "systemName": "test-system",
@@ -135,15 +142,16 @@ class DatabaseSchemaControllerTest {
 
         mockMvc.perform(
                         post(DB_SCHEMA_API_PATH).
+                                header(HttpHeaders.AUTHORIZATION, bearerAuth).
                                 contentType(MediaType.APPLICATION_JSON).
                                 content(missingTablesContent).
-                                with(authentication(authentication)).
                                 with(csrf())).
                 andExpect(status().isBadRequest());
     }
 
     @Test
     void testCreateOrUpdateDbSchema_Update() throws Exception {
+        final String bearerAuth = createBearerAuthForUserRoles(DB_SCHEMA_WRITE_ROLE);
         final System system = createSystem();
         final SystemComponent systemComponent = system.getSystemComponents().getFirst();
         when(systemComponentService.findOrCreateSystemComponent(COMPONENT_NAME)).thenReturn(systemComponent);
@@ -156,15 +164,14 @@ class DatabaseSchemaControllerTest {
                 .build();
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).
                 thenReturn(Optional.of(existingSchema));
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_WRITE_ROLE);
         CreateOrUpdateDbSchemaDto createOrUpdateDbSchemaDto = getCreateOrUpdateDbSchemaDto();
         String content = getJsonString(createOrUpdateDbSchemaDto);
 
         mockMvc.perform(
                         post(DB_SCHEMA_API_PATH).
+                                header(HttpHeaders.AUTHORIZATION, bearerAuth).
                                 contentType(MediaType.APPLICATION_JSON).
                                 content(content).
-                                with(authentication(authentication)).
                                 with(csrf())).
                 andExpect(status().isOk());
 
@@ -196,12 +203,12 @@ class DatabaseSchemaControllerTest {
 
     @Test
     void testCreateOrUpdateDbSchema_CreateForbiddenRole() throws Exception {
-        JeapAuthenticationToken authentication = createAuthenticationForUserRoles(DB_SCHEMA_OTHER_ROLE);
+        final String bearerAuth = createBearerAuthForUserRoles(DB_SCHEMA_OTHER_ROLE);
         mockMvc.perform(
                         post(DB_SCHEMA_API_PATH).
+                                header(HttpHeaders.AUTHORIZATION, bearerAuth).
                                 contentType(MediaType.APPLICATION_JSON).
                                 content(getJsonString(getCreateOrUpdateDbSchemaDto())).
-                                with(authentication(authentication)).
                                 with(csrf())).
                 andExpect(status().isForbidden());
     }
@@ -250,9 +257,6 @@ class DatabaseSchemaControllerTest {
         return objectMapper.writeValueAsString(o);
     }
 
-    private JeapAuthenticationToken createAuthenticationForUserRoles(SemanticApplicationRole... userroles)  {
-        return JeapAuthenticationTestTokenBuilder.create().withUserRoles(userroles).build();
-    }
 
     private System createSystem() {
         System system = System.builder()
@@ -270,6 +274,12 @@ class DatabaseSchemaControllerTest {
         String system;
         String component;
         String version;
+    }
+
+    private String createBearerAuthForUserRoles(SemanticApplicationRole... userroles) {
+        return "Bearer " + jwsBuilderFactory.createValidForFixedLongPeriodBuilder(SUBJECT, CONTEXT).
+                withUserRoles(userroles).
+                build().serialize();
     }
 
 }

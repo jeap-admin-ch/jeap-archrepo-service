@@ -32,7 +32,7 @@ public class WebSecurityConfig {
         PathPatternRequestMatcher.Builder api = PathPatternRequestMatcher.withDefaults().basePath("/api");
         RequestMatcher apiExcludedDatabaseSchemaExcludedOpenApiPostWithBearerAuth = new AndRequestMatcher(
                 api.matcher("/**"),
-                new NegatedRequestMatcher(api.matcher("/dbschemas/**")), // OAuth2 protected
+                new NegatedRequestMatcher(postToDbSchemaWithBearerTokenRequestMatcher(api)), // OAuth2 protected
                 new NegatedRequestMatcher(postToOpenApiWithBearerTokenRequestMatcher(api)) // OAuth2 protected
         );
         http.securityMatcher(apiExcludedDatabaseSchemaExcludedOpenApiPostWithBearerAuth);
@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/model/*/relations").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/rest-api-relation-without-pact").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/system-components-without-open-api-spec").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/dbschemas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/openapi/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reactions/**").permitAll()
                 .anyRequest().hasRole("api"));
@@ -51,19 +52,12 @@ public class WebSecurityConfig {
     }
     //@formatter:on
 
-    @Bean
-    @Order(90) // Higher priority than the main apiSecurityFilterChain
-    SecurityFilterChain dbSchemaVersionsChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/dbschemas/versions") // only match this path
-                .authorizeHttpRequests(r -> r
-                        .requestMatchers(HttpMethod.GET, "/api/dbschemas/versions").permitAll() // allow all requests
-                        .anyRequest().denyAll() // defensive: deny anything else accidentally falling here
-                );
-        return http.build();
-    }
-
     private RequestMatcher postToOpenApiWithBearerTokenRequestMatcher(PathPatternRequestMatcher.Builder api) {
         return new AndRequestMatcher(api.matcher("/openapi/**"), this::isPostWithBearerAuth);
+    }
+
+    private RequestMatcher postToDbSchemaWithBearerTokenRequestMatcher(PathPatternRequestMatcher.Builder api) {
+        return new AndRequestMatcher(api.matcher("/dbschemas/**"), this::isPostWithBearerAuth);
     }
 
     private boolean isPostWithBearerAuth(HttpServletRequest request) {
