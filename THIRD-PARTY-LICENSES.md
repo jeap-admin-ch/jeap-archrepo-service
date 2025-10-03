@@ -83,6 +83,7 @@ Apache License Version 2.0
  * Apache Commons Codec - [commons-codec:commons-codec](https://commons.apache.org/proper/commons-codec/)
  * Apache Commons Collections - [commons-collections:commons-collections](http://commons.apache.org/collections/)
  * Apache Commons IO - [commons-io:commons-io](https://commons.apache.org/proper/commons-io/)
+ * Apache Commons IO - [commons-io:commons-io](https://commons.apache.org/proper/commons-io/)
  * Commons Lang - [commons-lang:commons-lang](http://commons.apache.org/lang/)
  * Apache Commons Logging - [commons-logging:commons-logging](http://commons.apache.org/proper/commons-logging/)
  * Apache Commons Logging - [commons-logging:commons-logging](https://commons.apache.org/proper/commons-logging/)
@@ -312,6 +313,7 @@ Apache License Version 2.0
  * AWS Java SDK :: Third Party :: Jackson-core - [software.amazon.awssdk:third-party-jackson-core](https://aws.amazon.com/sdkforjava)
  * AWS Java SDK :: HTTP Clients :: URL Connection - [software.amazon.awssdk:url-connection-client](https://aws.amazon.com/sdkforjava/http-clients/url-connection-client)
  * AWS Java SDK :: Utilities - [software.amazon.awssdk:utils](https://aws.amazon.com/sdkforjava/utils)
+ * AWS Java SDK :: Utils Lite - [software.amazon.awssdk:utils-lite](https://aws.amazon.com/sdkforjava)
  * AWS Event Stream - [software.amazon.eventstream:eventstream](https://github.com/awslabs/aws-eventstream-java)
  * AWS Advanced JDBC Wrapper - [software.amazon.jdbc:aws-advanced-jdbc-wrapper](https://github.com/awslabs/aws-advanced-jdbc-wrapper)
 
@@ -355,6 +357,7 @@ BSD License 3
 Bouncy Castle Licence
 -------------------------------
 
+ * Bouncy Castle Provider - [org.bouncycastle:bcprov-jdk18on](https://www.bouncycastle.org/download/bouncy-castle-java/)
  * Bouncy Castle Provider - [org.bouncycastle:bcprov-jdk18on](https://www.bouncycastle.org/download/bouncy-castle-java/)
 
 CDDL
