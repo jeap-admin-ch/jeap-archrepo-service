@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
         classes = ArchRepoApplication.class,
-        properties = {  "server.port=8901",
+        properties = {  "server.port=8902",
                 "jeap.security.oauth2.resourceserver.authorization-server.issuer=" + JwsBuilder.DEFAULT_ISSUER,
                 "jeap.security.oauth2.resourceserver.authorization-server.jwk-set-uri=http://localhost:${server.port}/test-app/.well-known/jwks.json"})
 @Import(JeapOAuth2IntegrationTestResourceConfiguration.class)
