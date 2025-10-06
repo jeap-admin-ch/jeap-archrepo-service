@@ -24,6 +24,11 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
     private final ReactionObserverService reactionObserverService;
     private final ReactionStatisticsRepository reactionStatisticsRepository;
 
+    @Override
+    public int getOrder() {
+        return Integer.MAX_VALUE - 20;
+    }
+
     /**
      * Import observed reactions into the model.
      * @param model current model
@@ -45,6 +50,7 @@ class ReactionsObservedStatisticsImporter implements ArchRepoImporter {
                         ReactionStatistics reactionStatistics = toEntity(statisticsDto, systemComponent);
                         systemComponent.addReactionStatistics(reactionStatistics);
                         reactionStatisticsRepository.save(reactionStatistics);
+                        log.trace("Saved reaction statistics: {}", reactionStatistics);
                     }
                 });
             } else {
