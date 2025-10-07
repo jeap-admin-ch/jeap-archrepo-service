@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -735,7 +736,9 @@ class TemplateRendererTest {
                 .scope("public")
                 .build();
 
-        String content = templateRenderer.renderEventPage(event);
+        List<String> uploadedAttachmentNames = List.of("graph-event1-variant1.png", "graph-event1-variant2.png");
+
+        String content = templateRenderer.renderEventPage(event, uploadedAttachmentNames);
         assertContent("event.expected", content);
     }
 
@@ -771,7 +774,9 @@ class TemplateRendererTest {
                 .scope("public")
                 .build();
 
-        String content = templateRenderer.renderCommandPage(command);
+        List<String> uploadedAttachmentNames = List.of("graph-Command1-variant1.png", "graph-Command1-variant2.png");
+
+        String content = templateRenderer.renderCommandPage(command, uploadedAttachmentNames);
         assertContent("command.expected", content);
     }
 

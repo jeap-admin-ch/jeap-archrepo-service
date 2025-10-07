@@ -65,6 +65,8 @@
             </td>
             <td colspan="1">
                 <a href="linkS">value</a>
+
+
                 <ac:structured-macro ac:name="code" ac:schema-version="1">
                     <ac:parameter ac:name="title">Schema</ac:parameter>
                     <ac:parameter ac:name="collapse">true</ac:parameter>
@@ -85,6 +87,7 @@
             <td colspan="1">
                 <a href="linkS">value2</a>
                 <p>Avro Schema Compatibility with Version 1.1.0: <strong>BACKWARD</strong></p>
+
                 <ac:structured-macro ac:name="code" ac:schema-version="1">
                     <ac:parameter ac:name="title">Schema</ac:parameter>
                     <ac:parameter ac:name="collapse">true</ac:parameter>
@@ -163,3 +166,26 @@
         </tr>
         </tbody>
     </table>
+
+
+    <div>
+        <p><br /></p>
+        <h2>Message Graphs</h2>
+        <div>
+            <ac:image ac:border="true">
+                <span><ri:attachment ri:filename='graph-Command1-variant1.png' /></span>
+            </ac:image>
+        </div>
+        <div>
+            <ac:image ac:border="true">
+                <span><ri:attachment ri:filename='graph-Command1-variant2.png' /></span>
+            </ac:image>
+        </div>
+        <style>
+            ac\\:image img {
+                max-height: 400px;
+                height: auto;
+            }
+        </style>
+
+    </div>

@@ -1,5 +1,7 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
+import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 public interface ConfluenceAdapter {
@@ -7,6 +9,9 @@ public interface ConfluenceAdapter {
      * @return Page ID
      */
     String getPageByName(String pageName);
+
+
+    void addOrUpdateAttachment(String pageId, String attachmentFileName, InputStream contentStream);
 
     /**
      * @return Page ID
@@ -19,4 +24,6 @@ public interface ConfluenceAdapter {
      * @return Deleted page count
      */
     int deleteOrphanPages(String rootPageId, Set<String> generatedPageIds);
+
+    void deleteUnusedAttachments(String pageId, List<String> attachmentNames);
 }

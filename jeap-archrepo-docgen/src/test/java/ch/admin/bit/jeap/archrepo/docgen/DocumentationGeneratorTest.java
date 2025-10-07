@@ -1,66 +1,98 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
-import ch.admin.bit.jeap.archrepo.docgen.plantuml.PlantUmlRenderer;
+import ch.admin.bit.jeap.archrepo.docgen.graph.MessageGraphAttachmentService;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
+import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("SpringJavaAutowiredMembersInspection")
 @ExtendWith(MockitoExtension.class)
-@ExtendWith(SpringExtension.class)
 class DocumentationGeneratorTest {
 
     private static final String ROOT_PAGE_NAME = "rootPageName";
-
-    @Autowired
-    ApplicationContext applicationContext;
+    private static final String ROOT_PAGE_ID = "rootPageId";
+    private static final String SYSTEM_NAME = "MockSystem";
 
     @Mock
-    ConfluenceAdapter confluenceAdapterMock;
+    private ConfluenceAdapter confluenceAdapter;
 
+    @Mock
+    private MessageGraphAttachmentService messageGraphAttachmentService;
+
+    @Mock
+    private TemplateRenderer templateRenderer;
+
+    @Mock
+    private DocumentationGeneratorConfluenceProperties props;
+
+    @InjectMocks
     private DocumentationGenerator documentationGenerator;
-
-    @Test
-    void generate() {
-        // given
-        String rootPageId = "rootPageId";
-        String systemName = "system";
-        System system = System.builder()
-                .name(systemName)
-                .build();
-        ArchitectureModel model = ArchitectureModel.builder()
-                .systems(List.of(system))
-                .build();
-        doReturn(rootPageId).when(confluenceAdapterMock).getPageByName(ROOT_PAGE_NAME);
-        doAnswer(args -> args.getArgument(1).equals(systemName) ? rootPageId : UUID.randomUUID().toString())
-                .when(confluenceAdapterMock).addOrUpdatePageUnderAncestor(anyString(), anyString(), anyString());
-
-        // when
-        documentationGenerator.generate(model);
-
-        // then
-        verify(confluenceAdapterMock)
-                .addOrUpdatePageUnderAncestor(eq(rootPageId), eq(systemName + " (System)"), anyString());
-    }
 
     @BeforeEach
     void setUp() {
-        DocumentationGeneratorConfiguration generatorConfig = new DocumentationGeneratorConfiguration();
-        TemplateRenderer templateRenderer = new TemplateRenderer(generatorConfig.templateEngine(applicationContext), new PlantUmlRenderer());
-        DocumentationGeneratorConfluenceProperties props = new DocumentationGeneratorConfluenceProperties();
-        props.setRootPageName(ROOT_PAGE_NAME);
-        documentationGenerator = new DocumentationGenerator(confluenceAdapterMock, templateRenderer, props);
+        when(props.getRootPageName()).thenReturn(ROOT_PAGE_NAME);
+    }
+
+    @Test
+    void generate_withMocks_createsExpectedPages() {
+        // Mocks for SystemComponent, Event and Command
+        SystemComponent componentMock = mock(SystemComponent.class);
+        when(componentMock.getName()).thenReturn("ComponentA");
+
+        Event eventMock = mock(Event.class);
+        when(eventMock.getMessageTypeName()).thenReturn("EventA");
+
+        Command commandMock = mock(Command.class);
+        when(commandMock.getMessageTypeName()).thenReturn("CommandA");
+
+        // Mock for System
+        System systemMock = mock(System.class);
+        when(systemMock.getName()).thenReturn(SYSTEM_NAME);
+        when(systemMock.getSystemComponents()).thenReturn(List.of(componentMock));
+        when(systemMock.getEvents()).thenReturn(List.of(eventMock));
+        when(systemMock.getCommands()).thenReturn(List.of(commandMock));
+
+        ArchitectureModel model = ArchitectureModel.builder()
+                .systems(List.of(systemMock))
+                .build();
+
+        // Handling of the ConfluenceAdapter-Mocks
+        when(confluenceAdapter.getPageByName(ROOT_PAGE_NAME)).thenReturn(ROOT_PAGE_ID);
+        when(confluenceAdapter.addOrUpdatePageUnderAncestor(anyString(), anyString(), anyString()))
+                .thenAnswer(invocation -> UUID.randomUUID().toString());
+
+        // Handling of the Attachment-Mocks
+        when(messageGraphAttachmentService.getAttachmentNames(any())).thenReturn(List.of("graph1.png"));
+        doNothing().when(messageGraphAttachmentService).generateAttachments(any(), anyString());
+
+        // Handling of the TemplateRenderer-Mocks
+        when(templateRenderer.renderSystemPage(any(), any())).thenReturn("Rendered System Page");
+        when(templateRenderer.renderIndexPage()).thenReturn("Rendered Index Page");
+        when(templateRenderer.renderComponentPage(any(), any())).thenReturn("Rendered Component Page");
+        when(templateRenderer.renderEventPage(any(), any())).thenReturn("Rendered Event Page");
+        when(templateRenderer.renderCommandPage(any(), any())).thenReturn("Rendered Command Page");
+
+        // Ausführung
+        documentationGenerator.generate(model);
+
+        // Verifikation
+        verify(confluenceAdapter).addOrUpdatePageUnderAncestor(eq(ROOT_PAGE_ID), eq(SYSTEM_NAME + " (System)"), anyString());
+        verify(templateRenderer).renderSystemPage(any(), eq(systemMock));
+        verify(templateRenderer).renderIndexPage();
+        verify(templateRenderer).renderComponentPage(any(), eq(componentMock));
+        verify(templateRenderer).renderEventPage(eq(eventMock), any());
+        verify(templateRenderer).renderCommandPage(eq(commandMock), any());
     }
 }

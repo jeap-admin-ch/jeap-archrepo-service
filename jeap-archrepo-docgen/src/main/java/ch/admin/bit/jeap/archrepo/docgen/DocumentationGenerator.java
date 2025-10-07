@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
+import ch.admin.bit.jeap.archrepo.docgen.graph.MessageGraphAttachmentService;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
@@ -8,6 +9,8 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class DocumentationGenerator {
     private final ConfluenceAdapter confluenceAdapter;
     private final TemplateRenderer templateRenderer;
     private final DocumentationGeneratorConfluenceProperties props;
+    private final MessageGraphAttachmentService messageGraphAttachmentService;
 
     public void generate(ArchitectureModel model) {
         String rootPageId = confluenceAdapter.getPageByName(props.getRootPageName());
@@ -52,14 +56,20 @@ public class DocumentationGenerator {
     }
 
     private void generateEvent(GeneratorContext context, String ancestorId, Event event) {
-        String content = templateRenderer.renderEventPage(event);
+        List<String> graphAttachmentNames = messageGraphAttachmentService.getAttachmentNames(event);
+
+        String content = templateRenderer.renderEventPage(event, graphAttachmentNames);
         String pageId = confluenceAdapter.addOrUpdatePageUnderAncestor(ancestorId, event.getMessageTypeName(), content);
+        messageGraphAttachmentService.generateAttachments(event, pageId);
         context.addGeneratedPageIds(pageId);
     }
 
     private void generateCommand(GeneratorContext context, String ancestorId, Command command) {
-        String content = templateRenderer.renderCommandPage(command);
+        List<String> graphAttachmentNames = messageGraphAttachmentService.getAttachmentNames(command);
+
+        String content = templateRenderer.renderCommandPage(command, graphAttachmentNames);
         String pageId = confluenceAdapter.addOrUpdatePageUnderAncestor(ancestorId, command.getMessageTypeName(), content);
+        messageGraphAttachmentService.generateAttachments(command, pageId);
         context.addGeneratedPageIds(pageId);
     }
 }

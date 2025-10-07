@@ -142,15 +142,17 @@ class TemplateRenderer {
         return UUID.nameUUIDFromBytes(plantUmLSource.getBytes(StandardCharsets.UTF_8)).toString();
     }
 
-    String renderEventPage(Event event) {
+    String renderEventPage(Event event, List<String> uploadedAttachmentNames) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", event);
+        context.setVariable("attachmentNames", uploadedAttachmentNames);
         return templateEngine.process("event", context).trim();
     }
 
-    String renderCommandPage(Command command) {
+    String renderCommandPage(Command command, List<String> uploadedAttachmentNames) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", command);
+        context.setVariable("attachmentNames", uploadedAttachmentNames);
         return templateEngine.process("command", context).trim();
     }
 }

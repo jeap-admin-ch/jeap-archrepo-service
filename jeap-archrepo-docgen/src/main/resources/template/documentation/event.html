@@ -73,4 +73,21 @@
         </tbody>
     </table>
     <p th:if="${messageType.consumerContracts.empty}">Keine</p>
+
+    <div th:if="${attachmentNames}">
+        <p><br /></p>
+        <h2>Message Graphs</h2>
+        <div th:each="attachmentName : ${attachmentNames}">
+            <ac:image ac:border="true">
+                <span th:utext="|<ri:attachment ri:filename='${attachmentName}' />|"></span>
+            </ac:image>
+        </div>
+        <style>
+            ac\\:image img {
+                max-height: 400px;
+                height: auto;
+            }
+        </style>
+    </div>
+
 </th:block>

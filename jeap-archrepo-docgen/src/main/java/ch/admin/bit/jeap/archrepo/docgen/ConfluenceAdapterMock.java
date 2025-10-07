@@ -2,6 +2,9 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -15,6 +18,17 @@ public class ConfluenceAdapterMock implements ConfluenceAdapter {
     }
 
     @Override
+    public void addOrUpdateAttachment(String pageId, String attachmentFileName, InputStream contentStream) {
+        log.info("Add or update attachment: pageId={} attachmentFileName={}", pageId, attachmentFileName);
+        try {
+            int size = contentStream.available();
+            log.debug("Attachment '{}' has {} bytes of content.", attachmentFileName, size);
+        } catch (IOException e) {
+            log.warn("Could not read content stream for attachment '{}': {}", attachmentFileName, e.getMessage());
+        }
+    }
+
+    @Override
     public String addOrUpdatePageUnderAncestor(String ancestorId, String pageName, String content) {
         int fakePageid = (ancestorId + pageName).hashCode();
         log.info("Add or update page: ancestorId={} pageName={} fakePageId={}", ancestorId, pageName, fakePageid);
@@ -24,5 +38,19 @@ public class ConfluenceAdapterMock implements ConfluenceAdapter {
     @Override
     public int deleteOrphanPages(String rootPageId, Set<String> generatedPageIds) {
         return 0;
+    }
+
+    @Override
+    public void deleteUnusedAttachments(String ancestorId, List<String> attachmentNames) {
+        log.info("Delete unused attachments under ancestorId={} with kept attachments={}", ancestorId, attachmentNames);
+        List<String> allAttachments = List.of("tbd-notes.txt", "tbd-graph.png");
+        Set<String> toBeKept = Set.copyOf(attachmentNames);
+        List<String> toBeDeleted = allAttachments.stream()
+                .filter(att -> !toBeKept.contains(att))
+                .toList();
+
+        for (String deleted : toBeDeleted) {
+            log.debug("Attachment '{}' deleted under ancestorId={}", deleted, ancestorId);
+        }
     }
 }

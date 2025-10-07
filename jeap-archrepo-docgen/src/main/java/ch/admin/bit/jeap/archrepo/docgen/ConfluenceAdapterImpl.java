@@ -2,13 +2,13 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceAttachment;
 import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceClient;
 import org.sahli.asciidoc.confluence.publisher.client.http.ConfluencePage;
 import org.sahli.asciidoc.confluence.publisher.client.http.NotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.io.InputStream;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
@@ -34,6 +34,46 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
     @Override
     public String getPageByName(String pageName) {
         return confluenceClient.getPageByTitle(props.getSpaceKey(), pageName);
+    }
+
+    @Override
+    public void deleteUnusedAttachments(String pageId, List<String> attachmentNames) {
+        try {
+            List<ConfluenceAttachment> attachments = confluenceClient.getAttachments(pageId);
+            Set<String> toBeKept = new HashSet<>(attachmentNames);
+            List<ConfluenceAttachment> toBeDeleted = attachments.stream()
+                    .filter(att -> !toBeKept.contains(att.getTitle()))
+                    .toList();
+            for (ConfluenceAttachment confluenceAttachment : toBeDeleted) {
+                confluenceClient.deleteAttachment(confluenceAttachment.getId());
+                log.info("Attachment '{}' deleted.", confluenceAttachment.getTitle());
+            }
+        } catch (Exception e) {
+            log.error("Error while deleting unused attachments: {}", e.getMessage(), e);
+            throw new RuntimeException("Deletion of unused attachments failed.", e);
+        }
+    }
+
+    @Override
+    public void addOrUpdateAttachment(String pageId, String attachmentFileName, InputStream contentStream) {
+        try {
+            List<ConfluenceAttachment> attachments = confluenceClient.getAttachments(pageId);
+            Optional<ConfluenceAttachment> match = attachments.stream()
+                    .filter(att -> att.getTitle().equals(attachmentFileName))
+                    .findFirst();
+
+            if (match.isPresent()) {
+                String attachmentId = match.get().getId();
+                confluenceClient.updateAttachmentContent(pageId, attachmentId, contentStream);
+                log.debug("Attachment '{}' updated.", attachmentFileName);
+            } else {
+                confluenceClient.addAttachment(pageId, attachmentFileName, contentStream);
+                log.debug("Attachment '{}' added.", attachmentFileName);
+            }
+        } catch (Exception e) {
+            log.error("Error while adding or updating the attachment '{}': {}", attachmentFileName, e.getMessage(), e);
+            throw new RuntimeException("Upload of attachment failed.", e);
+        }
     }
 
     @Override
