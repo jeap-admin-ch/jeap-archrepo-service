@@ -18,4 +18,11 @@ public interface SystemGraphRepository extends JpaRepository<SystemGraph, UUID> 
     @Transactional
     @Query(value = "UPDATE system_graph SET graph_data = :graphData, fingerprint = :fingerprint, modified_at = CURRENT_TIMESTAMP WHERE system_name = :systemName AND fingerprint != :fingerprint", nativeQuery = true)
     void updateGraphDataAndFingerprintIfFingerprintChanged(String systemName, byte[] graphData, String fingerprint);
+
+    SystemGraph findBySystemNameIgnoreCase(String systemName);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE SystemGraph g SET g.lastPublishedFingerprint = :fingerprint WHERE g.id = :id")
+    void updateLastPublishedFingerprint(UUID id, String fingerprint);
 }

@@ -31,15 +31,19 @@ public class SystemGraph extends MutableDomainEntity {
 
     private String fingerprint;
 
+    @Column(name = "last_published_fingerprint")
+    private String lastPublishedFingerprint;
+
     protected SystemGraph() {
         super();
     }
 
     @Builder
-    public SystemGraph(String systemName, byte[] graphData, String fingerprint) {
+    public SystemGraph(String systemName, byte[] graphData, String fingerprint, String lastPublishedFingerprint) {
         this.id = Generators.timeBasedEpochGenerator().generate();
         this.systemName = systemName;
         this.graphData = graphData;
         this.fingerprint = fingerprint;
+        this.lastPublishedFingerprint = lastPublishedFingerprint;
     }
 }

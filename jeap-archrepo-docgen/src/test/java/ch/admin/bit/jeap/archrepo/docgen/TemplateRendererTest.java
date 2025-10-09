@@ -93,7 +93,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system);
+        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
 
         assertContent("system.expected", content);
     }
@@ -141,7 +141,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system);
+        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
         assertContent("systemwithevent.expected", content);
     }
 
@@ -188,7 +188,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system);
+        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
         assertContent("systemwithcommand.expected", content);
     }
 
@@ -226,7 +226,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system);
+        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
         assertContent("systemwithnullevent.expected", content);
     }
 
@@ -244,7 +244,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("component.expected", content);
     }
 
@@ -307,7 +307,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithevent.expected", content);
     }
 
@@ -360,7 +360,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithcommandevent.expected", content);
     }
 
@@ -452,7 +452,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithcommand.expected", content);
     }
 
@@ -508,7 +508,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, component);
+        String content = templateRenderer.renderComponentPage(model, component, "graph-Component.png");
         assertContent("componentwithnullconsumerprovider.expected", content);
     }
 
@@ -571,7 +571,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithrestrelations.expected", content);
     }
 
@@ -615,7 +615,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithOpenApiUrl.expected", content);
     }
 
@@ -632,7 +632,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertThat(content).contains("Kein Datenbankschema bekannt.");
     }
 
@@ -662,7 +662,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRendererWithMock.renderComponentPage(model, systemComponent);
+        String content = templateRendererWithMock.renderComponentPage(model, systemComponent, "graph-system.png");
         assertThat(content).contains("Datenbankschema zu gross (50001). Dokumentation wird nicht generiert.");
     }
 
@@ -700,7 +700,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithDatabaseSchema.expected", content);
     }
 
@@ -871,7 +871,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent);
+        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
         assertContent("componentwithreactions.expected", content);
     }
 

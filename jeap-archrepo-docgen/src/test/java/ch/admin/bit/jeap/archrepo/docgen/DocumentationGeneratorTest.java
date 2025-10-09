@@ -1,6 +1,8 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
+import ch.admin.bit.jeap.archrepo.docgen.graph.ComponentGraphAttachmentService;
 import ch.admin.bit.jeap.archrepo.docgen.graph.MessageGraphAttachmentService;
+import ch.admin.bit.jeap.archrepo.docgen.graph.SystemGraphAttachmentService;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
@@ -30,6 +32,12 @@ class DocumentationGeneratorTest {
 
     @Mock
     private MessageGraphAttachmentService messageGraphAttachmentService;
+
+    @Mock
+    private SystemGraphAttachmentService systemGraphAttachmentService;
+
+    @Mock
+    private ComponentGraphAttachmentService componentGraphAttachmentService;
 
     @Mock
     private TemplateRenderer templateRenderer;
@@ -68,31 +76,41 @@ class DocumentationGeneratorTest {
                 .systems(List.of(systemMock))
                 .build();
 
-        // Handling of the ConfluenceAdapter-Mocks
+        // ConfluenceAdapter mocks
         when(confluenceAdapter.getPageByName(ROOT_PAGE_NAME)).thenReturn(ROOT_PAGE_ID);
         when(confluenceAdapter.addOrUpdatePageUnderAncestor(anyString(), anyString(), anyString()))
                 .thenAnswer(invocation -> UUID.randomUUID().toString());
 
-        // Handling of the Attachment-Mocks
-        when(messageGraphAttachmentService.getAttachmentNames(any())).thenReturn(List.of("graph1.png"));
-        doNothing().when(messageGraphAttachmentService).generateAttachments(any(), anyString());
+        // Attachment mocks
+        when(systemGraphAttachmentService.getSystemAttachmentNameIfExists(eq(SYSTEM_NAME))).thenReturn("systemGraph.png");
+        doNothing().when(systemGraphAttachmentService).generateAttachment(eq(systemMock), anyString());
 
-        // Handling of the TemplateRenderer-Mocks
-        when(templateRenderer.renderSystemPage(any(), any())).thenReturn("Rendered System Page");
+        when(componentGraphAttachmentService.getComponentAttachmentNameIfExists(eq("ComponentA"))).thenReturn("componentGraph.png");
+        doNothing().when(componentGraphAttachmentService).generateAttachment(eq(componentMock), anyString());
+
+        when(messageGraphAttachmentService.getAttachmentNames(eq(eventMock))).thenReturn(List.of("eventGraph.png"));
+        doNothing().when(messageGraphAttachmentService).generateAttachments(eq(eventMock), anyString());
+
+        // TemplateRenderer mocks
+        when(templateRenderer.renderSystemPage(any(), eq(systemMock), any())).thenReturn("Rendered System Page");
         when(templateRenderer.renderIndexPage()).thenReturn("Rendered Index Page");
-        when(templateRenderer.renderComponentPage(any(), any())).thenReturn("Rendered Component Page");
-        when(templateRenderer.renderEventPage(any(), any())).thenReturn("Rendered Event Page");
-        when(templateRenderer.renderCommandPage(any(), any())).thenReturn("Rendered Command Page");
+        when(templateRenderer.renderComponentPage(any(), eq(componentMock), any())).thenReturn("Rendered Component Page");
+        when(templateRenderer.renderEventPage(eq(eventMock), any())).thenReturn("Rendered Event Page");
+        when(templateRenderer.renderCommandPage(eq(commandMock), any())).thenReturn("Rendered Command Page");
 
-        // Ausführung
+        // Execution
         documentationGenerator.generate(model);
 
-        // Verifikation
+        // Verification
         verify(confluenceAdapter).addOrUpdatePageUnderAncestor(eq(ROOT_PAGE_ID), eq(SYSTEM_NAME + " (System)"), anyString());
-        verify(templateRenderer).renderSystemPage(any(), eq(systemMock));
+        verify(templateRenderer).renderSystemPage(any(), eq(systemMock), any());
         verify(templateRenderer).renderIndexPage();
-        verify(templateRenderer).renderComponentPage(any(), eq(componentMock));
+        verify(templateRenderer).renderComponentPage(any(), eq(componentMock), any());
         verify(templateRenderer).renderEventPage(eq(eventMock), any());
         verify(templateRenderer).renderCommandPage(eq(commandMock), any());
+
+        verify(systemGraphAttachmentService).generateAttachment(eq(systemMock), anyString());
+        verify(componentGraphAttachmentService).generateAttachment(eq(componentMock), anyString());
+        verify(messageGraphAttachmentService).generateAttachments(eq(eventMock), anyString());
     }
 }

@@ -48,8 +48,9 @@
     <h1>Datenmodell</h1>
     <p>Kein Datenbankschema bekannt.</p>
 
-    <h1>Rest API</h1>
 
+
+    <h1>Rest API</h1>
     <p>-</p>
 
 
@@ -182,7 +183,23 @@
     </table>
 
 
+
     <h2>Reaktionen</h2>
 
 
     <p>Keine</p>
+
+
+    <div>
+        <p><br /></p>
+        <h2>Message Graph</h2>
+        <ac:image ac:border="true">
+            <span><ri:attachment ri:filename='graph-Component.png' /></span>
+        </ac:image>
+        <style>
+            ac\:image img {
+                max-height: 400px;
+                height: auto;
+            }
+        </style>
+    </div>

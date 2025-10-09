@@ -152,4 +152,17 @@
     </table>
     <p th:if="${systemCommands.empty}">Keine</p>
 
+    <div th:if="${systemGraphAttachmentName != null}">
+        <p><br /></p>
+        <h2>Message Graph</h2>
+        <ac:image ac:border="true">
+            <span th:utext="|<ri:attachment ri:filename='${systemGraphAttachmentName}' />|"></span>
+        </ac:image>
+        <style>
+            ac\:image img {
+                max-height: 400px;
+                height: auto;
+            }
+        </style>
+    </div>
 </th:block>

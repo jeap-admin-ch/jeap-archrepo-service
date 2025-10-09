@@ -18,4 +18,11 @@ public interface ComponentGraphRepository extends JpaRepository<ComponentGraph, 
     @Transactional
     @Query(value = "UPDATE component_graph SET graph_data = :graphData, fingerprint = :fingerprint, modified_at = CURRENT_TIMESTAMP WHERE system_name = :systemName AND component_name = :componentName AND fingerprint != :fingerprint", nativeQuery = true)
     void updateGraphAndFingerprintBySystemNameAndComponentNameIfFingerprintChanged(String systemName, String componentName, byte[] graphData, String fingerprint);
+
+    ComponentGraph findByComponentNameIgnoreCase(String componentName);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ComponentGraph g SET g.lastPublishedFingerprint = :fingerprint WHERE g.id = :id")
+    void updateLastPublishedFingerprint(UUID id, String fingerprint);
 }

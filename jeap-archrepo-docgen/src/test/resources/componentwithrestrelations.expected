@@ -48,8 +48,9 @@
     <h1>Datenmodell</h1>
     <p>Kein Datenbankschema bekannt.</p>
 
-    <h1>Rest API</h1>
 
+
+    <h1>Rest API</h1>
     <p>-</p>
 
 
@@ -147,9 +148,9 @@
 
         <tr>
 
-                <td colspan="1" rowspan="1">
-                    <p>/api/a/b</p>
-                </td>
+            <td colspan="1" rowspan="1">
+                <p>/api/a/b</p>
+            </td>
 
             <td colspan="1">
                 <p>GET</p>
@@ -159,20 +160,17 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer3"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer3]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -180,9 +178,9 @@
 
         <tr>
 
-                <td colspan="1" rowspan="3">
-                    <p>/api/b/c</p>
-                </td>
+            <td colspan="1" rowspan="3">
+                <p>/api/b/c</p>
+            </td>
 
             <td colspan="1">
                 <p>DELETE</p>
@@ -192,20 +190,17 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer3"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer3]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -223,20 +218,17 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer2"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer2]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -254,20 +246,17 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -275,9 +264,9 @@
 
         <tr>
 
-                <td colspan="1" rowspan="3">
-                    <p>/api/incoming</p>
-                </td>
+            <td colspan="1" rowspan="3">
+                <p>/api/incoming</p>
+            </td>
 
             <td colspan="1">
                 <p>DELETE</p>
@@ -287,35 +276,29 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer4"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer4]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
+                /
+                <a href="http://pact_outgoing1" target="_blank">Pact</a>
 
-
-                                </li>
-                                <li>
-
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer4"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer4]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-                                    /
-                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -335,65 +318,53 @@
                         <ac:parameter ac:name="title">More than three ...</ac:parameter>
                         <ac:rich-text-body>
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+                /
+                <a href="http://pact_outgoing1" target="_blank">Pact</a>
 
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    /
-                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+                /
+                <a href="http://pact_outgoing2" target="_blank">Pact</a>
 
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                </li>
-                                <li>
+                /
+                <a href="http://pact_outgoing3" target="_blank">Pact</a>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer2"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer2]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer4"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer4]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-
-                                    /
-                                    <a href="http://pact_outgoing2" target="_blank">Pact</a>
-
-
-                                </li>
-                                <li>
-
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer3"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer3]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-                                    /
-                                    <a href="http://pact_outgoing3" target="_blank">Pact</a>
-
-
-                                </li>
-                                <li>
-
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer4"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer4]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
                         </ac:rich-text-body>
                     </ac:structured-macro>
@@ -416,23 +387,20 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+                /
+                <a href="http://pact_outgoing1" target="_blank">Pact</a>
 
-
-                                    /
-                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -440,9 +408,9 @@
 
         <tr>
 
-                <td colspan="1" rowspan="1">
-                    <p>/api/incoming/other</p>
-                </td>
+            <td colspan="1" rowspan="1">
+                <p>/api/incoming/other</p>
+            </td>
 
             <td colspan="1">
                 <p>GET</p>
@@ -452,53 +420,44 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+                /
+                <a href="http://pact_outgoing1" target="_blank">Pact</a>
 
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    /
-                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+                /
+                <a href="http://pact_outgoing2" target="_blank">Pact</a>
 
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                </li>
-                                <li>
+                /
+                <a href="http://pact_outgoing3" target="_blank">Pact</a>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer2"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer2]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-                                    /
-                                    <a href="http://pact_outgoing2" target="_blank">Pact</a>
-
-
-                                </li>
-                                <li>
-
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer3"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer3]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-                                    /
-                                    <a href="http://pact_outgoing3" target="_blank">Pact</a>
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
@@ -506,9 +465,9 @@
 
         <tr>
 
-                <td colspan="1" rowspan="1">
-                    <p>/foo/bar</p>
-                </td>
+            <td colspan="1" rowspan="1">
+                <p>/foo/bar</p>
+            </td>
 
             <td colspan="1">
                 <p>GET</p>
@@ -518,43 +477,36 @@
 
             <td colspan="1">
 
-                            <ul>
-                                <li>
+    <ul>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+                /
+                <a href="http://pact_outgoing1" target="_blank">Pact</a>
 
+        </li>
+        <li>
+            <ac:link>
+                <ri:page ri:content-title="consumer2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[consumer2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    /
-                                    <a href="http://pact_outgoing1" target="_blank">Pact</a>
+                /
+                <a href="http://pact_outgoing2" target="_blank">Pact</a>
 
-
-                                </li>
-                                <li>
-
-                                    <ac:link>
-                                        <ri:page ri:content-title="consumer2"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[consumer2]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
-
-
-                                    /
-                                    <a href="http://pact_outgoing2" target="_blank">Pact</a>
-
-
-                                </li>
-                            </ul>
+        </li>
+    </ul>
 
             </td>
 
         </tr>
-
         </tbody>
     </table>
 
@@ -576,3 +528,18 @@
 
 
     <p>Keine</p>
+
+
+    <div>
+        <p><br /></p>
+        <h2>Message Graph</h2>
+        <ac:image ac:border="true">
+            <span><ri:attachment ri:filename='graph-Component.png' /></span>
+        </ac:image>
+        <style>
+            ac\:image img {
+                max-height: 400px;
+                height: auto;
+            }
+        </style>
+    </div>

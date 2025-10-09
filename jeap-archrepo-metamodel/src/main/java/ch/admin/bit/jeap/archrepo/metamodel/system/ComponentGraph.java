@@ -35,16 +35,20 @@ public class ComponentGraph extends MutableDomainEntity {
 
     private String fingerprint;
 
+    @Column(name = "last_published_fingerprint")
+    private String lastPublishedFingerprint;
+
     protected ComponentGraph() {
         super();
     }
 
     @Builder
-    public ComponentGraph(String systemName, String componentName, byte[] graphData, String fingerprint) {
+    public ComponentGraph(String systemName, String componentName, byte[] graphData, String fingerprint, String lastPublishedFingerprint) {
         this.id = Generators.timeBasedEpochGenerator().generate();
         this.systemName = systemName;
         this.componentName = componentName;
         this.graphData = graphData;
         this.fingerprint = fingerprint;
+        this.lastPublishedFingerprint = lastPublishedFingerprint;
     }
 }

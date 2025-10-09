@@ -48,8 +48,9 @@
     <h1>Datenmodell</h1>
     <p>Kein Datenbankschema bekannt.</p>
 
-    <h1>Rest API</h1>
 
+
+    <h1>Rest API</h1>
     <p>-</p>
 
 
@@ -89,38 +90,40 @@
 
 
             <td colspan="1">
-                <ul>
-                    <li>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent1"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent1]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+    <ul>
+        <li>
 
-                    </li>
-                    <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent2"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent2]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+        </li>
+        <li>
 
-                    </li>
-                    <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent3"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent3]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+        </li>
+        <li>
 
-                    </li>
-                </ul>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+
+        </li>
+    </ul>
+
             </td>
 
         </tr>
@@ -142,48 +145,50 @@
                     <ac:structured-macro ac:name="expand" ac:schema-version="1">
                         <ac:parameter ac:name="title">More than three ...</ac:parameter>
                         <ac:rich-text-body>
-                            <ul>
-                                <li>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+    <ul>
+        <li>
 
-                                </li>
-                                <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent2"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent2]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
 
-                                </li>
-                                <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent3"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent3]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
 
-                                </li>
-                                <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent4"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent4]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
 
-                                </li>
-                            </ul>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent4"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent4]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+
+        </li>
+    </ul>
+
                         </ac:rich-text-body>
                     </ac:structured-macro>
                 </div>
@@ -208,18 +213,20 @@
 
 
             <td colspan="1">
-                <ul>
-                    <li>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent3"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent3]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+    <ul>
+        <li>
 
-                    </li>
-                </ul>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+
+        </li>
+    </ul>
+
             </td>
 
         </tr>
@@ -257,38 +264,40 @@
 
 
             <td colspan="1">
-                <ul>
-                    <li>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent1"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent1]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+    <ul>
+        <li>
 
-                    </li>
-                    <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent2"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent2]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+        </li>
+        <li>
 
-                    </li>
-                    <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent3"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent3]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+        </li>
+        <li>
 
-                    </li>
-                </ul>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+
+        </li>
+    </ul>
+
             </td>
 
         </tr>
@@ -310,48 +319,50 @@
                     <ac:structured-macro ac:name="expand" ac:schema-version="1">
                         <ac:parameter ac:name="title">More than three ...</ac:parameter>
                         <ac:rich-text-body>
-                            <ul>
-                                <li>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent1"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent1]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+    <ul>
+        <li>
 
-                                </li>
-                                <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent1"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent1]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent2"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent2]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
 
-                                </li>
-                                <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent2"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent2]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent3"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent3]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
 
-                                </li>
-                                <li>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
 
-                                    <ac:link>
-                                        <ri:page ri:content-title="OtherComponent4"/>
-                                        <ac:plain-text-link-body>
-                                            <![CDATA[OtherComponent4]]>
-                                        </ac:plain-text-link-body>
-                                    </ac:link>
+        </li>
+        <li>
 
-                                </li>
-                            </ul>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent4"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent4]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+
+        </li>
+    </ul>
+
                         </ac:rich-text-body>
                     </ac:structured-macro>
                 </div>
@@ -376,18 +387,20 @@
 
 
             <td colspan="1">
-                <ul>
-                    <li>
 
-                        <ac:link>
-                            <ri:page ri:content-title="OtherComponent3"/>
-                            <ac:plain-text-link-body>
-                                <![CDATA[OtherComponent3]]>
-                            </ac:plain-text-link-body>
-                        </ac:link>
+    <ul>
+        <li>
 
-                    </li>
-                </ul>
+            <ac:link>
+                <ri:page ri:content-title="OtherComponent3"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[OtherComponent3]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+
+        </li>
+    </ul>
+
             </td>
 
         </tr>
@@ -421,3 +434,18 @@
 
 
     <p>Keine</p>
+
+
+    <div>
+        <p><br /></p>
+        <h2>Message Graph</h2>
+        <ac:image ac:border="true">
+            <span><ri:attachment ri:filename='graph-Component.png' /></span>
+        </ac:image>
+        <style>
+            ac\:image img {
+                max-height: 400px;
+                height: auto;
+            }
+        </style>
+    </div>

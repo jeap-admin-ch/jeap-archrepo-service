@@ -36,7 +36,7 @@ class TemplateRenderer {
         return templateEngine.process("index", context).trim();
     }
 
-    String renderSystemPage(ArchitectureModel model, System system) {
+    String renderSystemPage(ArchitectureModel model, System system, String graphAttachmentName) {
         List<SystemEvent> systemEvents = system.getEvents().stream()
                 .map(e -> createSystemEvent(model, e))
                 .sorted(comparing(SystemEvent::getName))
@@ -56,6 +56,7 @@ class TemplateRenderer {
         String plantUmLSource = plantUmlRenderer.renderSystemContextView(systemContext);
         context.setVariable("contextViewPlantUml", plantUmLSource);
         context.setVariable("plantUmlMacroId", stableMacroUuid(system.getName()));
+        context.setVariable("systemGraphAttachmentName", graphAttachmentName);
         return templateEngine.process("system", context).trim();
     }
 
@@ -93,7 +94,7 @@ class TemplateRenderer {
                 .filter(r -> r.getCommandName().equals(command.getMessageTypeName()));
     }
 
-    String renderComponentPage(ArchitectureModel model, SystemComponent systemComponent) {
+    String renderComponentPage(ArchitectureModel model, SystemComponent systemComponent, String graphAttachmentName) {
         ComponentContext componentContext = ComponentContext.of(model, systemComponent);
 
         Context context = new Context(Locale.GERMAN);
@@ -112,6 +113,7 @@ class TemplateRenderer {
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
         context.setVariable("reactions", componentContext.getReactionStatisticsViews());
+        context.setVariable("componentGraphAttachmentName", graphAttachmentName);
 
         Optional<SystemComponentDatabaseSchema> databaseSchema = getDatabaseSchema(componentContext);
 
