@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +41,7 @@ public class MessageGraphAttachmentService {
                         message.getMessageTypeName(), Optional.ofNullable(graph.getVariant()).filter(v -> !v.isBlank()).orElse("not set"));
                 InputStream imageStream = createNewGraphPng(message, graph);
                 confluenceAdapter.addOrUpdateAttachment(pageId, generateMessageAttachmentName(graph), imageStream);
-                messageGraphRepository.updateActualDocFingerprint(graph.getId(), graph.getFingerprint());
+                messageGraphRepository.updateLastPublishedFingerprint(graph.getId(), graph.getFingerprint());
             }
             deleteUnusedGraphAttachments(pageId, messageGraphs);
         } catch (IOException e) {
@@ -51,10 +50,10 @@ public class MessageGraphAttachmentService {
     }
 
     private void deleteUnusedGraphAttachments(String pageId, List<MessageGraph> messageGraphs) {
-        List<String> attachmentNames = messageGraphs.stream()
+        List<String> attachmentNamesToKeep = messageGraphs.stream()
                 .map(this::generateMessageAttachmentName)
                 .toList();
-        confluenceAdapter.deleteUnusedAttachments(pageId, attachmentNames);
+        confluenceAdapter.deleteUnusedAttachments(pageId, attachmentNamesToKeep);
     }
 
     private InputStream createNewGraphPng(MessageType message, MessageGraph graph) throws IOException {
@@ -67,12 +66,13 @@ public class MessageGraphAttachmentService {
         List<MessageGraph> messageGraphs = messageGraphRepository.findAllByMessageTypeName(message.getMessageTypeName());
         return messageGraphs.stream()
                 .map(this::generateMessageAttachmentName)
+                .sorted()
                 .toList();
     }
 
     List<MessageGraph> filterOutdatedGraphs(List<MessageGraph> graphs) {
         return graphs.stream()
-                .filter(graph -> !graph.getFingerprint().equals(graph.getActualDocFingerprint()))
+                .filter(graph -> !graph.getFingerprint().equals(graph.getLastPublishedFingerprint()))
                 .toList();
     }
 

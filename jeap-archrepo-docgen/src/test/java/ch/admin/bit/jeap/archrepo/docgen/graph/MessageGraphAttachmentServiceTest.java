@@ -35,12 +35,12 @@ public class MessageGraphAttachmentServiceTest {
         service = new MessageGraphAttachmentService(repository, renderer, adapter, objectMapper);
     }
 
-    private MessageGraph createGraph(String type, String variant, String fingerprint, String actualFingerprint, byte[] graphData) {
+    private MessageGraph createGraph(String type, String variant, String fingerprint, String lastPublishedFingerprint, byte[] graphData) {
         return MessageGraph.builder()
                 .messageTypeName(type)
                 .variant(variant)
                 .fingerprint(fingerprint)
-                .actualDocFingerprint(actualFingerprint)
+                .lastPublishedFingerprint(lastPublishedFingerprint)
                 .graphData(graphData)
                 .build();
     }
@@ -61,7 +61,7 @@ public class MessageGraphAttachmentServiceTest {
 
         List<String> names = service.getAttachmentNames(message);
 
-        assertEquals(List.of("graph-MyCommand.png", "graph-MyCommand-v1.png"), names);
+        assertEquals(List.of("graph-MyCommand-v1.png", "graph-MyCommand.png"), names);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class MessageGraphAttachmentServiceTest {
         service.generateAttachments(message, "pageId");
 
         verify(adapter).addOrUpdateAttachment(eq("pageId"), eq("graph-MyCommand.png"), any(InputStream.class));
-        verify(repository).updateActualDocFingerprint(eq(outdatedGraph.getId()), eq("fp-new"));
+        verify(repository).updateLastPublishedFingerprint(eq(outdatedGraph.getId()), eq("fp-new"));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class MessageGraphAttachmentServiceTest {
         service.generateAttachments(message, "pageId");
 
         verify(adapter, never()).addOrUpdateAttachment(any(), any(), any());
-        verify(repository, never()).updateActualDocFingerprint(any(), any());
+        verify(repository, never()).updateLastPublishedFingerprint(any(), any());
     }
 
     @Test

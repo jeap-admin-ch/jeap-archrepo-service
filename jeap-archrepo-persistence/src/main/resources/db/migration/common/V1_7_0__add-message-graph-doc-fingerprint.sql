@@ -1,2 +1,2 @@
 ALTER TABLE message_graph
-    ADD COLUMN actual_doc_fingerprint TEXT;
+    ADD COLUMN last_published_fingerprint TEXT;

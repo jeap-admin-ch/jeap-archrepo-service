@@ -74,10 +74,10 @@
     </table>
     <p th:if="${messageType.receiverContracts.empty}">Keine</p>
 
-    <div th:if="${attachmentNames}">
+    <div th:if="${messageGraphAttachmentNames}">
         <p><br /></p>
         <h2>Message Graphs</h2>
-        <div th:each="attachmentName : ${attachmentNames}">
+        <div th:each="attachmentName : ${messageGraphAttachmentNames}">
             <ac:image ac:border="true">
                 <span th:utext="|<ri:attachment ri:filename='${attachmentName}' />|"></span>
             </ac:image>

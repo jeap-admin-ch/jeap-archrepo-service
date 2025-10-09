@@ -37,10 +37,10 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
     }
 
     @Override
-    public void deleteUnusedAttachments(String pageId, List<String> attachmentNames) {
+    public void deleteUnusedAttachments(String pageId, List<String> attachmentNamesToKeep) {
         try {
             List<ConfluenceAttachment> attachments = confluenceClient.getAttachments(pageId);
-            Set<String> toBeKept = new HashSet<>(attachmentNames);
+            Set<String> toBeKept = new HashSet<>(attachmentNamesToKeep);
             List<ConfluenceAttachment> toBeDeleted = attachments.stream()
                     .filter(att -> !toBeKept.contains(att.getTitle()))
                     .toList();

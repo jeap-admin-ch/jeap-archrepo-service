@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -23,6 +25,10 @@ public class GraphvizRenderer {
             log.debug("Graph image rendering completed successfully");
             return new ByteArrayInputStream(imageBytes);
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Graph rendering was interrupted.", e);
+            throw new RuntimeException("Graph rendering was interrupted.", e);
         } catch (Exception e) {
             log.error("Error while rendering the graph.", e);
             throw new RuntimeException("Error while rendering the graph.", e);
@@ -49,10 +55,17 @@ public class GraphvizRenderer {
         }
     }
 
-    private void validateProcessExit(Process process) throws InterruptedException {
-        int exitCode = process.waitFor();
+    private void validateProcessExit(Process process) throws InterruptedException, IOException {
+        boolean finished = process.waitFor(120, TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            throw new RuntimeException("Graphviz process timed out and was forcibly terminated.");
+        }
+
+        int exitCode = process.exitValue();
         if (exitCode != 0) {
-            throw new RuntimeException("Graphviz failed with exit code " + exitCode);
+            String errorOutput = new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+            throw new RuntimeException("Graphviz failed with exit code " + exitCode + ". Error output:\n" + errorOutput);
         }
     }
 }

@@ -145,14 +145,14 @@ class TemplateRenderer {
     String renderEventPage(Event event, List<String> uploadedAttachmentNames) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", event);
-        context.setVariable("attachmentNames", uploadedAttachmentNames);
+        context.setVariable("messageGraphAttachmentNames", uploadedAttachmentNames);
         return templateEngine.process("event", context).trim();
     }
 
     String renderCommandPage(Command command, List<String> uploadedAttachmentNames) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", command);
-        context.setVariable("attachmentNames", uploadedAttachmentNames);
+        context.setVariable("messageGraphAttachmentNames", uploadedAttachmentNames);
         return templateEngine.process("command", context).trim();
     }
 }

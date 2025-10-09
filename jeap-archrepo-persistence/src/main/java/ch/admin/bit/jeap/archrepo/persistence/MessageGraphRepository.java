@@ -25,6 +25,6 @@ public interface MessageGraphRepository extends JpaRepository<MessageGraph, UUID
 
     @Modifying
     @Transactional
-    @Query("UPDATE MessageGraph g SET g.actualDocFingerprint = :fingerprint WHERE g.id = :id")
-    void updateActualDocFingerprint(UUID id, String fingerprint);
+    @Query("UPDATE MessageGraph g SET g.lastPublishedFingerprint = :fingerprint WHERE g.id = :id")
+    void updateLastPublishedFingerprint(UUID id, String fingerprint);
 }
