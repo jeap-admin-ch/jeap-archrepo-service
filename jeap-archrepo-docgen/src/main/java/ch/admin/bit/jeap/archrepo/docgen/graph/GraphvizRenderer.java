@@ -2,15 +2,28 @@ package ch.admin.bit.jeap.archrepo.docgen.graph;
 
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
 public class GraphvizRenderer {
+
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+
+    private final long timeoutSeconds;
+
+    public GraphvizRenderer() {
+        this.timeoutSeconds = 60;
+    }
+
+    public GraphvizRenderer(long timeoutSeconds) {
+        this.timeoutSeconds = timeoutSeconds;
+    }
 
     public InputStream renderPng(GraphDto graph) {
         String dot = graph.toDot();
@@ -32,6 +45,8 @@ public class GraphvizRenderer {
         } catch (Exception e) {
             log.error("Error while rendering the graph.", e);
             throw new RuntimeException("Error while rendering the graph.", e);
+        } finally {
+            executor.shutdownNow();
         }
     }
 
@@ -41,22 +56,44 @@ public class GraphvizRenderer {
         return pb.start();
     }
 
-    private void writeDotToProcess(String dot, Process process) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
-            writer.write(dot);
+    private void writeDotToProcess(String dot, Process process) throws Exception {
+        Future<?> writeFuture = executor.submit(() -> {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
+                writer.write(dot);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+
+        try {
+            writeFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            writeFuture.cancel(true);
+            throw new RuntimeException("Timeout while writing DOT to Graphviz process", e);
         }
     }
 
-    private byte[] readProcessOutput(Process process) throws IOException {
-        try (InputStream processOut = process.getInputStream();
-             ByteArrayOutputStream pngOutput = new ByteArrayOutputStream()) {
-            processOut.transferTo(pngOutput);
-            return pngOutput.toByteArray();
+    private byte[] readProcessOutput(Process process) throws Exception {
+        Future<byte[]> readFuture = executor.submit(() -> {
+            try (InputStream processOut = process.getInputStream();
+                 ByteArrayOutputStream pngOutput = new ByteArrayOutputStream()) {
+                processOut.transferTo(pngOutput);
+                return pngOutput.toByteArray();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+
+        try {
+            return readFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            readFuture.cancel(true);
+            throw new RuntimeException("Timeout while reading output from Graphviz process", e);
         }
     }
 
     private void validateProcessExit(Process process) throws InterruptedException, IOException {
-        boolean finished = process.waitFor(120, TimeUnit.SECONDS);
+        boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
         if (!finished) {
             process.destroyForcibly();
             throw new RuntimeException("Graphviz process timed out and was forcibly terminated.");

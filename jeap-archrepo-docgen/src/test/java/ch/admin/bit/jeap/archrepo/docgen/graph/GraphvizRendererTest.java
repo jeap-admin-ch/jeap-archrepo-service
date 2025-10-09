@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.docgen.graph;
 
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -97,5 +98,64 @@ class GraphvizRendererTest {
         assertTrue(ex.getCause().getMessage().contains("Graphviz failed with exit code 1"));
         assertTrue(ex.getCause().getMessage().contains("Error: invalid DOT"));
 
+    }
+
+    @Test
+    void renderPng_shouldThrowException_whenWritingTimesOut() throws Exception {
+        GraphDto graphDto = mock(GraphDto.class);
+        when(graphDto.toDot()).thenReturn("digraph G { A -> B }");
+
+        OutputStream blockingStream = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                try {
+                    Thread.sleep(60_000);
+                } catch (InterruptedException e) {
+                    throw new IOException("Interrupted during write", e);
+                }
+            }
+        };
+
+        Process mockProcess = mock(Process.class);
+        when(mockProcess.getOutputStream()).thenReturn(blockingStream);
+        when(mockProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
+        when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
+        when(mockProcess.exitValue()).thenReturn(0);
+
+        GraphvizRenderer renderer = spy(new GraphvizRenderer(1));
+        doReturn(mockProcess).when(renderer).startGraphvizProcess();
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> renderer.renderPng(graphDto));
+        assertTrue(ex.getCause().getMessage().contains("Timeout while writing DOT to Graphviz process"));
+    }
+
+    @Test
+    void renderPng_shouldThrowException_whenReadingTimesOut() throws Exception {
+        GraphDto graphDto = mock(GraphDto.class);
+        when(graphDto.toDot()).thenReturn("digraph G { A -> B }");
+
+        InputStream blockingInput = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                try {
+                    Thread.sleep(60_000);
+                } catch (InterruptedException e) {
+                    throw new IOException("Interrupted during read", e);
+                }
+                return -1;
+            }
+        };
+
+        Process mockProcess = mock(Process.class);
+        when(mockProcess.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+        when(mockProcess.getInputStream()).thenReturn(blockingInput);
+        when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
+        when(mockProcess.exitValue()).thenReturn(0);
+
+        GraphvizRenderer renderer = spy(new GraphvizRenderer(1));
+        doReturn(mockProcess).when(renderer).startGraphvizProcess();
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> renderer.renderPng(graphDto));
+        assertTrue(ex.getCause().getMessage().contains("Timeout while reading output from Graphviz process"));
     }
 }
