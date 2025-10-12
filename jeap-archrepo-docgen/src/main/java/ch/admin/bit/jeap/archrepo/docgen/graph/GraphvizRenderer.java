@@ -1,8 +1,8 @@
 package ch.admin.bit.jeap.archrepo.docgen.graph;
 
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -25,12 +25,19 @@ public class GraphvizRenderer {
         this.timeoutSeconds = timeoutSeconds;
     }
 
+
+    @PreDestroy
+    public void shutdownExecutor() {
+        executor.shutdownNow();
+    }
+
     public InputStream renderPng(GraphDto graph) {
         String dot = graph.toDot();
         log.debug("DOT content generated:\n{}", dot);
 
+        Process process = null;
         try {
-            Process process = startGraphvizProcess();
+            process = startGraphvizProcess();
             writeDotToProcess(dot, process);
             byte[] imageBytes = readProcessOutput(process);
             validateProcessExit(process);
@@ -46,7 +53,9 @@ public class GraphvizRenderer {
             log.error("Error while rendering the graph.", e);
             throw new RuntimeException("Error while rendering the graph.", e);
         } finally {
-            executor.shutdownNow();
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+            }
         }
     }
 

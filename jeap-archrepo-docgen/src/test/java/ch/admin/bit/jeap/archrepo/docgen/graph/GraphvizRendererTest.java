@@ -1,7 +1,6 @@
 package ch.admin.bit.jeap.archrepo.docgen.graph;
 
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
