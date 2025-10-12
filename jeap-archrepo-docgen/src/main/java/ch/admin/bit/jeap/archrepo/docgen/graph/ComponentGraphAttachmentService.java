@@ -2,6 +2,9 @@ package ch.admin.bit.jeap.archrepo.docgen.graph;
 
 import ch.admin.bit.jeap.archrepo.docgen.ConfluenceAdapter;
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
+import ch.admin.bit.jeap.archrepo.docgen.graph.models.MessageNodeDto;
+import ch.admin.bit.jeap.archrepo.docgen.graph.models.NodeDto;
+import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.ComponentGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
@@ -44,7 +47,17 @@ public class ComponentGraphAttachmentService {
 
     private InputStream createNewGraphPng(ComponentGraph graph) throws IOException {
         GraphDto graphDto = objectMapper.readValue(graph.getGraphData(), GraphDto.class);
+        highlightOtherSystemsMessageNodes(graphDto, graph.getSystemName());
         return imageRenderer.renderPng(graphDto);
+    }
+
+    void highlightOtherSystemsMessageNodes(GraphDto graph, String systemName) {
+        for (NodeDto node : graph.getNodes()) {
+            if (node instanceof MessageNodeDto msgNode &&
+                    !msgNode.getMessageType().toLowerCase().startsWith(systemName.toLowerCase())) {
+                msgNode.setHighlighted(true);
+            }
+        }
     }
 
     boolean isOutdated(ComponentGraph graph) {
