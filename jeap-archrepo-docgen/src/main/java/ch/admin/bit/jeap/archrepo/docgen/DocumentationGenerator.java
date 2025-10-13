@@ -43,7 +43,6 @@ public class DocumentationGenerator {
         String content = templateRenderer.renderSystemPage(context.getModel(), system, graphAttachmentName);
         String systemPageName = system.getName() + SYSTEM_PAGE_NAME_POSTFIX;
         String systemPageId = confluenceAdapter.addOrUpdatePageUnderAncestor(rootPageId, systemPageName, content);
-        systemGraphAttachmentService.generateAttachment(system, systemPageId);
 
         String indexPageContent = templateRenderer.renderIndexPage();
         String componentsPageId = confluenceAdapter.addOrUpdatePageUnderAncestor(systemPageId, "Komponenten (" + system.getName() + ")", indexPageContent);
@@ -52,6 +51,7 @@ public class DocumentationGenerator {
         String commandsPageId = confluenceAdapter.addOrUpdatePageUnderAncestor(systemPageId, "Commands (" + system.getName() + ")", indexPageContent);
         system.getEvents().forEach(event -> generateEvent(context, eventsPageId, event));
         system.getCommands().forEach(command -> generateCommand(context, commandsPageId, command));
+        systemGraphAttachmentService.generateAttachment(system, systemPageId);
         context.addGeneratedPageIds(systemPageId, componentsPageId, eventsPageId, commandsPageId);
     }
 

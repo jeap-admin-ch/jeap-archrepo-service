@@ -65,10 +65,10 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
             if (match.isPresent()) {
                 String attachmentId = match.get().getId();
                 confluenceClient.updateAttachmentContent(pageId, attachmentId, contentStream);
-                log.debug("Attachment '{}' updated.", attachmentFileName);
+                log.debug("Attachment '{}' updated at page '{}'.", attachmentFileName, pageId);
             } else {
                 confluenceClient.addAttachment(pageId, attachmentFileName, contentStream);
-                log.debug("Attachment '{}' added.", attachmentFileName);
+                log.debug("Attachment '{}' added at page '{}'.", attachmentFileName, pageId);
             }
         } catch (Exception e) {
             log.error("Error while adding or updating the attachment '{}': {}", attachmentFileName, e.getMessage(), e);

@@ -108,7 +108,7 @@
 
     <div>
         <p><br /></p>
-        <h2>Message Graph</h2>
+        <h2>Graph</h2>
         <ac:image ac:border="true">
             <span><ri:attachment ri:filename='graph-Component.png' /></span>
         </ac:image>
