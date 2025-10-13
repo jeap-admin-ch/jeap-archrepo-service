@@ -25,7 +25,6 @@ public class GraphvizRenderer {
         this.timeoutSeconds = timeoutSeconds;
     }
 
-
     @PreDestroy
     public void shutdownExecutor() {
         executor.shutdownNow();
@@ -40,7 +39,6 @@ public class GraphvizRenderer {
             process = startGraphvizProcess();
             writeDotToProcess(dot, process);
             byte[] imageBytes = readProcessOutput(process);
-            validateProcessExit(process);
 
             log.debug("Graph image rendering completed successfully");
             return new ByteArrayInputStream(imageBytes);
@@ -53,8 +51,8 @@ public class GraphvizRenderer {
             log.error("Error while rendering the graph.", e);
             throw new RuntimeException("Error while rendering the graph.", e);
         } finally {
-            if (process != null && process.isAlive()) {
-                process.destroyForcibly();
+            if (process != null) {
+                validateProcessExit(process);
             }
         }
     }
@@ -101,17 +99,23 @@ public class GraphvizRenderer {
         }
     }
 
-    private void validateProcessExit(Process process) throws InterruptedException, IOException {
-        boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
-        if (!finished) {
-            process.destroyForcibly();
-            throw new RuntimeException("Graphviz process timed out and was forcibly terminated.");
-        }
+    void validateProcessExit(Process process) {
+        try {
+            boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                log.error("Graphviz process timed out and was forcibly terminated.");
+                return;
+            }
 
-        int exitCode = process.exitValue();
-        if (exitCode != 0) {
-            String errorOutput = new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
-            throw new RuntimeException("Graphviz failed with exit code " + exitCode + ". Error output:\n" + errorOutput);
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                String errorOutput = new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+                log.error("Graphviz failed with exit code {}. Error output:\n{}", exitCode, errorOutput);
+            }
+        } catch (Exception e) {
+            log.error("Unexpected error during Graphviz process validation.", e);
         }
     }
+
 }

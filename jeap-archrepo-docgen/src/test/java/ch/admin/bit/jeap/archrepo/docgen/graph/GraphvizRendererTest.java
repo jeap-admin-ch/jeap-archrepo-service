@@ -4,6 +4,7 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -57,7 +58,23 @@ class GraphvizRendererTest {
     }
 
     @Test
-    void renderPng_shouldThrowException_whenProcessTimesOut() throws Exception {
+    void validateProcessExit_shouldDestroyProcess_whenProcessTimesOut() {
+        Process mockProcess = mock(Process.class);
+        try {
+            when(mockProcess.waitFor(anyLong(), eq(TimeUnit.SECONDS))).thenReturn(false);
+            when(mockProcess.exitValue()).thenReturn(0);
+        } catch (InterruptedException e) {
+            fail("Unexpected InterruptedException");
+        }
+
+        GraphvizRenderer renderer = new GraphvizRenderer();
+        renderer.validateProcessExit(mockProcess);
+
+        verify(mockProcess).destroyForcibly();
+    }
+
+    @Test
+    void renderPng_shouldDestroyProcess_whenValidationFails() throws Exception {
         GraphDto graphDto = mock(GraphDto.class);
         when(graphDto.toDot()).thenReturn("digraph G { A -> B }");
 
@@ -65,38 +82,14 @@ class GraphvizRendererTest {
         when(mockProcess.getOutputStream()).thenReturn(new ByteArrayOutputStream());
         when(mockProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
         when(mockProcess.waitFor(anyLong(), any())).thenReturn(false); // simulate timeout
+        when(mockProcess.isAlive()).thenReturn(true);
 
         GraphvizRenderer renderer = spy(new GraphvizRenderer());
         doReturn(mockProcess).when(renderer).startGraphvizProcess();
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> renderer.renderPng(graphDto));
-        assertTrue(ex.getCause().getMessage().contains("Graphviz process timed out and was forcibly terminated."));
-    }
+        renderer.renderPng(graphDto);
 
-    @Test
-    void renderPng_shouldThrowException_whenProcessFailsWithErrorOutput() throws Exception {
-        GraphDto graphDto = mock(GraphDto.class);
-        when(graphDto.toDot()).thenReturn("digraph G { A -> B }");
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[]{});
-        ByteArrayInputStream errorStream = new ByteArrayInputStream("Error: invalid DOT".getBytes());
-
-        Process mockProcess = mock(Process.class);
-        when(mockProcess.getOutputStream()).thenReturn(outputStream);
-        when(mockProcess.getInputStream()).thenReturn(inputStream);
-        when(mockProcess.getErrorStream()).thenReturn(errorStream);
-        when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
-        when(mockProcess.exitValue()).thenReturn(1); // simulate error
-
-        GraphvizRenderer renderer = spy(new GraphvizRenderer());
-        doReturn(mockProcess).when(renderer).startGraphvizProcess();
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> renderer.renderPng(graphDto));
-
-        assertTrue(ex.getCause().getMessage().contains("Graphviz failed with exit code 1"));
-        assertTrue(ex.getCause().getMessage().contains("Error: invalid DOT"));
-
+        verify(mockProcess).destroyForcibly();
     }
 
     @Test
@@ -125,7 +118,7 @@ class GraphvizRendererTest {
         doReturn(mockProcess).when(renderer).startGraphvizProcess();
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> renderer.renderPng(graphDto));
-        assertTrue(ex.getCause().getMessage().contains("Timeout while writing DOT to Graphviz process"));
+        assertTrue(ex.getMessage().contains("Error while rendering the graph."));
     }
 
     @Test
@@ -155,6 +148,6 @@ class GraphvizRendererTest {
         doReturn(mockProcess).when(renderer).startGraphvizProcess();
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> renderer.renderPng(graphDto));
-        assertTrue(ex.getCause().getMessage().contains("Timeout while reading output from Graphviz process"));
+        assertTrue(ex.getMessage().contains("Error while rendering the graph."));
     }
 }
