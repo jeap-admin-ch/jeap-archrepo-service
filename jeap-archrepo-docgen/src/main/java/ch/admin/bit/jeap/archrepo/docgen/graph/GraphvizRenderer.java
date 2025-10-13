@@ -14,7 +14,6 @@ import java.util.concurrent.*;
 public class GraphvizRenderer {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
-
     private final long timeoutSeconds;
 
     public GraphvizRenderer() {
@@ -34,14 +33,20 @@ public class GraphvizRenderer {
         String dot = graph.toDot();
         log.debug("DOT content generated:\n{}", dot);
 
-        Process process = null;
         try {
-            process = startGraphvizProcess();
-            writeDotToProcess(dot, process);
-            byte[] imageBytes = readProcessOutput(process);
+            Process process = startGraphvizProcess();
 
-            log.debug("Graph image rendering completed successfully");
-            return new ByteArrayInputStream(imageBytes);
+            try (OutputStream processInput = process.getOutputStream();
+                 InputStream processOutput = process.getInputStream();
+                 InputStream processError = process.getErrorStream()) {
+
+                writeDotToProcess(dot, processInput);
+                byte[] imageBytes = readProcessOutput(processOutput);
+
+                validateProcessExit(process, processError);
+                log.debug("Graph image rendering completed successfully");
+                return new ByteArrayInputStream(imageBytes);
+            }
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -50,22 +55,12 @@ public class GraphvizRenderer {
         } catch (Exception e) {
             log.error("Error while rendering the graph.", e);
             throw new RuntimeException("Error while rendering the graph.", e);
-        } finally {
-            if (process != null) {
-                validateProcessExit(process);
-            }
         }
     }
 
-    Process startGraphvizProcess() throws IOException {
-        ProcessBuilder pb = new ProcessBuilder("dot", "-Tpng");
-        log.debug("Starting Graphviz process");
-        return pb.start();
-    }
-
-    private void writeDotToProcess(String dot, Process process) throws Exception {
+    private void writeDotToProcess(String dot, OutputStream outputStream) throws Exception {
         Future<?> writeFuture = executor.submit(() -> {
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
                 writer.write(dot);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -80,11 +75,10 @@ public class GraphvizRenderer {
         }
     }
 
-    private byte[] readProcessOutput(Process process) throws Exception {
+    private byte[] readProcessOutput(InputStream inputStream) throws Exception {
         Future<byte[]> readFuture = executor.submit(() -> {
-            try (InputStream processOut = process.getInputStream();
-                 ByteArrayOutputStream pngOutput = new ByteArrayOutputStream()) {
-                processOut.transferTo(pngOutput);
+            try (ByteArrayOutputStream pngOutput = new ByteArrayOutputStream()) {
+                inputStream.transferTo(pngOutput);
                 return pngOutput.toByteArray();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -99,7 +93,13 @@ public class GraphvizRenderer {
         }
     }
 
-    void validateProcessExit(Process process) {
+    Process startGraphvizProcess() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("dot", "-Tpng");
+        log.debug("Starting Graphviz process");
+        return pb.start();
+    }
+
+    void validateProcessExit(Process process, InputStream errorStream) {
         try {
             boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
             if (!finished) {
@@ -110,12 +110,11 @@ public class GraphvizRenderer {
 
             int exitCode = process.exitValue();
             if (exitCode != 0) {
-                String errorOutput = new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+                String errorOutput = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
                 log.error("Graphviz failed with exit code {}. Error output:\n{}", exitCode, errorOutput);
             }
         } catch (Exception e) {
             log.error("Unexpected error during Graphviz process validation.", e);
         }
     }
-
 }

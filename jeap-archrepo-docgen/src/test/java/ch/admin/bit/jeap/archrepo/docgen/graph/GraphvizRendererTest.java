@@ -19,6 +19,7 @@ class GraphvizRendererTest {
         Process mockProcess = mock(Process.class);
         when(mockProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
         when(mockProcess.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+        when(mockProcess.getErrorStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
         when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
         when(mockProcess.exitValue()).thenReturn(0);
 
@@ -47,6 +48,7 @@ class GraphvizRendererTest {
         Process mockProcess = mock(Process.class);
         when(mockProcess.getOutputStream()).thenReturn(failingStream);
         when(mockProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
+        when(mockProcess.getErrorStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
         when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
         when(mockProcess.exitValue()).thenReturn(0);
 
@@ -68,7 +70,7 @@ class GraphvizRendererTest {
         }
 
         GraphvizRenderer renderer = new GraphvizRenderer();
-        renderer.validateProcessExit(mockProcess);
+        renderer.validateProcessExit(mockProcess, new ByteArrayInputStream(new byte[]{}));
 
         verify(mockProcess).destroyForcibly();
     }
@@ -81,6 +83,7 @@ class GraphvizRendererTest {
         Process mockProcess = mock(Process.class);
         when(mockProcess.getOutputStream()).thenReturn(new ByteArrayOutputStream());
         when(mockProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
+        when(mockProcess.getErrorStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
         when(mockProcess.waitFor(anyLong(), any())).thenReturn(false); // simulate timeout
         when(mockProcess.isAlive()).thenReturn(true);
 
@@ -111,6 +114,7 @@ class GraphvizRendererTest {
         Process mockProcess = mock(Process.class);
         when(mockProcess.getOutputStream()).thenReturn(blockingStream);
         when(mockProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
+        when(mockProcess.getErrorStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
         when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
         when(mockProcess.exitValue()).thenReturn(0);
 
@@ -141,6 +145,7 @@ class GraphvizRendererTest {
         Process mockProcess = mock(Process.class);
         when(mockProcess.getOutputStream()).thenReturn(new ByteArrayOutputStream());
         when(mockProcess.getInputStream()).thenReturn(blockingInput);
+        when(mockProcess.getErrorStream()).thenReturn(new ByteArrayInputStream(new byte[]{}));
         when(mockProcess.waitFor(anyLong(), any())).thenReturn(true);
         when(mockProcess.exitValue()).thenReturn(0);
 
