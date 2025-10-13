@@ -33,17 +33,16 @@ public class GraphvizRenderer {
         String dot = graph.toDot();
         log.debug("DOT content generated:\n{}", dot);
 
+        Process process = null;
         try {
-            Process process = startGraphvizProcess();
+            process = startGraphvizProcess();
 
             try (OutputStream processInput = process.getOutputStream();
-                 InputStream processOutput = process.getInputStream();
-                 InputStream processError = process.getErrorStream()) {
+                 InputStream processOutput = process.getInputStream()) {
 
                 writeDotToProcess(dot, processInput);
                 byte[] imageBytes = readProcessOutput(processOutput);
 
-                validateProcessExit(process, processError);
                 log.debug("Graph image rendering completed successfully");
                 return new ByteArrayInputStream(imageBytes);
             }
@@ -55,6 +54,10 @@ public class GraphvizRenderer {
         } catch (Exception e) {
             log.error("Error while rendering the graph.", e);
             throw new RuntimeException("Error while rendering the graph.", e);
+        } finally {
+            if (process != null) {
+                validateProcessExit(process);
+            }
         }
     }
 
@@ -99,7 +102,7 @@ public class GraphvizRenderer {
         return pb.start();
     }
 
-    void validateProcessExit(Process process, InputStream errorStream) {
+    void validateProcessExit(Process process) {
         try {
             boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
             if (!finished) {
@@ -110,8 +113,7 @@ public class GraphvizRenderer {
 
             int exitCode = process.exitValue();
             if (exitCode != 0) {
-                String errorOutput = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
-                log.error("Graphviz failed with exit code {}. Error output:\n{}", exitCode, errorOutput);
+                log.error("Graphviz failed with exit code {}", exitCode);
             }
         } catch (Exception e) {
             log.error("Unexpected error during Graphviz process validation.", e);

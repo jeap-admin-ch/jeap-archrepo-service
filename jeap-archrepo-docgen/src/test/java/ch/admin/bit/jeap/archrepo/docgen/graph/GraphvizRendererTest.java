@@ -70,7 +70,7 @@ class GraphvizRendererTest {
         }
 
         GraphvizRenderer renderer = new GraphvizRenderer();
-        renderer.validateProcessExit(mockProcess, new ByteArrayInputStream(new byte[]{}));
+        renderer.validateProcessExit(mockProcess);
 
         verify(mockProcess).destroyForcibly();
     }
