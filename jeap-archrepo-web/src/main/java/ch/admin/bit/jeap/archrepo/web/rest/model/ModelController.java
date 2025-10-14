@@ -45,7 +45,10 @@ class ModelController {
             @ApiResponse(responseCode = "200", description = "Successful response",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ModelDto.class),
-                            examples = @ExampleObject(name = "relations", ref = "#/components/examples/modelExample")))
+                            examples = @ExampleObject(
+                                    name = "modelExample",
+                                    value = "{\"systems\": [{\"name\": \"System1\", \"description\": \"A sample system\", \"ownedBy\": \"Team A\", \"aliases\": [\"Sys1\"], \"systemComponents\": [{\"name\": \"Component1\", \"description\": \"A sample component\", \"ownedBy\": \"Team A\", \"importer\": null, \"type\": \"BACKEND_SERVICE\"}]}]}"
+                            )))
     })
     public ModelDto getModel() {
         ArchitectureModel model = repository.load();
@@ -81,7 +84,11 @@ class ModelController {
             @ApiResponse(responseCode = "200", description = "Successful response",
                     content = @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = RelationDto.class)),
-                            examples = @ExampleObject(name = "relations", ref = "#/components/examples/relationsExample"))),
+                            examples = @ExampleObject(
+                                    name = "relations",
+                                    value = "[{\"relationType\": \"REST_API_RELATION\", \"consumerSystem\": \"System1\", \"consumer\": \"Component1\", \"providerSystem\": \"System2\", \"provider\": \"Component2\", \"method\": \"GET\", \"path\": \"/api/data\"," +
+                                            " \"messageType\": null}, {\"relationType\": \"EVENT_RELATION\", \"consumerSystem\": \"System1\", \"consumer\": \"Component1\", \"providerSystem\": \"System3\", \"provider\": \"Component3\", \"method\": null, \"path\": null, \"messageType\": \"UserCreated\"}]"
+                            ))),
             @ApiResponse(responseCode = "404", description = "No system with this name exists", content = @Content(mediaType = "application/json"))
     })
     public List<RelationDto> getAllRelations(@PathVariable("system") String systemName) {
