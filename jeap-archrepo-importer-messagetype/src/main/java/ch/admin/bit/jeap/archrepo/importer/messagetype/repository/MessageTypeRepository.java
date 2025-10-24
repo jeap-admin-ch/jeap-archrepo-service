@@ -120,7 +120,7 @@ public abstract class MessageTypeRepository implements Closeable {
     }
 
     public String getDescriptorUrl(MessageTypeDescriptor descriptor) {
-        return String.format("%sbrowse/descriptor/%s/%s/%s/%s.json",
+        return String.format("%s/%s/%s/%s/%s.json",
                 repoLinkHttpBaseUri,
                 descriptor.getDefiningSystem().toLowerCase(),
                 descriptor.getMessageTypeSubdir(),
@@ -133,7 +133,7 @@ public abstract class MessageTypeRepository implements Closeable {
         File commonDir = new File(descriptorDir, COMMON);
         File globalDirSchemaFile = new File(commonDir, schemaName);
         if (globalDirSchemaFile.exists()) {
-            return String.format("%sbrowse/descriptor/_common/%s",
+            return String.format("%s/_common/%s",
                     repoLinkHttpBaseUri,
                     schemaName);
         }
@@ -141,7 +141,7 @@ public abstract class MessageTypeRepository implements Closeable {
         File commonSystemDir = new File(systemDir, COMMON);
         File commonDirSchemaFile = new File(commonSystemDir, schemaName);
         if (commonDirSchemaFile.exists()) {
-            return String.format("%sbrowse/descriptor/%s/_common/%s",
+            return String.format("%s/%s/_common/%s",
                     repoLinkHttpBaseUri,
                     descriptor.getDefiningSystem().toLowerCase(),
                     schemaName);
@@ -151,7 +151,7 @@ public abstract class MessageTypeRepository implements Closeable {
         String subdir = descriptor.getMessageTypeSubdir();
         File schemaFile = new File(typeDir, schemaName);
         if (schemaFile.exists()) {
-            return String.format("%sbrowse/descriptor/%s/%s/%s/%s",
+            return String.format("%s/%s/%s/%s/%s",
                     repoLinkHttpBaseUri,
                     descriptor.getDefiningSystem().toLowerCase(),
                     subdir,

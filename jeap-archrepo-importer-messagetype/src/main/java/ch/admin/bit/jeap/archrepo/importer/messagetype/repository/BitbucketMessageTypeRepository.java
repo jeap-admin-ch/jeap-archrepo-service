@@ -15,7 +15,7 @@ public class BitbucketMessageTypeRepository extends MessageTypeRepository {
         String projectName = uriComponents.getPathSegments().get(1).toUpperCase();
         String repoName = uriComponents.getPathSegments().get(2).replace(".git", "");
         return UriComponentsBuilder.fromUriString(gitUri)
-                .replacePath("projects/%s/repos/%s/".formatted(projectName, repoName))
+                .replacePath("projects/%s/repos/%s/browse/descriptor".formatted(projectName, repoName))
                 .toUriString();
     }
 }
