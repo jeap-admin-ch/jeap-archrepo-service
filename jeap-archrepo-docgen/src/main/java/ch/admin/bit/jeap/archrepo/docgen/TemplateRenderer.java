@@ -112,7 +112,6 @@ class TemplateRenderer {
         context.setVariable("receivedCommandRelations", componentContext.getReceivedCommandsGroupedByCommand());
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
-        context.setVariable("reactions", componentContext.getReactionStatisticsViews());
         context.setVariable("componentGraphAttachmentName", graphAttachmentName);
 
         Optional<SystemComponentDatabaseSchema> databaseSchema = getDatabaseSchema(componentContext);

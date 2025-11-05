@@ -11,8 +11,6 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
@@ -37,7 +35,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -778,101 +775,6 @@ class TemplateRendererTest {
 
         String content = templateRenderer.renderCommandPage(command, uploadedAttachmentNames);
         assertContent("command.expected", content);
-    }
-
-    @Test
-    void renderSystemComponentPageWithReactions() throws IOException {
-        Action action = Action.builder().actionType("actionType1")
-                .actionFqn("com.example.ActionA")
-                .build();
-        ReactionStatistics regularStatistics = ReactionStatistics.builder()
-                .component(BackendService.builder().name("testComponent").build())
-                .triggerType("triggerType1")
-                .triggerFqn("com.example.TriggerA")
-                .count(10)
-                .median(5.0)
-                .percentage(50.0)
-                .build();
-        regularStatistics.addAction(action);
-        Action action1 = Action.builder().actionType("actionType1")
-                .actionFqn("com.example.ActionB")
-                .build();
-        ReactionStatistics statisticsForEventTrigger = ReactionStatistics.builder()
-                .component(BackendService.builder().name("testComponent").build())
-                .triggerType("event")
-                .triggerFqn("com.example.TriggerA")
-                .count(10)
-                .median(5.0)
-                .percentage(50.0)
-                .build();
-        statisticsForEventTrigger.addAction(action1);
-        Action action2 = Action.builder().actionType("command")
-                .actionFqn("com.example.ActionC")
-                .build();
-        ReactionStatistics statisticsForCommandAction = ReactionStatistics.builder()
-                .component(BackendService.builder().name("testComponent").build())
-                .triggerType("event")
-                .triggerFqn("com.example.TriggerA")
-                .count(10)
-                .median(5.0)
-                .percentage(50.0)
-                .build();
-        statisticsForCommandAction.addAction(action2);
-        ReactionStatistics statisticsForNoAction = ReactionStatistics.builder()
-                .component(BackendService.builder().name("testComponent").build())
-                .triggerType("trigger")
-                .triggerFqn("com.example.TriggerA")
-                .count(10)
-                .median(5.0)
-                .percentage(50.0)
-                .build();
-        Action action3 = Action.builder().actionType("command")
-                .actionFqn("com.example.ActionB")
-                .build();
-        Action action4 = Action.builder().actionType("command")
-                .actionFqn("com.example.ActionC")
-                .build();
-        ReactionStatistics statisticsMultipleActionsForCommandAction = ReactionStatistics.builder()
-                .component(BackendService.builder().name("testComponent").build())
-                .triggerType("event")
-                .triggerFqn("com.example.TriggerA")
-                .count(10)
-                .median(5.0)
-                .percentage(50.0)
-                .build();
-        statisticsMultipleActionsForCommandAction.addAction(action3);
-        statisticsMultipleActionsForCommandAction.addAction(action4);
-
-        Action action5 = Action.builder().actionType("command")
-                .actionFqn("com.example.ActionC")
-                .build();
-        ReactionStatistics statisticsNoTrigger = ReactionStatistics.builder()
-                .component(BackendService.builder().name("testComponent").build())
-                .count(10)
-                .median(5.0)
-                .percentage(null)
-                .build();
-        statisticsNoTrigger.addAction(action5);
-
-        BackendService systemComponent = BackendService.builder()
-                .name("testComponent")
-                .build();
-        systemComponent.addReactionStatistics(regularStatistics);
-        systemComponent.addReactionStatistics(statisticsForEventTrigger);
-        systemComponent.addReactionStatistics(statisticsForCommandAction);
-        systemComponent.addReactionStatistics(statisticsForNoAction);
-        systemComponent.addReactionStatistics(statisticsMultipleActionsForCommandAction);
-        systemComponent.addReactionStatistics(statisticsNoTrigger);
-        System system = System.builder()
-                .name("System")
-                .description("Description")
-                .build();
-        system.addSystemComponent(systemComponent);
-
-        ArchitectureModel model = buildModel(system);
-
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
-        assertContent("componentwithreactions.expected", content);
     }
 
     @BeforeEach

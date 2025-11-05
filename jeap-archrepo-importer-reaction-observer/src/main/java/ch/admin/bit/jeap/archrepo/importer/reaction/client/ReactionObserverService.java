@@ -7,9 +7,6 @@ import java.util.List;
 
 public interface ReactionObserverService {
 
-    @GetExchange("/api/statistics/{component}")
-    List<ReactionsObservedStatisticsDto> getReactionsObservedStatistics(@PathVariable("component") String component);
-
     @GetExchange("/api/systems/names")
     List<String> getSystemNames();
 

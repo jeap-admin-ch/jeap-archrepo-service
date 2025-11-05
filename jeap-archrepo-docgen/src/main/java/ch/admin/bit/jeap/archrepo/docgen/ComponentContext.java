@@ -2,8 +2,6 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Relation;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.Action;
-import ch.admin.bit.jeap.archrepo.metamodel.reaction.ReactionStatistics;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -43,7 +41,6 @@ public class ComponentContext {
     List<ProvidedRestAPIRelationView> providedRestApiRelationViews;
     List<RelationView> consumedEventRelations;
     List<RelationView> receivedCommandRelations;
-    List<ReactionStatisticsView> reactionStatisticsViews;
 
     public static ComponentContext of(ArchitectureModel model, SystemComponent systemComponent) {
         List<RelationView> consumedRestApiRelations = getConsumedRelationsByType(model, systemComponent, RelationType.REST_API_RELATION);
@@ -56,7 +53,6 @@ public class ComponentContext {
         List<RelationView> receivedCommandRelations = getConsumedRelationsByType(model, systemComponent, RelationType.COMMAND_RELATION);
 
         String openApiSpecUrl = getOpenApiUrl(model, systemComponent);
-        List<ReactionStatisticsView> reactionStatisticsViews = getReactionStatisticsViews(systemComponent);
 
         return ComponentContext.builder()
                 .systemComponent(systemComponent)
@@ -68,53 +64,7 @@ public class ComponentContext {
                 .consumedEventRelations(consumedEventRelations)
                 .receivedCommandRelations(receivedCommandRelations)
                 .openApiSpecUrl(openApiSpecUrl)
-                .reactionStatisticsViews(reactionStatisticsViews)
                 .build();
-    }
-
-    private static List<ReactionStatisticsView> getReactionStatisticsViews(SystemComponent systemComponent) {
-        if (systemComponent.getReactionStatistics().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        Map<String, List<ReactionStatistics>> groupedByTrigger = new TreeMap<>(
-            systemComponent.getReactionStatistics().stream()
-                .collect(Collectors.groupingBy(stats -> stats.getTriggerType() + "|" + stats.getTriggerFqn()))
-        );
-
-        List<ReactionStatisticsView> result = new ArrayList<>();
-        for (Map.Entry<String, List<ReactionStatistics>> entry : groupedByTrigger.entrySet()) {
-            List<ReactionStatistics> reactionStatisticsByTrigger = entry.getValue();
-            List<ReactionStatistics> lessThanTwoActions = reactionStatisticsByTrigger.stream()
-                .filter(rs -> rs.getActions().size() <= 1)
-                .toList();
-            List<ReactionStatistics> twoOrMoreActions = reactionStatisticsByTrigger.stream()
-                .filter(rs -> rs.getActions().size() > 1)
-                .toList();
-            for (int i = 0; i < lessThanTwoActions.size(); i++) {
-                ReactionStatistics statistics = lessThanTwoActions.get(i);
-                String actionType = statistics.getActions().isEmpty() ? null : statistics.getActions().getFirst().getActionType();
-                String actionFqn = statistics.getActions().isEmpty() ? null : statistics.getActions().getFirst().getActionFqn();
-                if (i == 0) {
-                    // For the first item in the group, we use the rowSpan value
-                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn,  lessThanTwoActions.size(), 1));
-                } else {
-                    result.add(ReactionStatisticsView.of(statistics, actionType, actionFqn, null, 1));
-                }
-            }
-            for (ReactionStatistics statistics : twoOrMoreActions) {
-                for (int j = 0; j < statistics.getActions().size(); j++) {
-                    Action action = statistics.getActions().get(j);
-                    if (j == 0) {
-                        // For the first item in the group, we use the rowSpan value
-                        result.add(ReactionStatisticsView.of(statistics, action.getActionType(), action.getActionFqn(), statistics.getActions().size(), statistics.getActions().size()));
-                    } else {
-                        result.add(ReactionStatisticsView.of(statistics, action.getActionType(), action.getActionFqn(), null, null));
-                    }
-                }
-            }
-        }
-        return result;
     }
 
     public Set<String> getComponentsInContext() {
@@ -157,7 +107,7 @@ public class ComponentContext {
             for (Map.Entry<String, List<ProvidedRestAPIRelationView>> relation : groupedByMethod.entrySet()) {
                 if (firstRow) {
                     //first row contains the rowspan value
-                    result.add(new RestApiGroupedResult(new RestApiKey(entry.getKey(), groupedByMethod.keySet().size()), relation.getKey(), relation.getValue()));
+                    result.add(new RestApiGroupedResult(new RestApiKey(entry.getKey(), groupedByMethod.size()), relation.getKey(), relation.getValue()));
                     firstRow = false;
                 } else {
                     //other rows have a null value for the first column

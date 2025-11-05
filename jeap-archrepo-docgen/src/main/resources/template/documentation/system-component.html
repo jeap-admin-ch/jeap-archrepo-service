@@ -85,9 +85,6 @@
     <h2>Empfangene Commands</h2>
     <div th:replace="~{fragment/grouped-relations-table :: grouped-relations-table(relations=${receivedCommandRelations}, counterpartLabel='Command Sender', label='Command')}"></div>
 
-    <h2>Reaktionen</h2>
-    <div th:replace="~{fragment/reactions-table :: reactions-table(reactions=${reactions}, counterpartLabel='Reactions', label='Reactions')}"></div>
-
     <div th:if="${componentGraphAttachmentName != null}">
         <p><br /></p>
         <h2>Graph</h2>

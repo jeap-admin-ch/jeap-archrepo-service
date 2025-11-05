@@ -58,9 +58,6 @@ public class PactProviderTestBase {
     OpenApiSpecRepository openApiSpecRepository;
 
     @MockitoBean
-    ReactionStatisticsRepository reactionStatisticsRepository;
-
-    @MockitoBean
     SystemRepository systemRepository;
 
     @MockitoBean
@@ -116,12 +113,6 @@ public class PactProviderTestBase {
     void databaseSchemaVersions() {
         when(systemComponentDatabaseSchemaRepository.getDatabaseSchemaVersions()).thenReturn(
                 List.of(new DatabaseSchemaVersionImpl("test-system", "test-component", "1.2.3")));
-    }
-
-    @State("A model with one component with observed reactions")
-    void reactionStatistics() {
-        when(reactionStatisticsRepository.getMaxLastModifiedAtList()).thenReturn(
-                List.of(new ReactionStatisticsLastModifiedAtImpl("test-component", ZonedDateTime.of(2025, 8, 1, 14, 0, 0 ,0, ZoneId.of("UTC")))));
     }
 
     @State("A database schema exists for the component 'test-component' in the system 'test-system'")
@@ -221,11 +212,5 @@ public class PactProviderTestBase {
         String system;
         String component;
         String version;
-    }
-
-    @Value
-    private static class ReactionStatisticsLastModifiedAtImpl implements ReactionStatisticsLastModifiedAt {
-        String component;
-        ZonedDateTime lastModifiedAt;
     }
 }
