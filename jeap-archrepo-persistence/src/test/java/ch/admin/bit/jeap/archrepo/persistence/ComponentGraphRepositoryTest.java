@@ -9,8 +9,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
 class ComponentGraphRepositoryTest {
@@ -20,6 +23,60 @@ class ComponentGraphRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
+
+
+    @Test
+    void getMaxCreatedAndModifiedAtList_shouldReturnCorrectMaxValues() {
+        // Arrange
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime earlier = now.minusDays(2);
+        ZonedDateTime later = now.plusDays(1);
+
+        ComponentGraph graph1 = ComponentGraph.builder()
+                .systemName("system-a")
+                .componentName("component-a")
+                .graphData("graph-a".getBytes(StandardCharsets.UTF_8))
+                .fingerprint("fp-a")
+                .build();
+        ReflectionTestUtils.setField(graph1, "createdAt", earlier);
+        ReflectionTestUtils.setField(graph1, "modifiedAt", now);
+        entityManager.persist(graph1);
+
+        ComponentGraph graph2 = ComponentGraph.builder()
+                .systemName("system-b")
+                .componentName("component-b")
+                .graphData("graph-b".getBytes(StandardCharsets.UTF_8))
+                .fingerprint("fp-b")
+                .build();
+        ReflectionTestUtils.setField(graph2, "createdAt", later);
+        ReflectionTestUtils.setField(graph2, "modifiedAt", now);
+        entityManager.persist(graph2);
+
+        entityManager.flush();
+
+        // Act
+        List<ReactionLastModifiedAt> result = componentGraphRepository.getMaxCreatedAndModifiedAtList();
+
+        // Assert
+        assertThat(result).hasSize(2);
+
+        ReactionLastModifiedAt compA = result.stream()
+                .filter(r -> r.getComponent().equals("component-a"))
+                .findFirst()
+                .orElseThrow();
+
+        ReactionLastModifiedAt compB = result.stream()
+                .filter(r -> r.getComponent().equals("component-b"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(compA.getMaxCreatedAt().toInstant()).isCloseTo(earlier.toInstant(), within(1, ChronoUnit.MILLIS));
+        assertThat(compA.getMaxModifiedAt().toInstant()).isCloseTo(now.toInstant(), within(1, ChronoUnit.MILLIS));
+
+        assertThat(compB.getMaxCreatedAt().toInstant()).isCloseTo(later.toInstant(), within(1, ChronoUnit.MILLIS));
+        assertThat(compB.getMaxModifiedAt().toInstant()).isCloseTo(now.toInstant(), within(1, ChronoUnit.MILLIS));
+
+    }
 
     @Test
     void saveComponentGraph_and_find() {

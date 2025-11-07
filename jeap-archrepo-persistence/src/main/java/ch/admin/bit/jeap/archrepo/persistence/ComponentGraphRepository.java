@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -25,4 +27,15 @@ public interface ComponentGraphRepository extends JpaRepository<ComponentGraph, 
     @Transactional
     @Query("UPDATE ComponentGraph g SET g.lastPublishedFingerprint = :fingerprint WHERE g.id = :id")
     void updateLastPublishedFingerprint(UUID id, String fingerprint);
+
+
+    @Query("""
+    SELECT g.componentName AS component,
+           MAX(g.createdAt) AS maxCreatedAt,
+           MAX(g.modifiedAt) AS maxModifiedAt
+    FROM ComponentGraph g
+    GROUP BY g.componentName
+    """)
+    List<ReactionLastModifiedAt> getMaxCreatedAndModifiedAtList();
+
 }

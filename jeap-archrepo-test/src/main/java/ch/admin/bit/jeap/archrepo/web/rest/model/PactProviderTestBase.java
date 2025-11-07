@@ -67,6 +67,9 @@ public class PactProviderTestBase {
     SystemComponentRepository systemComponentRepository;
 
     @MockitoBean
+    ComponentGraphRepository componentGraphRepository;
+
+    @MockitoBean
     RestApiRepository restApiRepository;
 
     @MockitoBean
@@ -199,7 +202,34 @@ public class PactProviderTestBase {
                 .tables(List.of(tableA, tableB))
                 .build();
     }
-    
+
+
+    @State("A model with one component with observed reactions")
+    void reactionStatistics() {
+        ZonedDateTime lastModified = ZonedDateTime.of(2025, 8, 1, 14, 0, 0, 0, ZoneId.of("UTC"));
+
+        ReactionLastModifiedAt projection = new ReactionLastModifiedAt() {
+            @Override
+            public String getComponent() {
+                return "test-component";
+            }
+
+            @Override
+            public ZonedDateTime getMaxCreatedAt() {
+                return lastModified.minusDays(1);
+            }
+
+            @Override
+            public ZonedDateTime getMaxModifiedAt() {
+                return lastModified;
+            }
+        };
+
+        when(componentGraphRepository.getMaxCreatedAndModifiedAtList())
+                .thenReturn(List.of(projection));
+    }
+
+
     @Value
     private static class ApiDocVersionImpl implements ApiDocVersion {
         String system;
