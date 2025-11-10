@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @RestController
@@ -34,13 +35,18 @@ class ReactionApiController {
     public List<ReactionLastModifiedAtDto> getComponentsWithReactions() {
         log.debug("Retrieving all components with observed reactions...");
 
+
         return componentGraphRepository.getMaxCreatedAndModifiedAtList().stream()
-                .map(row -> new ReactionLastModifiedAtDto(
-                        row.getComponent(),
-                        row.getMaxCreatedAt().isAfter(row.getMaxModifiedAt())
-                                ? row.getMaxCreatedAt()
-                                : row.getMaxModifiedAt()
-                ))
+                .map(row -> {
+                    ZonedDateTime created = row.getMaxCreatedAt();
+                    ZonedDateTime modified = row.getMaxModifiedAt();
+
+                    ZonedDateTime lastModified = (created != null && (modified == null || created.isAfter(modified)))
+                            ? created
+                            : modified;
+
+                    return new ReactionLastModifiedAtDto(row.getComponent(), lastModified);
+                })
                 .toList();
     }
 }

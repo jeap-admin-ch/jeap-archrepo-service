@@ -90,4 +90,39 @@ class ReactionApiControllerTest {
         ZonedDateTime maxCreatedAt;
         ZonedDateTime maxModifiedAt;
     }
+
+    @Test
+    void getComponentsWithReactions_shouldHandleNullDatesGracefully() throws Exception {
+        // Arrange
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime earlier = now.minusDays(3);
+
+        ReactionLastModifiedAt bothSet = new TestProjection("component1", now.minusDays(5), now);
+        ReactionLastModifiedAt onlyCreatedSet = new TestProjection("component2", earlier, null);
+        ReactionLastModifiedAt onlyModifiedSet = new TestProjection("component3", null, earlier);
+        ReactionLastModifiedAt bothNull = new TestProjection("component4", null, null);
+
+        when(componentGraphRepository.getMaxCreatedAndModifiedAtList())
+                .thenReturn(List.of(bothSet, onlyCreatedSet, onlyModifiedSet, bothNull));
+
+        // Act
+        String json = mockMvc.perform(get(API_PATH)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<ReactionLastModifiedAtDto> result = objectMapper.readValue(json, new TypeReference<>() {
+        });
+
+        // Assert
+        assertThat(result).hasSize(4);
+
+        ReactionLastModifiedAtDto dto1 = result.stream().filter(r -> r.component().equals("component1")).findFirst().orElseThrow();
+        ReactionLastModifiedAtDto dto2 = result.stream().filter(r -> r.component().equals("component2")).findFirst().orElseThrow();
+        ReactionLastModifiedAtDto dto3 = result.stream().filter(r -> r.component().equals("component3")).findFirst().orElseThrow();
+
+        assertThat(dto1.lastModifiedAt().toInstant()).isCloseTo(now.toInstant(), within(1, ChronoUnit.MILLIS));
+        assertThat(dto2.lastModifiedAt().toInstant()).isCloseTo(earlier.toInstant(), within(1, ChronoUnit.MILLIS));
+        assertThat(dto3.lastModifiedAt().toInstant()).isCloseTo(earlier.toInstant(), within(1, ChronoUnit.MILLIS));
+    }
 }
