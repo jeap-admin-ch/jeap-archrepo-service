@@ -128,7 +128,6 @@ Apache License Version 2.0
  * Netty/Handler/Proxy - [io.netty:netty-handler-proxy](https://netty.io/netty-handler-proxy/)
  * Netty/Resolver - [io.netty:netty-resolver](https://netty.io/netty-resolver/)
  * Netty/Transport - [io.netty:netty-transport](https://netty.io/netty-transport/)
- * Netty/Transport/Classes/Epoll - [io.netty:netty-transport-classes-epoll](https://netty.io/netty-transport-classes-epoll/)
  * Netty/Transport/Native/Unix/Common - [io.netty:netty-transport-native-unix-common](https://netty.io/netty-transport-native-unix-common/)
  * perfmark:perfmark-api - [io.perfmark:perfmark-api](https://github.com/perfmark/perfmark)
  * Java CF Env Core Library - [io.pivotal.cfenv:java-cfenv](https://github.com/pivotal-cf/java-cfenv/)
@@ -301,7 +300,6 @@ Apache License Version 2.0
  * AWS Java SDK :: Identity SPI - [software.amazon.awssdk:identity-spi](https://aws.amazon.com/sdkforjava)
  * AWS Java SDK :: Core :: Protocols :: Json Utils - [software.amazon.awssdk:json-utils](https://aws.amazon.com/sdkforjava)
  * AWS Java SDK :: Metrics SPI - [software.amazon.awssdk:metrics-spi](https://aws.amazon.com/sdkforjava/core/metrics-spi)
- * AWS Java SDK :: HTTP Clients :: Netty Non-Blocking I/O - [software.amazon.awssdk:netty-nio-client](https://aws.amazon.com/sdkforjava/http-clients/netty-nio-client)
  * AWS Java SDK :: Profiles - [software.amazon.awssdk:profiles](https://aws.amazon.com/sdkforjava)
  * AWS Java SDK :: Core :: Protocols :: Protocol Core - [software.amazon.awssdk:protocol-core](https://aws.amazon.com/sdkforjava)
  * AWS Java SDK :: Services :: Amazon RDS - [software.amazon.awssdk:rds](https://aws.amazon.com/sdkforjava)
@@ -315,7 +313,7 @@ Apache License Version 2.0
  * AWS Java SDK :: Utilities - [software.amazon.awssdk:utils](https://aws.amazon.com/sdkforjava/utils)
  * AWS Java SDK :: Utils Lite - [software.amazon.awssdk:utils-lite](https://aws.amazon.com/sdkforjava)
  * AWS Event Stream - [software.amazon.eventstream:eventstream](https://github.com/awslabs/aws-eventstream-java)
- * AWS Advanced JDBC Wrapper - [software.amazon.jdbc:aws-advanced-jdbc-wrapper](https://github.com/awslabs/aws-advanced-jdbc-wrapper)
+ * AWS Advanced JDBC Wrapper - [software.amazon.jdbc:aws-advanced-jdbc-wrapper](https://github.com/aws/aws-advanced-jdbc-wrapper)
 
 BSD
 -------------------------------
