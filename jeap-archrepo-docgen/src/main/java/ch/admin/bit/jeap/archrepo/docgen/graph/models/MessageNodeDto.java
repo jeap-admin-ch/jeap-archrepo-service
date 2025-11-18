@@ -13,7 +13,7 @@ public class MessageNodeDto implements NodeDto {
     private long id;
     private String messageType;
     private String variant;
-    private boolean isHighlighted = false;
+    private boolean highlighted = false;
 
     @Override
     public String getDotId() {
@@ -22,7 +22,7 @@ public class MessageNodeDto implements NodeDto {
 
     @Override
     public String toDot() {
-        String style = isHighlighted ? ", style=filled, fillcolor=lightblue" : "";
+        String style = highlighted ? ", style=filled, fillcolor=lightblue" : "";
         String messageNodeName = messageType.replaceAll("(Event|Command)$", "");
         String label = variant != null && !variant.isBlank()
                 ? String.format("%s\\n[%s]", messageNodeName, variant)

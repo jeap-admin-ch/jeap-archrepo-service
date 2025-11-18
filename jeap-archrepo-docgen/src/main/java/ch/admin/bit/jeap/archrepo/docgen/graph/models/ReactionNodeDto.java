@@ -12,7 +12,8 @@ import lombok.AllArgsConstructor;
 public class ReactionNodeDto implements NodeDto {
     private long id;
     private String component;
-    private boolean isHighlighted = false;
+    private boolean highlighted = false;
+    private boolean partOfCluster = false;
 
     @Override
     public String getDotId() {
@@ -21,9 +22,8 @@ public class ReactionNodeDto implements NodeDto {
 
     @Override
     public String toDot() {
-        String style = isHighlighted ? ", style=filled, fillcolor=lightblue" : "";
-        String componentName = component.replaceAll("(-scs|-service|-component)$", "");
-        String label = String.format("%s\\n%d", componentName, id);
+        String style = highlighted ? ", style=filled, fillcolor=lightblue" : "";
+        String label = partOfCluster ? String.valueOf(id) : component.replaceAll("(-scs|-service)$", "") + "\\n" + id;
         return String.format("  \"%s\" [label=\"%s\", shape=box, style=rounded%s];", getDotId(), label, style);
     }
 }

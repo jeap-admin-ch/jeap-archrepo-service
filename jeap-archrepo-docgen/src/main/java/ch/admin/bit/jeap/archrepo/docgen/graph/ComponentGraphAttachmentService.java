@@ -4,7 +4,6 @@ import ch.admin.bit.jeap.archrepo.docgen.ConfluenceAdapter;
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.MessageNodeDto;
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.NodeDto;
-import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.ComponentGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
