@@ -9,8 +9,8 @@ import java.time.ZonedDateTime;
 @UtilityClass
 public class SystemComponentFactory {
 
-    public SystemComponent createSystemComponent(System system, String cfAppName, Importer importer) {
-        SystemComponent systemComponent = createByName(cfAppName);
+    public SystemComponent createSystemComponent(System system, String componentName, Importer importer) {
+        SystemComponent systemComponent = createByName(componentName);
         systemComponent.setImporter(importer);
         systemComponent.setOwnedBy(system.getDefaultOwner());
         systemComponent.setLastSeenFromDate(ZonedDateTime.now());
@@ -18,13 +18,13 @@ public class SystemComponentFactory {
         return systemComponent;
     }
 
-    private SystemComponent createByName(String cfAppName) {
-        if (cfAppName.endsWith("-ui") || cfAppName.endsWith("-frontend") || cfAppName.endsWith("-webui")) {
-            return new Frontend(cfAppName);
-        } else if (cfAppName.endsWith("-scs")) {
-            return new SelfContainedSystem(cfAppName);
+    private SystemComponent createByName(String componentName) {
+        if (componentName.endsWith("-ui") || componentName.endsWith("-frontend") || componentName.endsWith("-webui")) {
+            return new Frontend(componentName);
+        } else if (componentName.endsWith("-scs")) {
+            return new SelfContainedSystem(componentName);
         } else {
-            return new BackendService(cfAppName);
+            return new BackendService(componentName);
         }
     }
 }
