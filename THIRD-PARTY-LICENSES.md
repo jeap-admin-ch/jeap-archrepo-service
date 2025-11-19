@@ -24,7 +24,6 @@ Apache License Version 2.0
  * ch.admin.bit.jeap:jeap-archrepo-importer-pactbroker - [ch.admin.bit.jeap:jeap-archrepo-importer-pactbroker](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-pactbroker)
  * ch.admin.bit.jeap:jeap-archrepo-importer-prometheus - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus)
  * ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-aws - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-aws](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus-aws)
- * ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-cf - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-cf](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus-cf)
  * ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-rhos - [ch.admin.bit.jeap:jeap-archrepo-importer-prometheus-rhos](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-prometheus-rhos)
  * ch.admin.bit.jeap:jeap-archrepo-importer-reaction-observer - [ch.admin.bit.jeap:jeap-archrepo-importer-reaction-observer](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importer-reaction-observer)
  * ch.admin.bit.jeap:jeap-archrepo-importers - [ch.admin.bit.jeap:jeap-archrepo-importers](https://github.com/jeap-admin-ch/jeap-archrepo-service/tree/main/jeap-archrepo-importers)
