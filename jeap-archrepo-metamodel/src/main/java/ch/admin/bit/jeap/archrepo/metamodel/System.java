@@ -268,6 +268,7 @@ public class System extends MutableDomainEntity {
         relations.removeIf(rel -> removedSystemComponentName.equals(rel.getProviderName()) || removedSystemComponentName.equals(rel.getConsumerName()));
         restApis.removeIf(restApi -> restApi.getProvider().getName().equals(removedSystemComponentName));
         openApiSpecs.removeIf(openApiSpec -> openApiSpec.getProvider().getName().equals(removedSystemComponentName));
+        databaseSchemas.removeIf(dbSchema -> dbSchema.getSystemComponent().getName().equals(removedSystemComponentName));
     }
 
     /**

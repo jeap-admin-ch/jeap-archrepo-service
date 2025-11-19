@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Reaction nodes are getting now clustered by their component name.
+- DB schemas for deleted compoents are now removed automatically.
 
 ## [4.0.0] - 2025-11-19
 
