@@ -4,7 +4,6 @@ import ch.admin.bit.jeap.archrepo.importer.deploymentlog.DeploymentlogImporterCo
 import ch.admin.bit.jeap.archrepo.importer.messagetype.MessageTypeImporterConfiguration;
 import ch.admin.bit.jeap.archrepo.importer.pactbroker.PactBrokerImporterConfiguration;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.aws.AWSImporterConfiguration;
-import ch.admin.bit.jeap.archrepo.importer.prometheus.cf.CloudFoundryImporterConfiguration;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.RhosImporterConfiguration;
 import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.ComponentScan;
 @TestConfiguration
 @EnableAutoConfiguration(exclude = {
         PactBrokerImporterConfiguration.class,
-        CloudFoundryImporterConfiguration.class,
         AWSImporterConfiguration.class,
         RhosImporterConfiguration.class,
         MessageTypeImporterConfiguration.class,
