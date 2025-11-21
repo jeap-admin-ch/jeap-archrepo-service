@@ -2,10 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceAttachment;
-import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceClient;
-import org.sahli.asciidoc.confluence.publisher.client.http.ConfluencePage;
-import org.sahli.asciidoc.confluence.publisher.client.http.NotFoundException;
+import org.sahli.asciidoc.confluence.publisher.client.http.*;
 
 import java.io.InputStream;
 import java.util.*;
@@ -36,6 +33,7 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
         return confluenceClient.getPageByTitle(props.getSpaceKey(), pageName);
     }
 
+
     @Override
     public void deleteUnusedAttachments(String pageId, List<String> attachmentNamesToKeep) {
         try {
@@ -44,9 +42,19 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
             List<ConfluenceAttachment> toBeDeleted = attachments.stream()
                     .filter(att -> !toBeKept.contains(att.getTitle()))
                     .toList();
+
             for (ConfluenceAttachment confluenceAttachment : toBeDeleted) {
-                confluenceClient.deleteAttachment(confluenceAttachment.getId());
-                log.info("Attachment '{}' deleted.", confluenceAttachment.getTitle());
+                try {
+                    confluenceClient.deleteAttachment(confluenceAttachment.getId());
+                    log.info("Attachment '{}' deleted.", confluenceAttachment.getTitle());
+                } catch (RequestFailedException e) {
+                    if (e.getMessage().contains("not found")) {
+                        log.info("Attachment '{}' already deleted or not found (idempotent).", confluenceAttachment.getTitle());
+                    } else {
+                        log.error("Failed to delete attachment '{}': {}", confluenceAttachment.getTitle(), e.getMessage(), e);
+                        throw new RuntimeException("Deletion of unused attachments failed.", e);
+                    }
+                }
             }
         } catch (Exception e) {
             log.error("Error while deleting unused attachments: {}", e.getMessage(), e);
