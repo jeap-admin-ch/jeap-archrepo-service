@@ -50,7 +50,14 @@ class MessageGraphImporter implements ArchRepoImporter {
             try {
                 GraphDto graphDto = messageGraphDto.get(v);
                 // 'No variant' is delivered as messageTypeName from Reaction Observer Service
-                String variant = messageTypeName.equals(v) ? "" : v;
+                String variant;
+                if (messageTypeName.equals(v)) {
+                    variant = "";
+                } else if (v.contains("/")) {
+                    variant = v.substring(v.indexOf("/") + 1);
+                } else {
+                    variant = v;
+                }
                 byte[] graphData = objectMapper.writeValueAsBytes(graphDto.graph());
 
                 if (messageGraphRepository.existsByMessageTypeNameAndVariant(messageTypeName, variant)) {

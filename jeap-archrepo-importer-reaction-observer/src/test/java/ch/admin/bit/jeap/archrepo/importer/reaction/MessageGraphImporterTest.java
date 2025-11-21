@@ -272,4 +272,33 @@ class MessageGraphImporterTest {
         verify(messageGraphRepository, never()).save(any());
         verify(messageGraphRepository, never()).updateGraphAndFingerprintByMessageTypeNameAndVariantIfFingerprintChanged(any(), any(), any(), any());
     }
+
+    @Test
+    void importIntoModel_withVariantContainingSlash_extractsVariantCorrectly() throws JsonProcessingException {
+        // Arrange
+        String messageTypeName = "Event1";
+        String rawVariant = "Event1/v2";
+        String expectedVariant = "v2";
+
+        when(messageType1.getMessageTypeName()).thenReturn(messageTypeName);
+        when(model.getAllMessageTypes()).thenReturn(List.of(messageType1));
+
+        Map<String, Object> graphData = Map.of("nodes", List.of("node1"));
+        MessageGraphDto messageGraphDto = new MessageGraphDto();
+        messageGraphDto.put(rawVariant, new GraphDto(graphData, "fingerprint123"));
+
+        when(reactionObserverService.getMessageGraph(messageTypeName)).thenReturn(messageGraphDto);
+        when(objectMapper.writeValueAsBytes(graphData)).thenReturn("{\"nodes\":[\"node1\"]}".getBytes());
+        when(messageGraphRepository.existsByMessageTypeNameAndVariant(messageTypeName, expectedVariant)).thenReturn(false);
+
+        MessageGraphImporter importer = new MessageGraphImporter(
+                reactionObserverService, messageGraphRepository, objectMapper);
+
+        // Act
+        importer.importIntoModel(model, "ref");
+
+        // Assert
+        verify(messageGraphRepository).existsByMessageTypeNameAndVariant(messageTypeName, expectedVariant);
+        verify(messageGraphRepository).save(argThat(saved -> expectedVariant.equals(saved.getVariant())));
+    }
 }

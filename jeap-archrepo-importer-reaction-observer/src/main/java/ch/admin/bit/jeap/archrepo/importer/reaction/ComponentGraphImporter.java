@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Map;
 
@@ -42,7 +43,11 @@ class ComponentGraphImporter implements ArchRepoImporter {
                 return;
             }
             saveOrUpdateComponentGraph(componentName, systemName, graphDto);
-        } catch (Exception e) {
+        }
+        catch (HttpClientErrorException.NotFound e) {
+            log.info("Component graph not found for component: {} in system: {}", componentName, systemName);
+        }
+        catch (Exception e) {
             log.warn("Failed to get or process graph data for component: {} in system: {}", componentName, systemName, e);
         }
     }
