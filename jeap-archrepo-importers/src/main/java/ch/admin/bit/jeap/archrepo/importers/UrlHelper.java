@@ -25,6 +25,17 @@ public class UrlHelper {
         return input;
     }
 
+    public static int countPathVariables(String path) {
+        String[] segments = path.split("/");
+        int count = 0;
+        for (String segment : segments) {
+            if (segment.matches("\\{.*}")) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     public static boolean hasPathVariable(String path) {
         return path.matches(".*\\{.*}.*");
     }

@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -124,6 +127,7 @@ class RequestResponseInteractionImporter implements RestApiResolver {
 
     @Override
     public Optional<RestApi> retrieveExistingRestApiWithMatchingPattern(SystemComponent provider, String method, String path) {
+        List<RestApi> matchingRestApis = new ArrayList<>();
         for (RestApi currentRestApi : provider.getParent().getRestApis()) {
             if (UrlHelper.restApisProviderMethodAreMatching(currentRestApi, provider, method)) {
                 // Match path to provider APIs
@@ -135,23 +139,36 @@ class RequestResponseInteractionImporter implements RestApiResolver {
                     log.debug("Found matching rest api with regex from jeap ('{}') with the pact relation '{}'",
                             currentRestApi.getPath(),
                             path);
-                    return Optional.of(currentRestApi);
-                }
+                    matchingRestApis.add(currentRestApi);
+                } else {
 
-                // Match provided REST API to path
-                matcher = Pattern.compile(UrlHelper.convertPathToRegex(path), Pattern.CASE_INSENSITIVE)
-                        .matcher(UrlHelper.removeTrailingSlash(currentRestApiPathWithoutContextPrefix));
-                if (matcher.matches()) {
-                    log.debug("Found matching rest api with regex from jeap ('{}') with the pact relation '{}'",
-                            currentRestApi.getPath(),
-                            path);
-                    return Optional.of(currentRestApi);
+                    // Match provided REST API to path
+                    matcher = Pattern.compile(UrlHelper.convertPathToRegex(path), Pattern.CASE_INSENSITIVE)
+                            .matcher(UrlHelper.removeTrailingSlash(currentRestApiPathWithoutContextPrefix));
+                    if (matcher.matches()) {
+                        log.debug("Found matching rest api with regex from jeap ('{}') with the pact relation '{}'",
+                                currentRestApi.getPath(),
+                                path);
+                        matchingRestApis.add(currentRestApi);
+                    }
                 }
 
             }
         }
 
-        log.debug("No rest api present for provider {} on {} : {}", provider, method, path);
-        return Optional.empty();
+        if (matchingRestApis.isEmpty()) {
+            log.debug("No rest api present for provider {} on {} : {}", provider, method, path);
+            return Optional.empty();
+        } else if (matchingRestApis.size() == 1) {
+            return Optional.of(matchingRestApis.getFirst());
+        } else {
+            log.info("Multiple matching rest apis found for provider '{}' on '{}' '{}'. Matching rest apis: {}",
+                    provider.getName(), method, path, matchingRestApis);
+
+            // Find the most specific matching rest api (the one with the less path variables)
+            matchingRestApis.sort(Comparator.comparingInt(api -> UrlHelper.countPathVariables(api.getPath())));
+
+            return Optional.of(matchingRestApis.getFirst());
+        }
     }
 }

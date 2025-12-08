@@ -20,5 +20,19 @@ class UrlHelperTest {
         assertThat(UrlHelper.convertPathToRegex(input)).isEqualTo(expected);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "/api/contexts/{param}/documents/{param}/test, 2",
+            "/api/{param}/, 1",
+            "/{param}, 1",
+            "/{param}/{id}/{test}, 3",
+            "/api/{param}, 1",
+            "/foo/{docId}/bar/{uuid}/foo, 2",
+            "/api/v2/systems/{system-id}/context-types/{context-type-id}, 2",
+            "/api/test, 0"})
+    void countPathVariables(String input, int expected) {
+        assertThat(UrlHelper.countPathVariables(input)).isEqualTo(expected);
+    }
+
 
 }
