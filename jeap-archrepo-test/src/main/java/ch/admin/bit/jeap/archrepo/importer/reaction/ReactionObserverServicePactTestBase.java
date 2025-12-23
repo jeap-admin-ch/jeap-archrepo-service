@@ -33,7 +33,6 @@ public class ReactionObserverServicePactTestBase {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @SuppressWarnings("DataFlowIssue")
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getSystemNamesComponentInteraction(PactDslWithProvider builder) {
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
@@ -71,6 +70,45 @@ public class ReactionObserverServicePactTestBase {
         assertThat(systemNames).isNotEmpty();
         assertThat(systemNames.getFirst()).isEqualTo("system-1");
         assertThat(systemNames.getLast()).isEqualTo("system-2");
+    }
+
+    @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
+    private RequestResponsePact getComponentNamesInteraction(PactDslWithProvider builder) {
+        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        return builder.given("Component names are available")
+                .uponReceiving("A GET request to " + BASE_API_PATH + "/components/names")
+                .path(BASE_API_PATH + "/components/names")
+                .method("GET")
+                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .willRespondWith()
+                .status(200)
+                .matchHeader("Content-Type", "application/json")
+                .body("""
+                        [
+                          "component-1",
+                          "component-2"
+                        ]
+                        """)
+                .toPact();
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "getComponentNamesInteraction")
+    void testGetComponentNames() {
+        // given
+        ReactionObserverServiceProperties props = new ReactionObserverServiceProperties();
+        props.setUrl("http://localhost:8888");
+        props.setUsername("user");
+        props.setPassword("secret");
+        ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
+
+        // when
+        List<String> componentNames = reactionObserverService.getComponentNames();
+
+        // then
+        assertThat(componentNames).isNotEmpty();
+        assertThat(componentNames.getFirst()).isEqualTo("component-1");
+        assertThat(componentNames.getLast()).isEqualTo("component-2");
     }
 
     @SuppressWarnings("DataFlowIssue")
