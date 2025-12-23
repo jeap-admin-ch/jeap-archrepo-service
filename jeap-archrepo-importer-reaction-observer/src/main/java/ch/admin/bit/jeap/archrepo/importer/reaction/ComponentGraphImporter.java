@@ -12,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -26,12 +29,30 @@ class ComponentGraphImporter implements ArchRepoImporter {
     @Override
     public void importIntoModel(ArchitectureModel model, String environment) {
         log.info("Getting service graphs from Reaction Observer Service...");
-        Map<String, String> componentToSystemMap = model.getAllSystemComponentNamesWithSystemName();
+        Map<String, String> componentToSystemMap = getComponentToSystemMapForComponentsObservingReactions(model);
 
         for (Map.Entry<String, String> entry : componentToSystemMap.entrySet()) {
             importComponent(entry.getKey(), entry.getValue());
         }
         log.info("Service graph import completed");
+    }
+
+    private Map<String, String> getComponentToSystemMapForComponentsObservingReactions(ArchitectureModel model) {
+        Map<String, String> componentToSystemMap = new HashMap<>(model.getAllSystemComponentNamesWithSystemName());
+        Set<String> reactionObserverServiceComponentNames = new HashSet<>(reactionObserverService.getComponentNames());
+        componentToSystemMap.keySet().retainAll(reactionObserverServiceComponentNames);
+
+        logComponentsNotObservingReactions(componentToSystemMap.keySet(), reactionObserverServiceComponentNames);
+
+        return componentToSystemMap;
+    }
+
+    private static void logComponentsNotObservingReactions(Set<String> modelComponentNames, Set<String> reactionObserverServiceComponentNames) {
+        Set<String> missingComponents = new HashSet<>(modelComponentNames);
+        missingComponents.removeAll(reactionObserverServiceComponentNames);
+        if (!missingComponents.isEmpty()) {
+            log.info("The following components are not observing reactions in the Reaction Observer Service and will be skipped: {}", missingComponents);
+        }
     }
 
     private void importComponent(String componentName, String systemName) {
@@ -43,11 +64,9 @@ class ComponentGraphImporter implements ArchRepoImporter {
                 return;
             }
             saveOrUpdateComponentGraph(componentName, systemName, graphDto);
-        }
-        catch (HttpClientErrorException.NotFound e) {
+        } catch (HttpClientErrorException.NotFound e) {
             log.info("Component graph not found for component: {} in system: {}", componentName, systemName);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.warn("Failed to get or process graph data for component: {} in system: {}", componentName, systemName, e);
         }
     }

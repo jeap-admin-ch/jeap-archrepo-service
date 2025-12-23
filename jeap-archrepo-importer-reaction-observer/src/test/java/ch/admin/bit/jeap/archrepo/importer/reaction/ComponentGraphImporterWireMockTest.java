@@ -56,6 +56,14 @@ class ComponentGraphImporterWireMockTest {
         // Arrange
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
 
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/components/names"))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""
+                                [ "component1", "component2" ]
+                                """)));
+
         stubFor(get(urlEqualTo("/reaction-observer-service/api/graphs/components/component1"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
                 .willReturn(aResponse()
@@ -139,9 +147,10 @@ class ComponentGraphImporterWireMockTest {
         // Create test model with components
         SystemComponent comp1 = BackendService.builder().name("component1").build();
         SystemComponent comp2 = BackendService.builder().name("component2").build();
+        SystemComponent comp3 = BackendService.builder().name("component3-no-reactions").build();
 
         System system1 = System.builder().name("system1").systemComponents(List.of(comp1)).build();
-        System system2 = System.builder().name("system2").systemComponents(List.of(comp2)).build();
+        System system2 = System.builder().name("system2").systemComponents(List.of(comp2, comp3)).build();
 
         ArchitectureModel testModel = ArchitectureModel.builder()
                 .systems(List.of(system1, system2))
@@ -196,6 +205,14 @@ class ComponentGraphImporterWireMockTest {
         // Arrange
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
 
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/components/names"))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""
+                                [ "component1", "component2" ]
+                                """)));
+
         // Stub for service graph returning 404
         stubFor(get(urlEqualTo("/reaction-observer-service/api/graphs/components/component-no-graph"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
@@ -224,6 +241,14 @@ class ComponentGraphImporterWireMockTest {
     void importIntoModel_withExistingServiceGraph_updatesComponentGraph() {
         // Arrange
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+
+        stubFor(get(urlEqualTo("/reaction-observer-service/api/components/names"))
+                .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Basic " + basicAuth))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""
+                                [ "existing-component" ]
+                                """)));
 
         // Stub for service graph
         stubFor(get(urlEqualTo("/reaction-observer-service/api/graphs/components/existing-component"))

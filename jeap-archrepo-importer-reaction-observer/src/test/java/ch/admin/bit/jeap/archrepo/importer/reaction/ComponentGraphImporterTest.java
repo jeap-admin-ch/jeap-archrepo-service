@@ -45,7 +45,7 @@ class ComponentGraphImporterTest {
         // Arrange
         String systemName = "testSystem";
         String componentName = "testComponent";
-        Map<String, String> componentToSystemMap = Map.of(componentName, systemName);
+        Map<String, String> componentToSystemMap = Map.of(componentName, systemName, "anotherComponent-noReactions", "anotherSystem");
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(componentToSystemMap);
         when(componentGraphRepository.existsBySystemNameAndComponentName(systemName, componentName)).thenReturn(false);
 
@@ -80,6 +80,7 @@ class ComponentGraphImporterTest {
             "edges", List.of(triggerEdge, actionEdge)
         );
         GraphDto graphDto = new GraphDto(graphData, "fingerprint123");
+        when(reactionObserverService.getComponentNames()).thenReturn(List.of(componentName));
         when(reactionObserverService.getComponentGraph(componentName)).thenReturn(graphDto);
 
         String expectedSerializedData = "{\"nodes\":[{\"nodeType\":\"MESSAGE\",\"id\":123,\"messageKey\":\"msg_123\",\"messageType\":\"TestEvent\",\"variant\":\"default\"},{\"nodeType\":\"REACTION\",\"id\":77,\"component\":\"test-component\"}],\"edges\":[{\"edgeType\":\"TRIGGER\",\"sourceId\":123,\"sourceNodeType\":\"MESSAGE\",\"targetReactionId\":77,\"median\":10},{\"edgeType\":\"ACTION\",\"sourceReactionId\":77,\"targetId\":123,\"targetNodeType\":\"REACTION\"}]}";
@@ -143,6 +144,7 @@ class ComponentGraphImporterTest {
             "edges", List.of(triggerEdge, actionEdge)
         );
         GraphDto graphDto = new GraphDto(graphData, "fingerprint123");
+        when(reactionObserverService.getComponentNames()).thenReturn(List.of(componentName));
         when(reactionObserverService.getComponentGraph(componentName)).thenReturn(graphDto);
 
         String expectedSerializedData = "{\"nodes\":[{\"nodeType\":\"MESSAGE\",\"id\":124,\"messageKey\":\"msg_124\",\"messageType\":\"UpdatedEvent\",\"variant\":\"default\"},{\"nodeType\":\"REACTION\",\"id\":78,\"component\":\"updated-component\"}],\"edges\":[{\"edgeType\":\"TRIGGER\",\"sourceId\":124,\"sourceNodeType\":\"MESSAGE\",\"targetReactionId\":78,\"median\":15},{\"edgeType\":\"ACTION\",\"sourceReactionId\":78,\"targetId\":124,\"targetNodeType\":\"REACTION\"}]}";
@@ -167,6 +169,7 @@ class ComponentGraphImporterTest {
         String componentName = "testComponent";
         Map<String, String> componentToSystemMap = Map.of(componentName, systemName);
         when(model.getAllSystemComponentNamesWithSystemName()).thenReturn(componentToSystemMap);
+        when(reactionObserverService.getComponentNames()).thenReturn(List.of(componentName));
         when(reactionObserverService.getComponentGraph(componentName)).thenReturn(null);
 
         ComponentGraphImporter importer = new ComponentGraphImporter(
@@ -198,6 +201,7 @@ class ComponentGraphImporterTest {
         GraphDto graphDto1 = new GraphDto(graphData1, "fingerprint1");
         GraphDto graphDto2 = new GraphDto(graphData2, "fingerprint2");
 
+        when(reactionObserverService.getComponentNames()).thenReturn(List.of(component1, component2));
         when(reactionObserverService.getComponentGraph(component1)).thenReturn(graphDto1);
         when(reactionObserverService.getComponentGraph(component2)).thenReturn(graphDto2);
 
@@ -230,6 +234,7 @@ class ComponentGraphImporterTest {
 
         Map<String, Object> graphData = Map.of("nodes", List.of("node1"));
         GraphDto graphDto = new GraphDto(graphData, "fingerprint123");
+        when(reactionObserverService.getComponentNames()).thenReturn(List.of(componentName));
         when(reactionObserverService.getComponentGraph(componentName)).thenReturn(graphDto);
 
         when(objectMapper.writeValueAsBytes(graphData)).thenThrow(new JsonProcessingException("Serialization error") {});

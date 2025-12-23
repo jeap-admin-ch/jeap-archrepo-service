@@ -10,6 +10,9 @@ public interface ReactionObserverService {
     @GetExchange("/api/systems/names")
     List<String> getSystemNames();
 
+    @GetExchange("/api/components/names")
+    List<String> getComponentNames();
+
     @GetExchange("/api/graphs/systems/{system}")
     GraphDto getSystemGraph(@PathVariable("system") String system);
 
