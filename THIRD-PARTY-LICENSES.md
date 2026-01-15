@@ -79,7 +79,6 @@ Apache License Version 2.0
  * Apache Commons Codec - [commons-codec:commons-codec](https://commons.apache.org/proper/commons-codec/)
  * Apache Commons Collections - [commons-collections:commons-collections](http://commons.apache.org/collections/)
  * Apache Commons IO - [commons-io:commons-io](https://commons.apache.org/proper/commons-io/)
- * Apache Commons IO - [commons-io:commons-io](https://commons.apache.org/proper/commons-io/)
  * Commons Lang - [commons-lang:commons-lang](http://commons.apache.org/lang/)
  * Apache Commons Logging - [commons-logging:commons-logging](http://commons.apache.org/proper/commons-logging/)
  * Apache Commons Logging - [commons-logging:commons-logging](https://commons.apache.org/proper/commons-logging/)
