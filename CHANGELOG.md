@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.14.0] - 2026-01-14
+## [4.14.0] - 2026-01-15
 
 ### Changed
 
 - Update parent from 30.7.0 to 30.8.0
+- update org.eclipse.jgit from 7.3.0.202506031305-r to 7.5.0.202512021534-r
+- update wiremock-standalone from 3.13.1 to 3.13.2
+- update commons-io from 2.20.0 to 2.21.0
 
 ## [4.13.0] - 2026-01-07
 
