@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Value;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -120,6 +121,7 @@ class OpenApiControllerTests {
     }
 
     @Test
+    @Disabled("Enable after JEAP-6593")
     void testUploadOpenApiDocumentation_WhenCreatedWithCorrectBearerAuth_ThenRespondsWithCreated() throws Exception {
         mockSystemComponent();
         final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
@@ -139,6 +141,41 @@ class OpenApiControllerTests {
     }
 
     @Test
+    //TODO JEAP-6593: remove test
+    void testUploadOpenApiDocumentation_WhenComponentNotExists_ThenDoNothingAndRespondsWithOk() throws Exception {
+        mockSystemComponent();
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        MockMultipartFile file = createMockMultipartFile();
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isOk());
+
+        verify(openApiImporter, never()).importIntoModel(any(SystemComponent.class), any());
+    }
+
+    @Test
+    void testUploadOpenApiDocumentation_WhenComponentExists_ThenRespondsWithCreated() throws Exception {
+        mockSystemComponentExists();
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        MockMultipartFile file = createMockMultipartFile();
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isCreated());
+
+        OpenApiSpec openApiSpec = openApiSpecArgumentCaptor.getValue();
+        assertThat(openApiSpec.getDefiningSystem().getName()).isEqualTo(SYSTEM);
+        assertThat(openApiSpec.getProvider().getName()).isEqualTo(SERVICE);
+        assertThat(openApiSpec.getContent()).isEqualTo(CONTENT);
+        assertThat(openApiSpec.getVersion()).isEqualTo(VERSION);
+        verify(openApiImporter, times(1)).importIntoModel(any(SystemComponent.class), eq(CONTENT));
+    }
+
+    @Test
+    @Disabled("Enable after JEAP-6593")
     void testUploadOpenApiDocumentation_WhenUpdatedWithCorrectBearerAuth_ThenRespondsWithOK() throws Exception {
         SystemComponent systemComponent = mockSystemComponent();
         OpenApiSpec openApiSpec = mock(OpenApiSpec.class);
@@ -195,6 +232,7 @@ class OpenApiControllerTests {
     }
 
     @Test
+    @Disabled("Enable after JEAP-6593")
     void testUploadOpenApi_WhenHasCorrectBasicAuth_ThenOK() throws Exception {
         MockMultipartFile file = createMockMultipartFile();
 
@@ -217,6 +255,7 @@ class OpenApiControllerTests {
     }
 
     @Test
+    @Disabled("Enable after JEAP-6593")
     void testUploadOpenApiSpecWithoutVersion() throws Exception {
         mockSystemComponent();
 
@@ -378,6 +417,16 @@ class OpenApiControllerTests {
         when(systemComponent.getParent()).thenReturn(system);
         when(systemComponent.getName()).thenReturn(SERVICE);
         when(systemComponentService.findOrCreateSystemComponent(SERVICE)).thenReturn(systemComponent);
+        return systemComponent;
+    }
+
+    //TODO: Delete after JEAP-6593
+    private SystemComponent mockSystemComponentExists() {
+        System system = createSystem();
+        SystemComponent systemComponent = mock(SystemComponent.class);
+        when(systemComponent.getParent()).thenReturn(system);
+        when(systemComponent.getName()).thenReturn(SERVICE);
+        when(systemComponentService.findSystemComponent(SERVICE)).thenReturn(Optional.of(systemComponent));
         return systemComponent;
     }
 

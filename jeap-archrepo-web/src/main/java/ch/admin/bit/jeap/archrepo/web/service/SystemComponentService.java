@@ -39,6 +39,12 @@ public class SystemComponentService {
         return systemComponentRepository.findByNameIgnoreCase(componentName).orElseGet(() -> createSystemComponent(componentName));
     }
 
+    @Transactional(readOnly = true)
+    public Optional<SystemComponent> findSystemComponent(String componentName) {
+        log.info("Retrieve system component: {}", componentName);
+        return systemComponentRepository.findByNameIgnoreCase(componentName);
+    }
+
     private SystemComponent createSystemComponent(String componentName) {
         System system = findOrCreateSystem(extractSystemName(componentName));
 

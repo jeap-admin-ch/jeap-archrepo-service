@@ -97,10 +97,20 @@ class OpenApiController {
                 throw new AccessDeniedException("Missing authorization to upload an OpenAPI documentation.");
             }
 
-            SystemComponent systemComponent = systemComponentService.findOrCreateSystemComponent(systemComponentName);
+            Optional<SystemComponent> systemComponentOptional = systemComponentService.findSystemComponent(systemComponentName);
+
+            //TODO JEAP-6593: Remove this check and use findOrCreateSystemComponent()
+            if (systemComponentOptional.isEmpty()){
+                log.info("System component '{}' does not exist in the database. Ignoring OpenAPI documentation upload.", systemComponentName);
+                return ResponseEntity.status(HttpStatus.OK).build();
+            }
+
+            SystemComponent systemComponent = systemComponentOptional.get();
+
             Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByProvider(systemComponent);
-            String serverUrl = openApiImporter.getServerUrl(file.getBytes());
+
             byte[] content = file.getBytes();
+            String serverUrl = openApiImporter.getServerUrl(content);
 
             if (openApiSpecOptional.isEmpty()) {
                 saveNewOpenApiDocumentation(systemComponent, version, content);
