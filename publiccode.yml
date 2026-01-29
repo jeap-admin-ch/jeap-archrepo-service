@@ -1,4 +1,4 @@
-publiccodeYmlVersion: 0.4.0
+publiccodeYmlVersion: 0.5.0
 name: jeap-archrepo-service
 applicationSuite: jEAP
 softwareVersion: 4.17.0
@@ -17,13 +17,16 @@ organisation:
 description:
   en:
     localisedName: jeap-archrepo-service
-    shortDescription: Central repository holding an architecture model for documenting components and their relations in a microservice-based system architecture
+    shortDescription: >
+      Service template which provides a centralized system for automatically managing and documenting the
+      application architecture inventory.
     longDescription: >
       The jEAP Architecture Repository Service (Arch Repo) is a central architecture repository holding the 
       architecture model for documenting components and their relations in a microservice-based system architecture.
       It maintains an up-to-date inventory of microservices, their relationships, events, and interfaces, and 
       automatically generates architecture documentation from this data. The Arch Repo focuses on system architecture 
       and integrates information from multiple sources, publishing the resulting architecture model to Confluence.
+      A service instance can be created by depending on this template, then adding specific configuration.
     features:
       - Maintains an up-to-date inventory of microservices, relationships, and interfaces
       - Integrates multiple data sources to automatically generate architecture documentation
