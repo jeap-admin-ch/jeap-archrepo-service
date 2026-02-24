@@ -21,7 +21,7 @@ public class JobsController {
     @PostMapping
     @Operation(
             summary = "Create a new job",
-            description = "Create a new job to trigger Documentation Generation, Documentation Deletion (do not use on prod space!) oder Model Update manually")
+            description = "Create a new job to trigger Documentation Generation (GENERATE_DOC) or  Model Update manually (UPDATE_MODEL)")
     @ApiResponse(responseCode = "200", description = "Job successfully created and started asynchronously")
     @Async
     public void triggerUpdate(@RequestBody JobDto jobDto) {

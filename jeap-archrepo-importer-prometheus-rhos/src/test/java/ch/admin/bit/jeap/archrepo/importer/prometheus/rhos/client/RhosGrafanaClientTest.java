@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -70,6 +71,30 @@ class RhosGrafanaClientTest {
 
         //then
         assertEquals(3, services.size());
+    }
+
+    @Test
+    void getStageName_withDevEnvironment_returnD() {
+        //when
+        String stageName = RhosGrafanaClient.getStageName("dev");
+
+        //then
+        assertEquals("d", stageName);
+    }
+
+    @Test
+    void getStageName_allEnvironments_returnCorrectStageNames() {
+        //then
+        assertAll(
+                () -> assertEquals("p", RhosGrafanaClient.getStageName("prod")),
+                () -> assertEquals("p", RhosGrafanaClient.getStageName("PROD")),
+                () -> assertEquals("a", RhosGrafanaClient.getStageName("abn")),
+                () -> assertEquals("a", RhosGrafanaClient.getStageName("ABN")),
+                () -> assertEquals("d", RhosGrafanaClient.getStageName("dev")),
+                () -> assertEquals("d", RhosGrafanaClient.getStageName("DEV")),
+                () -> assertEquals("r", RhosGrafanaClient.getStageName("ref")),
+                () -> assertEquals("r", RhosGrafanaClient.getStageName("unknown"))
+        );
     }
 
     private static RhosGrafanaQueryResponseData createJeapRelationResult(String datapoint) {

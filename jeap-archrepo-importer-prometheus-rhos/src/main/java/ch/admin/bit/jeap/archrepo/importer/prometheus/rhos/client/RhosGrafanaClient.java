@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Retryable(retryFor = Exception.class,
         maxAttempts = 4,
@@ -93,11 +91,13 @@ public class RhosGrafanaClient {
         }
     }
 
-    private static String getStageName(String environment) {
+    static String getStageName(String environment) {
         if ("prod".equalsIgnoreCase(environment)) {
             return "p";
         } else if ("abn".equalsIgnoreCase(environment)) {
             return "a";
+        } else if ("dev".equalsIgnoreCase(environment)) {
+            return "d";
         }
         return "r";
     }
