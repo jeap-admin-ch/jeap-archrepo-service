@@ -142,7 +142,7 @@ class OpenApiController {
     @Transactional(readOnly = true)
     @GetMapping("/{systemName}/{systemComponentName}")
     @Operation(summary = "Get the OpenApi Spec of a systemComponent")
-    public String getOpenApiJsonWithSystemName(
+    public ResponseEntity<String> getOpenApiJsonWithSystemName(
             @PathVariable("systemName") @Size(max = SYSTEM_MAX_LENGTH) String ignored,
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
         return getOpenApiJson(systemComponentName);
@@ -151,7 +151,7 @@ class OpenApiController {
     @Transactional(readOnly = true)
     @GetMapping("/{systemComponentName}")
     @Operation(summary = "Get the OpenApi Spec of a systemComponent")
-    public String getOpenApiJson(
+    public ResponseEntity<String> getOpenApiJson(
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName) {
         log.info("Retrieve openApiSpec for systemComponent {}", systemComponentName);
 
@@ -161,11 +161,13 @@ class OpenApiController {
         Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByProvider(systemComponent);
 
         if (openApiSpecOptional.isEmpty()) {
-            throw new IllegalStateException("No Open API spec found for system component " + systemComponentName);
+            log.warn("No Open API spec found for system component {}", systemComponentName);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No Open API spec found for system component " + systemComponentName);
         }
 
         log.debug("Found openApiSpec {} ", openApiSpecOptional.get());
-        return new String(openApiSpecOptional.get().getContent(), StandardCharsets.UTF_8);
+        return ResponseEntity.ok(new String(openApiSpecOptional.get().getContent(), StandardCharsets.UTF_8));
     }
 
     @Transactional(readOnly = true)
