@@ -1,7 +1,7 @@
 package ch.admin.bit.jeap.archrepo.importer.deploymentlog;
 
-import ch.admin.bit.jeap.rest.tracing.AddSenderSystemHeader;
 import ch.admin.bit.jeap.archrepo.importer.deploymentlog.client.DeploymentlogService;
+import ch.admin.bit.jeap.rest.tracing.AddSenderSystemHeaderToRestClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,7 +24,7 @@ public class DeploymentlogImporterConfiguration {
                                               @Value("${spring.application.name}") String applicationName) {
         RestClient client = RestClient.builder()
                 .baseUrl(properties.getUrl())
-                .defaultHeader(AddSenderSystemHeader.APPLICATION_NAME_HEADER, applicationName)
+                .defaultHeader(AddSenderSystemHeaderToRestClient.APPLICATION_NAME_HEADER, applicationName)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, encodeBasicAuth(properties))
                 .build();
         return HttpServiceProxyFactory

@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Update parent from 30.20.0 to 31.0.0
+- adapted AddSenderSystemHeader.APPLICATION_NAME_HEADER to AddSenderSystemHeaderToRestClient.APPLICATION_NAME_HEADER
 
 ## [4.21.0] - 2026-03-11
 
