@@ -117,6 +117,8 @@ Apache License Version 2.0
  * Netty/Buffer - [io.netty:netty-buffer](https://netty.io/netty-buffer/)
  * Netty/Codec - [io.netty:netty-codec](https://netty.io/netty-codec/)
  * Netty/Codec/HTTP - [io.netty:netty-codec-http](https://netty.io/netty-codec-http/)
+ * Netty/Codec/HTTP - [io.netty:netty-codec-http](https://netty.io/netty-codec-http/)
+ * Netty/Codec/HTTP2 - [io.netty:netty-codec-http2](https://netty.io/netty-codec-http2/)
  * Netty/Codec/HTTP2 - [io.netty:netty-codec-http2](https://netty.io/netty-codec-http2/)
  * Netty/Codec/Socks - [io.netty:netty-codec-socks](https://netty.io/netty-codec-socks/)
  * Netty/Common - [io.netty:netty-common](https://netty.io/netty-common/)
