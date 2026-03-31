@@ -13,6 +13,11 @@
     <artifactId>jeap-archrepo-test</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
 
+    <properties>
+        <!-- Override due to CVE-2026-33870, from 4.1.131.Final coming with pact-provider -->
+        <netty-codec-http.version>4.1.132.Final</netty-codec-http.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.admin.bit.jeap</groupId>
@@ -59,6 +64,17 @@
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!-- Netty is a dependency of au.com.dius.pact.provider:junit5 -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+            <version>${netty-codec-http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http2</artifactId>
+            <version>${netty-codec-http.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
