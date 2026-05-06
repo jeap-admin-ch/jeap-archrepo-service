@@ -14,8 +14,8 @@
     <name>${project.groupId}:${project.artifactId}</name>
 
     <properties>
-        <!-- Override due to CVE-2026-33870, from 4.1.131.Final coming with pact-provider -->
-        <netty-codec-http.version>4.1.132.Final</netty-codec-http.version>
+        <!-- Override due to CVE-2026-33870, frkom 4.1.131.Final coming with pact-provider -->
+        <netty-codec-http.version>4.1.133.Final</netty-codec-http.version>
     </properties>
 
     <dependencies>
