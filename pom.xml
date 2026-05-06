@@ -27,13 +27,13 @@
     <parent>
         <groupId>ch.admin.bit.jeap</groupId>
         <artifactId>jeap-spring-boot-parent</artifactId>
-        <version>33.3.0</version>
+        <version>34.7.0-alpha-springboot4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <artifactId>jeap-archrepo-service</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <version>4.30.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -41,7 +41,8 @@
         <org.eclipse.jgit.version>7.5.0.202512021534-r</org.eclipse.jgit.version>
         <asciidoc-confluence-publisher-client.version>0.12.0</asciidoc-confluence-publisher-client.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
-        <commons-io.version>2.21.0</commons-io.version>
+        <commons-io.version>2.22.0</commons-io.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <guava.version>33.5.0-jre</guava.version>
     </properties>
 
@@ -69,77 +70,77 @@
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-metamodel</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-persistence</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importers</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-messagetype</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-pactbroker</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus-aws</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-prometheus-rhos</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-deploymentlog</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-openapi</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-importer-reaction-observer</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-docgen</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-web</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-test</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.admin.bit.jeap</groupId>
                 <artifactId>jeap-archrepo-dbschema-model</artifactId>
-                <version>4.30.0-SNAPSHOT</version>
+                <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
@@ -161,6 +162,16 @@
                 <artifactId>wiremock-standalone</artifactId>
                 <version>${wiremock-standalone.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

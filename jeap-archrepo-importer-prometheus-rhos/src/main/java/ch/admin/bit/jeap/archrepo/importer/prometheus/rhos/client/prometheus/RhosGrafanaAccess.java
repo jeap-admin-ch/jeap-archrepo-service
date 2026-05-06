@@ -4,12 +4,10 @@ import ch.admin.bit.jeap.archrepo.importer.prometheus.client.prometheus.Promethe
 import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.prometheus.dto.RhosDatasource;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.prometheus.dto.RhosGrafanaQueryResponseData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -53,8 +51,9 @@ public class RhosGrafanaAccess {
         for (RhosHostProperties host : rhosConnectorProperties.getHosts()) {
             log.info("Configuring GrafanaClient for host '{}'", host.getHost());
             String baseUrl = String.format(API_URL_PATTERN, host.getHost());
-            ClientHttpRequestFactory requestFactory = ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
-                    .withReadTimeout(rhosConnectorProperties.getTimeout()));
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(rhosConnectorProperties.getTimeout());
+            requestFactory.setReadTimeout(rhosConnectorProperties.getTimeout());
             restClients.add(restClientBuilder
                     .requestFactory(requestFactory)
                     .baseUrl(baseUrl)

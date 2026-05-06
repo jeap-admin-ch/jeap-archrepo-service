@@ -5,12 +5,12 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.GraphDto;
 import ch.admin.bit.jeap.archrepo.metamodel.system.ComponentGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -123,7 +123,8 @@ class ComponentGraphAttachmentServiceTest {
         ConfluenceAdapter confluenceAdapter = mock(ConfluenceAdapter.class);
         ObjectMapper objectMapper = mock(ObjectMapper.class);
         when(objectMapper.readValue(any(byte[].class), eq(GraphDto.class)))
-                .thenThrow(new IOException("Parsing failed"));
+                .thenThrow(new JacksonException("Parsing failed") {
+                });
 
         ComponentGraphAttachmentService service = new ComponentGraphAttachmentService(
                 graphRepo, renderer, confluenceAdapter, objectMapper

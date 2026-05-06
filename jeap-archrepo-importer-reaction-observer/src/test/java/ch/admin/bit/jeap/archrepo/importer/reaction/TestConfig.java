@@ -5,7 +5,8 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemGraph;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
 import ch.admin.bit.jeap.archrepo.persistence.SystemGraphRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -41,6 +42,6 @@ class TestConfig {
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        return new JsonMapper();
     }
 }

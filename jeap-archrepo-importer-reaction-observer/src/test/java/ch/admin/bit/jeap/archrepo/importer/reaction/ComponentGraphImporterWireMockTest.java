@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.importer.reaction;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
@@ -8,18 +9,21 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Base64;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -30,13 +34,22 @@ import static org.mockito.Mockito.verify;
         ReactionsObserverImporterConfiguration.class,
         TestConfig.class
 }, properties = {
-        "reactionobserverservice.url=http://localhost:${wiremock.server.port}/reaction-observer-service",
         "reactionobserverservice.username=user",
         "reactionobserverservice.password=secret",
         "spring.application.name=test",
         "spring.main.allow-bean-definition-overriding=true"})
-@AutoConfigureWireMock(port = 0)
 class ComponentGraphImporterWireMockTest {
+
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().dynamicPort())
+            .configureStaticDsl(true)
+            .build();
+
+    @DynamicPropertySource
+    static void registerWireMockProperties(DynamicPropertyRegistry registry) {
+        registry.add("reactionobserverservice.url", () -> wireMock.baseUrl() + "/reaction-observer-service");
+    }
 
     @Autowired
     private ComponentGraphImporter importer;
@@ -46,6 +59,7 @@ class ComponentGraphImporterWireMockTest {
 
     @BeforeEach
     void setUp() {
+        wireMock.resetAll();
         reset(componentGraphRepository);
         when(componentGraphRepository.save(any(ComponentGraph.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(componentGraphRepository.existsBySystemNameAndComponentName(any(), any())).thenReturn(false);

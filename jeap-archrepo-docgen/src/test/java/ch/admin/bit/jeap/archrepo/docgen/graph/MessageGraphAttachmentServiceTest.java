@@ -6,12 +6,12 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.MessageNodeDto;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -141,7 +141,8 @@ public class MessageGraphAttachmentServiceTest {
         MessageGraph graph = createGraph("MyCommand", "", "fp-new", "fp-old", graphData);
 
         when(repository.findAllByMessageTypeName("MyCommand")).thenReturn(List.of(graph));
-        when(objectMapper.readValue(eq(graphData), eq(GraphDto.class))).thenThrow(new IOException("Parsing failed"));
+        when(objectMapper.readValue(eq(graphData), eq(GraphDto.class))).thenThrow(new JacksonException("Parsing failed") {
+        });
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             service.generateAttachments(message, "pageId");

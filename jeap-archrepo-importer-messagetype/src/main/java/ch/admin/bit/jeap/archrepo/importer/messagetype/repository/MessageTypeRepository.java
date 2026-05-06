@@ -1,9 +1,8 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype.repository;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -26,7 +25,6 @@ import java.util.stream.Stream;
 public abstract class MessageTypeRepository implements Closeable {
     private static final String COMMON = "_common";
 
-    private final JsonFactory jsonFactory = new JsonFactory();
     private final ObjectMapper objectMapper;
     private final String gitUri;
     private File gitRepoPath;
@@ -37,8 +35,9 @@ public abstract class MessageTypeRepository implements Closeable {
     protected MessageTypeRepository(String gitUri) {
         this.gitUri = gitUri;
         this.repoLinkHttpBaseUri = processBaseUri(gitUri);
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     protected String processBaseUri(String gitUri) {
@@ -112,8 +111,7 @@ public abstract class MessageTypeRepository implements Closeable {
 
     private <T> T readDescriptor(File descriptorFile, Class<T> descriptorType) {
         try {
-            JsonParser jsonParser = jsonFactory.createParser(descriptorFile);
-            return objectMapper.readValue(jsonParser, descriptorType);
+            return objectMapper.readValue(descriptorFile, descriptorType);
         } catch (IOException e) {
             throw MessageTypeRepoException.descriptorParsingFailed(descriptorFile.getAbsolutePath(), e);
         }

@@ -9,7 +9,6 @@ import ch.admin.bit.jeap.archrepo.persistence.TeamRepository;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -40,15 +39,13 @@ class UpdateServiceUpdateModelTest {
     @MockitoBean
     OpenApiSpecRepository openApiSpecRepository;
 
-    @Captor
-    ArgumentCaptor<List<System>> systemCaptor;
-
     @Test
     void updateModel() {
         when(systemRepository.findAll()).thenReturn(List.of(System.builder().name(SYSTEM_NAME).build()));
 
         service.updateModel();
 
+        ArgumentCaptor<List<System>> systemCaptor = ArgumentCaptor.forClass(List.class);
         verify(systemRepository).saveAll(systemCaptor.capture());
 
         assertThat(systemCaptor.getValue()).hasSize(1);

@@ -13,13 +13,12 @@ import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoWebTestConfiguration;
 import ch.admin.bit.jeap.archrepo.web.rest.model.CreateSystemDto;
 import ch.admin.bit.jeap.archrepo.web.rest.model.DeleteRestApiDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -64,14 +63,8 @@ class ManagementControllerTest {
     @MockitoBean
     RestApiRelationRepository restApiRelationRepository;
 
-    @Captor
-    ArgumentCaptor<System> systemCaptor;
-
     private static final String API_USER = "api";
     private static final String API_SECRET = "secret";
-
-    @Captor
-    ArgumentCaptor<Team> teamCaptor;
 
 
     @Test
@@ -91,6 +84,7 @@ class ManagementControllerTest {
                         .with(httpBasic(API_USER, API_SECRET)))
                 .andExpect(status().isCreated());
 
+        ArgumentCaptor<System> systemCaptor = ArgumentCaptor.forClass(System.class);
         verify(systemRepository).save(systemCaptor.capture());
         System savedSystem = systemCaptor.getValue();
         assertEquals("Test System", savedSystem.getName());
@@ -145,10 +139,12 @@ class ManagementControllerTest {
                         .with(httpBasic(API_USER, API_SECRET)))
                 .andExpect(status().isCreated());
 
+        ArgumentCaptor<Team> teamCaptor = ArgumentCaptor.forClass(Team.class);
         verify(teamRepository).save(teamCaptor.capture());
         Team savedTeam = teamCaptor.getValue();
         assertEquals(teamName, savedTeam.getName());
         
+        ArgumentCaptor<System> systemCaptor = ArgumentCaptor.forClass(System.class);
         verify(systemRepository).save(systemCaptor.capture());
         System savedSystem = systemCaptor.getValue();
         assertEquals("Test System", savedSystem.getName());
@@ -172,6 +168,7 @@ class ManagementControllerTest {
                         .with(httpBasic(API_USER, API_SECRET)))
                 .andExpect(status().isOk());
 
+        ArgumentCaptor<Team> teamCaptor = ArgumentCaptor.forClass(Team.class);
         verify(teamRepository).save(teamCaptor.capture());
         Team savedTeam = teamCaptor.getValue();
         assertEquals(teamName, savedTeam.getName());
@@ -191,6 +188,7 @@ class ManagementControllerTest {
                         .with(httpBasic(API_USER, API_SECRET)))
                 .andExpect(status().isOk());
 
+        ArgumentCaptor<Team> teamCaptor = ArgumentCaptor.forClass(Team.class);
         verify(teamRepository).save(teamCaptor.capture());
         Team savedTeam = teamCaptor.getValue();
         assertEquals(teamName, savedTeam.getName());

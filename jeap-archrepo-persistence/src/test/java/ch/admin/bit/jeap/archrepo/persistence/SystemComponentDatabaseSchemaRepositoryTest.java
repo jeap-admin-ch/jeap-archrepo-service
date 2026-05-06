@@ -7,7 +7,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.ZonedDateTime;

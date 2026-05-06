@@ -7,12 +7,12 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.NodeDto;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,7 @@ public class MessageGraphAttachmentService {
                 messageGraphRepository.updateLastPublishedFingerprint(graph.getId(), graph.getFingerprint());
             }
             deleteUnusedGraphAttachments(pageId, messageGraphs);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error generating graph attachments", e);
         }
     }
@@ -56,7 +56,7 @@ public class MessageGraphAttachmentService {
         confluenceAdapter.deleteUnusedAttachments(pageId, attachmentNamesToKeep);
     }
 
-    private InputStream createNewGraphPng(MessageType message, MessageGraph graph) throws IOException {
+    private InputStream createNewGraphPng(MessageType message, MessageGraph graph) {
         GraphDto graphDto = objectMapper.readValue(graph.getGraphData(), GraphDto.class);
         highlightMessageNode(graphDto, message);
         return imageRenderer.renderPng(graphDto);

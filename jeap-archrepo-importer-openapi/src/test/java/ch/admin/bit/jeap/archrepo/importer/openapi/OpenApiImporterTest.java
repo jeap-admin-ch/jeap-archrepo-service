@@ -5,7 +5,8 @@ import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.RestApiRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,7 +95,7 @@ class OpenApiImporterTest {
 
     @SneakyThrows
     private void doImportTest(String fileName, int count) {
-        OpenApiImporter openApiImporter = new OpenApiImporter(new ObjectMapper(), restApiRepository);
+        OpenApiImporter openApiImporter = new OpenApiImporter(new JsonMapper(), restApiRepository);
         ClassPathResource classPathResource = new ClassPathResource("openapi/" + fileName);
         byte[] openApiSpecFileContent = Files.readAllBytes(classPathResource.getFile().toPath());
         SystemComponent systemComponent = BackendService.builder().name("junit").build();
@@ -105,7 +106,7 @@ class OpenApiImporterTest {
     @Test
     @SuppressWarnings("java:S5778")
     void importIntoModel_wrongContent_exceptionThrown() {
-        OpenApiImporter openApiImporter = new OpenApiImporter(new ObjectMapper(), restApiRepository);
+        OpenApiImporter openApiImporter = new OpenApiImporter(new JsonMapper(), restApiRepository);
         SystemComponent systemComponent = BackendService.builder().name("junit").build();
         assertThrows(OpenApiFileParsingException.class,
                 () -> openApiImporter.importIntoModel(systemComponent, "dummy".getBytes()));
@@ -114,7 +115,7 @@ class OpenApiImporterTest {
     @SneakyThrows
     @Test
     void getServerUrl_returnServerUrl() {
-        OpenApiImporter openApiImporter = new OpenApiImporter(new ObjectMapper(), restApiRepository);
+        OpenApiImporter openApiImporter = new OpenApiImporter(new JsonMapper(), restApiRepository);
         ClassPathResource classPathResource = new ClassPathResource("openapi/test-communication-scs.json");
         byte[] openApiSpecFileContent = Files.readAllBytes(classPathResource.getFile().toPath());
         assertThat(openApiImporter.getServerUrl(openApiSpecFileContent)).isEqualTo("https://some-url/communication");

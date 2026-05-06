@@ -15,16 +15,15 @@ import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationContext;
 import ch.admin.bit.jeap.security.test.jws.JwsBuilder;
 import ch.admin.bit.jeap.security.test.jws.JwsBuilderFactory;
 import ch.admin.bit.jeap.security.test.resource.configuration.JeapOAuth2IntegrationTestResourceConfiguration;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.Value;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -95,8 +94,7 @@ class DatabaseSchemaControllerTest {
     @MockitoBean
     SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
 
-    @Captor
-    ArgumentCaptor<SystemComponentDatabaseSchema> systemComponentDatabaseSchemaArgumentCaptor;
+    ArgumentCaptor<SystemComponentDatabaseSchema> systemComponentDatabaseSchemaArgumentCaptor = ArgumentCaptor.forClass(SystemComponentDatabaseSchema.class);
 
     @Test
     void testCreateOrUpdateDbSchema_CreateValid() throws Exception {

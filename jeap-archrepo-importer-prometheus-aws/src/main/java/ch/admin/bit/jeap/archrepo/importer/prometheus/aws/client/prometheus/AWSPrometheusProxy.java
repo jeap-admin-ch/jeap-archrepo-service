@@ -4,7 +4,8 @@ import ch.admin.bit.jeap.archrepo.importer.prometheus.client.PrometheusHelper;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.client.prometheus.PrometheusException;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.client.prometheus.dto.PrometheusQueryResponse;
 import ch.admin.bit.jeap.archrepo.importer.prometheus.client.prometheus.dto.PrometheusQueryResponseResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -41,7 +42,7 @@ public class AWSPrometheusProxy {
     private final URI ampUri;
 
     public AWSPrometheusProxy(AWSConnectorProperties connectorProperties) {
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new JsonMapper();
         this.awsConnectorProperties = connectorProperties;
         try {
             this.ampUri = new URI(String.format(QUERY_URL_PATTERN,

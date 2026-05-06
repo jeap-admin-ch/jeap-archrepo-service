@@ -9,7 +9,6 @@ import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
 import ch.admin.bit.jeap.archrepo.persistence.TeamRepository;
 import ch.admin.bit.jeap.archrepo.web.rest.model.ArchRepoTestConfiguration;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -29,7 +28,7 @@ class UpdateServiceGenerateDocumentationTest {
     ArchRepoImporter importer;
     @MockitoBean
     DocumentationGenerator generator;
-    @Mock
+    @MockitoBean
     ArchitectureModelRepository repository;
     @MockitoBean
     TeamRepository teamRepository;

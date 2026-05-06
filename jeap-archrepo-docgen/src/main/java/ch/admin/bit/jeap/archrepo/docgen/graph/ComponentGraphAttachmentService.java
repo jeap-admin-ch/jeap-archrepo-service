@@ -7,12 +7,12 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.NodeDto;
 import ch.admin.bit.jeap.archrepo.metamodel.system.ComponentGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 @Component
@@ -39,12 +39,12 @@ public class ComponentGraphAttachmentService {
                 confluenceAdapter.addOrUpdateAttachment(pageId, getComponentAttachmentName(component.getName()), imageStream);
                 componentGraphRepository.updateLastPublishedFingerprint(graph.getId(), graph.getFingerprint());
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error generating graph attachment", e);
         }
     }
 
-    private InputStream createNewGraphPng(ComponentGraph graph) throws IOException {
+    private InputStream createNewGraphPng(ComponentGraph graph) {
         GraphDto graphDto = objectMapper.readValue(graph.getGraphData(), GraphDto.class);
         highlightOtherSystemsMessageNodes(graphDto, graph.getSystemName());
         return imageRenderer.renderPng(graphDto);

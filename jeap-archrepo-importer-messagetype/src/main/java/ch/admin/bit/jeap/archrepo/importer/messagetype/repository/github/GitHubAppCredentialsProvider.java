@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.messagetype.repository.github;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -57,7 +58,7 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
         this.privateKey = parsePrivateKey(privateKeyPem);
         this.httpClient = HttpClient.newBuilder().build();
 
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new JsonMapper();
     }
 
     @Override

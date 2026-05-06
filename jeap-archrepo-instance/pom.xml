@@ -6,7 +6,7 @@
     <parent>
         <groupId>ch.admin.bit.jeap</groupId>
         <artifactId>jeap-archrepo-service</artifactId>
-        <version>4.30.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>jeap-archrepo-instance</artifactId>
@@ -17,6 +17,7 @@
         <!-- prevent the license plugin from adding a THIRD-PARTY-LICENSES.md file to this pom packaged project -->
         <license.skipAggregateAddThirdParty>true</license.skipAggregateAddThirdParty>
     </properties>
+
 
     <dependencies>
         <dependency>

@@ -9,11 +9,12 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.GraphDto;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.MessageGraphDto;
 import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import tools.jackson.core.JacksonException;
 
 import java.util.Base64;
 import java.util.List;
@@ -31,7 +32,7 @@ public class ReactionObserverServicePactTestBase {
     private static final String BASE_API_PATH = "/api";
     private static final String GRAPHS_API_PATH = BASE_API_PATH + "/graphs";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new JsonMapper();
 
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getSystemNamesComponentInteraction(PactDslWithProvider builder) {
@@ -188,7 +189,7 @@ public class ReactionObserverServicePactTestBase {
             assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo("MESSAGE");
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].targetReactionId")).isEqualTo(1);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].median")).isEqualTo(5);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -270,7 +271,7 @@ public class ReactionObserverServicePactTestBase {
             assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo("MESSAGE");
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].targetReactionId")).isEqualTo(1);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].median")).isEqualTo(5);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -374,7 +375,7 @@ public class ReactionObserverServicePactTestBase {
             assertThat(triggerEdges.getFirst().get("sourceNodeType")).isEqualTo("MESSAGE");
             assertThat(triggerEdges.getFirst().get("median")).isEqualTo(10);
 
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }

@@ -7,14 +7,14 @@ import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +49,7 @@ class MessageGraphImporterTest {
     private ArgumentCaptor<MessageGraph> messageGraphCaptor;
 
     @Test
-    void importIntoModel_withNewMessageGraph_savesMessageGraph() throws JsonProcessingException {
+    void importIntoModel_withNewMessageGraph_savesMessageGraph() throws JacksonException {
         // Arrange
         String messageTypeName = "TestEvent";
         String variant = "";
@@ -113,7 +113,7 @@ class MessageGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withExistingMessageGraph_updatesMessageGraph() throws JsonProcessingException {
+    void importIntoModel_withExistingMessageGraph_updatesMessageGraph() throws JacksonException {
         // Arrange
         String messageTypeName = "UpdatedEvent";
         String variant = "";
@@ -191,7 +191,7 @@ class MessageGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withMultipleMessageTypes_processesAllMessageTypes() throws JsonProcessingException {
+    void importIntoModel_withMultipleMessageTypes_processesAllMessageTypes() throws JacksonException {
         // Arrange
         String messageType1Name = "Event1";
         String messageType2Name = "Event2";
@@ -233,7 +233,7 @@ class MessageGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withSerializationError_continuesProcessing() throws JsonProcessingException {
+    void importIntoModel_withSerializationError_continuesProcessing() throws JacksonException {
         // Arrange
         String messageTypeName = "TestEvent";
         when(messageType1.getMessageTypeName()).thenReturn(messageTypeName);
@@ -244,7 +244,7 @@ class MessageGraphImporterTest {
         messageGraphDto.put(messageTypeName, new GraphDto(graphData, "fingerprint123"));
         when(reactionObserverService.getMessageGraph(messageTypeName)).thenReturn(messageGraphDto);
 
-        when(objectMapper.writeValueAsBytes(graphData)).thenThrow(new JsonProcessingException("Serialization error") {});
+        when(objectMapper.writeValueAsBytes(graphData)).thenThrow(new JacksonException("Serialization error") {});
 
         MessageGraphImporter importer = new MessageGraphImporter(
                 reactionObserverService, messageGraphRepository, objectMapper);
@@ -274,7 +274,7 @@ class MessageGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withVariantContainingSlash_extractsVariantCorrectly() throws JsonProcessingException {
+    void importIntoModel_withVariantContainingSlash_extractsVariantCorrectly() throws JacksonException {
         // Arrange
         String messageTypeName = "Event1";
         String rawVariant = "Event1/v2";

@@ -5,14 +5,14 @@ import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverServi
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.system.ComponentGraph;
 import ch.admin.bit.jeap.archrepo.persistence.ComponentGraphRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +41,7 @@ class ComponentGraphImporterTest {
     private ArgumentCaptor<ComponentGraph> componentGraphCaptor;
 
     @Test
-    void importIntoModel_withNewServiceGraph_savesComponentGraph() throws JsonProcessingException {
+    void importIntoModel_withNewServiceGraph_savesComponentGraph() throws JacksonException {
         // Arrange
         String systemName = "testSystem";
         String componentName = "testComponent";
@@ -105,7 +105,7 @@ class ComponentGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withExistingServiceGraph_updatesComponentGraph() throws JsonProcessingException {
+    void importIntoModel_withExistingServiceGraph_updatesComponentGraph() throws JacksonException {
         // Arrange
         String systemName = "testSystem";
         String componentName = "testComponent";
@@ -184,7 +184,7 @@ class ComponentGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withMultipleComponents_processesAllComponents() throws JsonProcessingException {
+    void importIntoModel_withMultipleComponents_processesAllComponents() throws JacksonException {
         // Arrange
         String system1 = "system1";
         String system2 = "system2";
@@ -225,7 +225,7 @@ class ComponentGraphImporterTest {
     }
 
     @Test
-    void importIntoModel_withSerializationError_continuesProcessing() throws JsonProcessingException {
+    void importIntoModel_withSerializationError_continuesProcessing() throws JacksonException {
         // Arrange
         String systemName = "testSystem";
         String componentName = "testComponent";
@@ -237,7 +237,7 @@ class ComponentGraphImporterTest {
         when(reactionObserverService.getComponentNames()).thenReturn(List.of(componentName));
         when(reactionObserverService.getComponentGraph(componentName)).thenReturn(graphDto);
 
-        when(objectMapper.writeValueAsBytes(graphData)).thenThrow(new JsonProcessingException("Serialization error") {});
+        when(objectMapper.writeValueAsBytes(graphData)).thenThrow(new JacksonException("Serialization error") {});
 
         ComponentGraphImporter importer = new ComponentGraphImporter(
                 reactionObserverService, componentGraphRepository, objectMapper);

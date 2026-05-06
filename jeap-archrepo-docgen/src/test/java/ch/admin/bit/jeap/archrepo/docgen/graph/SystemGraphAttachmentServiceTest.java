@@ -6,12 +6,12 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.MessageNodeDto;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemGraph;
 import ch.admin.bit.jeap.archrepo.persistence.SystemGraphRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -124,7 +124,8 @@ class SystemGraphAttachmentServiceTest {
         ConfluenceAdapter confluenceAdapter = mock(ConfluenceAdapter.class);
         ObjectMapper objectMapper = mock(ObjectMapper.class);
         when(objectMapper.readValue(any(byte[].class), eq(GraphDto.class)))
-                .thenThrow(new IOException("Parsing failed"));
+                .thenThrow(new JacksonException("Parsing failed") {
+                });
 
         SystemGraphAttachmentService service = new SystemGraphAttachmentService(
                 graphRepo, renderer, confluenceAdapter, objectMapper

@@ -1,35 +1,54 @@
 package ch.admin.bit.jeap.archrepo.importer.deploymentlog;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = DeploymentlogImporterConfiguration.class, properties = {
-        "deploymentlog.url=http://localhost:${wiremock.server.port}/deploymentlog-service",
         "deploymentlog.username=user",
         "deploymentlog.password=secret",
         "spring.application.name=test"})
-@AutoConfigureWireMock(port = 0)
 class DeploymentlogSystemComponentImporterTest {
+
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().dynamicPort())
+            .configureStaticDsl(true)
+            .build();
+
+    @DynamicPropertySource
+    static void registerWireMockProperties(DynamicPropertyRegistry registry) {
+        registry.add("deploymentlog.url", () -> wireMock.baseUrl() + "/deploymentlog-service");
+    }
 
     @Autowired
     private DeploymentlogSystemComponentImporter importer;
+
+    @BeforeEach
+    void setUp() {
+        wireMock.resetAll();
+    }
 
     @Test
     void importIntoModel() {

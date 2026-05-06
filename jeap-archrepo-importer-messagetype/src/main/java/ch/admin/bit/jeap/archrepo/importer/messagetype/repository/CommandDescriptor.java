@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype.repository;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.NonNull;
 import lombok.Value;
 

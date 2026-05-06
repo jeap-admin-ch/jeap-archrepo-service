@@ -1,23 +1,27 @@
 package ch.admin.bit.jeap.archrepo.importer.reaction;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Base64;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -26,12 +30,21 @@ import static org.mockito.Mockito.*;
         ReactionsObserverImporterConfiguration.class,
         TestConfig.class
 }, properties = {
-        "reactionobserverservice.url=http://localhost:${wiremock.server.port}/reaction-observer-service",
         "reactionobserverservice.username=user",
         "reactionobserverservice.password=secret",
         "spring.application.name=test"})
-@AutoConfigureWireMock(port = 0)
 class MessageGraphImporterWireMockTest {
+
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().dynamicPort())
+            .configureStaticDsl(true)
+            .build();
+
+    @DynamicPropertySource
+    static void registerWireMockProperties(DynamicPropertyRegistry registry) {
+        registry.add("reactionobserverservice.url", () -> wireMock.baseUrl() + "/reaction-observer-service");
+    }
 
     @Autowired
     private MessageGraphImporter importer;
@@ -41,6 +54,7 @@ class MessageGraphImporterWireMockTest {
 
     @BeforeEach
     void setUp() {
+        wireMock.resetAll();
         reset(messageGraphRepository);
         when(messageGraphRepository.save(any(MessageGraph.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(messageGraphRepository.existsByMessageTypeNameAndVariant(any(), any())).thenReturn(false);
