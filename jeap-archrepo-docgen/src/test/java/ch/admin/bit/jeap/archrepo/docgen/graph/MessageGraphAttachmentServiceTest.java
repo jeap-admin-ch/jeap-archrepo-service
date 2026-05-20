@@ -6,10 +6,10 @@ import ch.admin.bit.jeap.archrepo.docgen.graph.models.MessageNodeDto;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -87,7 +87,7 @@ public class MessageGraphAttachmentServiceTest {
 
         service.highlightMessageNode(graph, message);
 
-        assertTrue(node.isHighlighted());
+        assertTrue(node.getHighlighted());
     }
 
     @Test

@@ -36,17 +36,17 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
             // Assert: Cluster for trigger ID 1 and component "order" exists
             assertThat(dot).contains("subgraph \"cluster_trigger_1_order\"");
             assertThat(dot).contains("label=\"order\"");
-            assertThat(r1.isPartOfCluster()).isTrue();
-            assertThat(r2.isPartOfCluster()).isTrue();
+            assertThat(r1.getPartOfCluster()).isTrue();
+            assertThat(r2.getPartOfCluster()).isTrue();
 
             // Assert: For trigger ID 2 and component "order" there is only one reaction → no cluster
             assertThat(dot).doesNotContain("cluster_trigger_2_order");
-            assertThat(r3.isPartOfCluster()).isFalse();
+            assertThat(r3.getPartOfCluster()).isFalse();
 
             // Assert: "payment-service" has only 1 reaction → no cluster
             assertThat(dot).doesNotContain("cluster_trigger_3_payment");
             assertThat(dot).contains("\"REACTION-201\" [label=\"payment\\n201\"");
-            assertThat(r4.isPartOfCluster()).isFalse();
+            assertThat(r4.getPartOfCluster()).isFalse();
 
             // Assert: Edges are correctly included
             assertThat(dot).contains("\"MESSAGE-1\" -> \"REACTION-101\"");
@@ -72,8 +72,8 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
 
             // Assert: No clusters present
             assertThat(dot).doesNotContain("subgraph \"cluster_trigger");
-            assertThat(r1.isPartOfCluster()).isFalse();
-            assertThat(r2.isPartOfCluster()).isFalse();
+            assertThat(r1.getPartOfCluster()).isFalse();
+            assertThat(r2.getPartOfCluster()).isFalse();
         }
 
         @Test
@@ -94,11 +94,11 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
 
             // Assert: For trigger ID 1 and component "order" there is only one reaction → no cluster
             assertThat(dot).doesNotContain("subgraph \"cluster_trigger_1_order\"");
-            assertThat(r1.isPartOfCluster()).isFalse();
+            assertThat(r1.getPartOfCluster()).isFalse();
 
             // Assert: For trigger ID 1 and component "payment" there is only one reaction → no cluster
             assertThat(dot).doesNotContain("subgraph \"cluster_trigger_1_payment\"");
-            assertThat(r2.isPartOfCluster()).isFalse();
+            assertThat(r2.getPartOfCluster()).isFalse();
         }
 
         @Test
@@ -121,7 +121,7 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
 
             // Assert: No clusters created
             assertThat(dot).doesNotContain("subgraph \"cluster_trigger");
-            assertThat(r1.isPartOfCluster()).isFalse();
-            assertThat(r2.isPartOfCluster()).isFalse();
+            assertThat(r1.getPartOfCluster()).isFalse();
+            assertThat(r2.getPartOfCluster()).isFalse();
         }
     }

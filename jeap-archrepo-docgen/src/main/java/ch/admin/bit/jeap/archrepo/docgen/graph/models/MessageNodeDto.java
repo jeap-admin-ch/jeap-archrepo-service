@@ -1,9 +1,9 @@
 package ch.admin.bit.jeap.archrepo.docgen.graph.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ public class MessageNodeDto implements NodeDto {
     private long id;
     private String messageType;
     private String variant;
-    private boolean highlighted = false;
+    private Boolean highlighted = false;
 
     @Override
     public String getDotId() {
