@@ -22,7 +22,7 @@ public class MessageNodeDto implements NodeDto {
 
     @Override
     public String toDot() {
-        String style = highlighted ? ", style=filled, fillcolor=lightblue" : "";
+        String style = Boolean.TRUE.equals(highlighted) ? ", style=filled, fillcolor=lightblue" : "";
         String messageNodeName = messageType.replaceAll("(Event|Command)$", "");
         String label = variant != null && !variant.isBlank()
                 ? String.format("%s\\n[%s]", messageNodeName, variant)

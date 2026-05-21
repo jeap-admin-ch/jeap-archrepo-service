@@ -8,6 +8,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > - Spring Boot 3 maintenance (bug fixes, patches, and regular updates) continues on branch `release/springboot3`.
 > - The Spring Boot 4 upgrade process happens on the `master` branch, with the goal of releasing Spring Boot 4 compatible versions of all jeap components in a single major release.
 
+## [5.1.2-alpha-springboot4] - 2026-05-21
+
+### Changed
+
+- Fix NullPointerException in `ReactionNodeDto.toDot()` / `MessageNodeDto.toDot()` when graph JSON omits the
+  `highlighted` or `partOfCluster` fields
+
 ## [5.1.1-alpha-springboot4] - 2026-05-20
 
 ### Changed
