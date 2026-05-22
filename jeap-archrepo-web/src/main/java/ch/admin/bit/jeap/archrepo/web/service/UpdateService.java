@@ -4,9 +4,10 @@ import ch.admin.bit.jeap.archrepo.docgen.DocumentationGenerator;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.persistence.ArchitectureModelRepository;
+import ch.admin.bit.jeap.archrepo.persistence.SchedulerRunRepository;
+import ch.admin.bit.jeap.archrepo.persistence.SchedulerRunTracker;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoConfigProperties;
 import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Comparator.comparing;
@@ -27,13 +26,31 @@ import static java.util.Comparator.comparing;
 @RequiredArgsConstructor
 @Slf4j
 public class UpdateService {
-    private LocalDateTime lastRunGenerateDoc = LocalDateTime.MIN;
-    private LocalDateTime lastRunUpdateModel = LocalDateTime.MIN;
     private final ArchitectureModelRepository repository;
     private final DocumentationGenerator documentationGenerator;
     private final List<ArchRepoImporter> importers;
     private final MeterRegistry meterRegistry;
     private final ArchRepoConfigProperties archRepoConfigProperties;
+    private final SchedulerRunRepository schedulerRunRepository;
+
+    private SchedulerRunTracker generateDocumentationRunTracker;
+    private SchedulerRunTracker updateModelRunTracker;
+
+    @PostConstruct
+    void init() {
+        generateDocumentationRunTracker = new SchedulerRunTracker(
+                "generate-documentation",
+                "archrepo_generate_documentation_last_run_from",
+                schedulerRunRepository,
+                meterRegistry);
+        updateModelRunTracker = new SchedulerRunTracker(
+                "update-model",
+                "archrepo_model_update_last_run_from",
+                schedulerRunRepository,
+                meterRegistry);
+        generateDocumentationRunTracker.init();
+        updateModelRunTracker.init();
+    }
 
     @Timed("archrepo_generate_documentation")
     @Scheduled(cron = "${archrepo.documentation-generator.update-schedule}")
@@ -44,7 +61,7 @@ public class UpdateService {
         LockAssert.assertLocked();
         ArchitectureModel architectureModel = repository.load();
         documentationGenerator.generate(architectureModel);
-        lastRunGenerateDoc = LocalDateTime.now();
+        generateDocumentationRunTracker.recordRun();
         log.info("Scheduled documentation generation done");
     }
 
@@ -61,7 +78,7 @@ public class UpdateService {
                 .forEach(importer -> importer.importIntoModel(architectureModel, archRepoConfigProperties.getEnvironment().name().toLowerCase()));
         architectureModel.cleanup();
         repository.save(architectureModel);
-        lastRunUpdateModel = LocalDateTime.now();
+        updateModelRunTracker.recordRun();
 
         log.info("Scheduled model update done");
     }
@@ -77,20 +94,5 @@ public class UpdateService {
         importer.importIntoModel(architectureModel, archRepoConfigProperties.getEnvironment().name().toLowerCase());
         repository.save(architectureModel);
         log.info("Import done");
-    }
-
-    private long calculateDaysFromLastRunToNow(LocalDateTime lastRun) {
-        return Duration.between(lastRun, LocalDateTime.now()).toDays();
-    }
-
-    @PostConstruct
-    private void createMonitoringMetrics() {
-        Gauge.builder("archrepo_generate_documentation_last_run_from", () -> this.calculateDaysFromLastRunToNow(lastRunGenerateDoc))
-                .baseUnit("days")
-                .register(meterRegistry);
-
-        Gauge.builder("archrepo_model_update_last_run_from", () -> this.calculateDaysFromLastRunToNow(lastRunUpdateModel))
-                .baseUnit("days")
-                .register(meterRegistry);
     }
 }

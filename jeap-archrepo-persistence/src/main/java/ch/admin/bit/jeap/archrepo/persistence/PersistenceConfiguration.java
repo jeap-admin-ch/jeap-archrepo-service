@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 @AutoConfiguration
 @EnableTransactionManagement
 @EnableJpaRepositories
-@EntityScan(basePackageClasses = System.class)
+@EntityScan(basePackageClasses = {System.class, SchedulerRun.class})
 @ComponentScan
 public class PersistenceConfiguration {
     @Bean
