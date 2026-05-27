@@ -8,45 +8,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > - Spring Boot 3 maintenance (bug fixes, patches, and regular updates) continues on branch `release/springboot3`.
 > - The Spring Boot 4 upgrade process happens on the `master` branch, with the goal of releasing Spring Boot 4 compatible versions of all jeap components in a single major release.
 
-## [5.2.0-alpha-springboot4] - 2026-05-22
-
-### Added
-
-- Persist last-run timestamps of the documentation-generation and model-update scheduled jobs across restarts so that
-  the
-  `archrepo_generate_documentation_last_run_from` and `archrepo_model_update_last_run_from` gauges no longer reset to a
-  huge value after every deployment
-
-## [5.1.2-alpha-springboot4] - 2026-05-21
+## [6.0.0] - 2026-05-28
 
 ### Changed
 
+- Official release with spring boot 4
 - Fix NullPointerException in `ReactionNodeDto.toDot()` / `MessageNodeDto.toDot()` when graph JSON omits the
   `highlighted` or `partOfCluster` fields
-
-## [5.1.1-alpha-springboot4] - 2026-05-20
-
-### Changed
-
-- Fix deserialization issues due to stricter Jackson configuration in Spring Boot 4
-
-## [5.1.0-alpha-springboot4] - 2026-05-20
-
-### Changed
-
-- Update parent from 34.8.0-alpha-springboot4 to 34.12.0-alpha-springboot4
-
-## [5.0.1-alpha-springboot4] - 2026-05-12
-
-### Changed
-
-- Update netty-codec-http version to 4.2.13.Final for CVE-2026-42584 and CVE-2026-42587
-
-## [5.0.0-alpha-springboot4] - 2026-05-06
-
-### Changed
-
-- Migrate to Spring Boot 4
 
 ## [4.30.0] - 2026-04-16
 
