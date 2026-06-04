@@ -13,6 +13,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Update parent from 35.0.0 to 35.3.0
+- update org.eclipse.jgit from 7.5.0.202512021534-r to 7.6.0.202603022253-r
+- update guava from 33.5.0-jre to 33.6.0-jre
 
 ## [6.0.0] - 2026-05-28
 
