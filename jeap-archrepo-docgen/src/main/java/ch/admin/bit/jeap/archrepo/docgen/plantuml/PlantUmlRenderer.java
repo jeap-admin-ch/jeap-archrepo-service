@@ -5,7 +5,7 @@ import ch.admin.bit.jeap.archrepo.docgen.RelationView;
 import ch.admin.bit.jeap.archrepo.docgen.SystemContext;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.model.database.DatabaseSchema;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -11,13 +11,6 @@ import java.util.Set;
 public class ConfluenceAdapterMock implements ConfluenceAdapter {
 
     @Override
-    public String getPageByName(String pageName) {
-        int fakePageId = pageName.hashCode();
-        log.info("Get page by name: pageName={} fakePageId={}", pageName, fakePageId);
-        return String.valueOf(fakePageId);
-    }
-
-    @Override
     public void addOrUpdateAttachment(String pageId, String attachmentFileName, InputStream contentStream) {
         log.info("Add or update attachment: pageId={} attachmentFileName={}", pageId, attachmentFileName);
         try {

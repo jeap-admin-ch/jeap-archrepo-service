@@ -45,7 +45,7 @@ archrepo:
     confluence:
       url: "https://foo.bar"
       space-key: "ARCDOCTEST"
-      root-page-name: "Systeme"
+      root-page-id: "123456"
       username: "ezv-archrepo-techuser"
       password: "PASSWORD"
       mock-confluence-client: true

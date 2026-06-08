@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 public class DocumentationGeneratorConfluenceProperties {
 
     /**
-     * Name of the root page under which all systems are listed
+     * Id of the root page under which all systems are listed
      */
-    private String rootPageName;
+    private String rootPageId;
 
     /**
      * Key of the confluence space into which the documentation is generated

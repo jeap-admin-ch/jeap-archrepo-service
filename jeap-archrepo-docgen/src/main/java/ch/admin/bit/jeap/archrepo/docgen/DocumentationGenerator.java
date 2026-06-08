@@ -30,7 +30,7 @@ public class DocumentationGenerator {
     private final ComponentGraphAttachmentService componentGraphAttachmentService;
 
     public void generate(ArchitectureModel model) {
-        String rootPageId = confluenceAdapter.getPageByName(props.getRootPageName());
+        String rootPageId = props.getRootPageId();
         GeneratorContext context = new GeneratorContext(model, rootPageId);
         model.getSystems().forEach(system -> generateSystem(context, rootPageId, system));
         log.info("Documentation generated, containing {} pages", context.getGeneratedPageIds().size());

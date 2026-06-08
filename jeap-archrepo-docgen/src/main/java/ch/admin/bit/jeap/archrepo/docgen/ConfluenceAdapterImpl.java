@@ -29,12 +29,6 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
     }
 
     @Override
-    public String getPageByName(String pageName) {
-        return confluenceClient.getPageByTitle(props.getSpaceKey(), pageName);
-    }
-
-
-    @Override
     public void deleteUnusedAttachments(String pageId, List<String> attachmentNamesToKeep) {
         try {
             List<ConfluenceAttachment> attachments = confluenceClient.getAttachments(pageId);
@@ -72,7 +66,7 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
 
             if (match.isPresent()) {
                 String attachmentId = match.get().getId();
-                confluenceClient.updateAttachmentContent(pageId, attachmentId, contentStream);
+                confluenceClient.updateAttachmentContent(pageId, attachmentId, contentStream, false);
                 log.debug("Attachment '{}' updated at page '{}'.", attachmentFileName, pageId);
             } else {
                 confluenceClient.addAttachment(pageId, attachmentFileName, contentStream);
@@ -88,7 +82,7 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
     public String addOrUpdatePageUnderAncestor(String ancestorId, String pageName, String content) {
         String contentId;
         try {
-            contentId = this.confluenceClient.getPageByTitle(props.getSpaceKey(), pageName);
+            contentId = this.confluenceClient.getPageByTitle(props.getSpaceKey(), ancestorId, pageName);
             updatePage(contentId, ancestorId, pageName, content);
         } catch (NotFoundException e) {
             log.info("Creating page {}", pageName);
@@ -108,7 +102,7 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
             log.info("Updating page {}", pageName);
             this.confluenceClient.deletePropertyByKey(contentId, CONTENT_HASH_PROPERTY_KEY);
             int newPageVersion = existingPage.getVersion() + 1;
-            this.confluenceClient.updatePage(contentId, ancestorId, pageName, content, newPageVersion, VERSION_MESSAGE);
+            this.confluenceClient.updatePage(contentId, ancestorId, pageName, content, newPageVersion, VERSION_MESSAGE, false);
             this.confluenceClient.setPropertyByKey(contentId, CONTENT_HASH_PROPERTY_KEY, newContentHash);
         } else {
             log.info("Page {} is up-to-date", pageName);

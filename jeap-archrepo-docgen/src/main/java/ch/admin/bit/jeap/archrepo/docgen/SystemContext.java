@@ -7,7 +7,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import com.google.common.collect.Streams;
 import lombok.Builder;
 import lombok.Value;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Comparator;
 import java.util.List;

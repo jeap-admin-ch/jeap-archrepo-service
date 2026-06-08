@@ -8,6 +8,16 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > - Spring Boot 3 maintenance (bug fixes, patches, and regular updates) continues on branch `release/springboot3`.
 > - The Spring Boot 4 upgrade process happens on the `master` branch, with the goal of releasing Spring Boot 4 compatible versions of all jeap components in a single major release.
 
+## [6.2.0] - 2026-06-08
+
+### Changed
+
+- Update asciidoc-confluence-publisher-client from 0.12.0 to 0.33.0
+- Adapt Confluence integration to the new client API: use `ConfluenceRestV1Client`, pass the ancestor id to
+  `getPageByTitle`, and set `notifyWatchers=false` on page/attachment updates
+- Configure the documentation root page via `archrepo.documentation-generator.confluence.root-page-id` instead of
+  `root-page-name` (v1 no longer supports looking up a page by title without an ancestor)
+
 ## [6.1.0] - 2026-06-04
 
 ### Changed

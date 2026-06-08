@@ -5,11 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface ConfluenceAdapter {
-    /**
-     * @return Page ID
-     */
-    String getPageByName(String pageName);
-
 
     void addOrUpdateAttachment(String pageId, String attachmentFileName, InputStream contentStream);
 

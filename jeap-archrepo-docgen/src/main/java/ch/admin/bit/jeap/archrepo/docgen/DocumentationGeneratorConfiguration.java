@@ -1,7 +1,7 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
 import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceClient;
-import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceRestClient;
+import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceRestV1Client;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ class DocumentationGeneratorConfiguration {
 
     @Bean
     ConfluenceClient confluenceClient(DocumentationGeneratorConfluenceProperties props) {
-        return new ConfluenceRestClient(props.getUrl(), true, null, props.getUsername(), props.getPassword());
+        return new ConfluenceRestV1Client(props.getUrl(), true, false, null, null, props.getUsername(), props.getPassword());
     }
 
     @Bean

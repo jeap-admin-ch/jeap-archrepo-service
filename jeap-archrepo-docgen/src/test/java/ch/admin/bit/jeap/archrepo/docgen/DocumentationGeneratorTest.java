@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class DocumentationGeneratorTest {
 
-    private static final String ROOT_PAGE_NAME = "rootPageName";
     private static final String ROOT_PAGE_ID = "rootPageId";
     private static final String SYSTEM_NAME = "MockSystem";
 
@@ -50,7 +49,7 @@ class DocumentationGeneratorTest {
 
     @BeforeEach
     void setUp() {
-        when(props.getRootPageName()).thenReturn(ROOT_PAGE_NAME);
+        when(props.getRootPageId()).thenReturn(ROOT_PAGE_ID);
     }
 
     @Test
@@ -77,7 +76,6 @@ class DocumentationGeneratorTest {
                 .build();
 
         // ConfluenceAdapter mocks
-        when(confluenceAdapter.getPageByName(ROOT_PAGE_NAME)).thenReturn(ROOT_PAGE_ID);
         when(confluenceAdapter.addOrUpdatePageUnderAncestor(anyString(), anyString(), anyString()))
                 .thenAnswer(invocation -> UUID.randomUUID().toString());
 

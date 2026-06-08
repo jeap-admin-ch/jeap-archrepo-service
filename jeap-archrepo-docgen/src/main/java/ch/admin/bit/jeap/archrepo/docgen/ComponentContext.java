@@ -8,7 +8,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import com.google.common.collect.Streams;
 import lombok.Builder;
 import lombok.Value;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
