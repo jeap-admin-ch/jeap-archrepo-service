@@ -14,9 +14,26 @@
     <name>${project.groupId}:${project.artifactId}</name>
 
     <properties>
-        <!-- Override due to CVE-2026-42584, CVE-2026-42587 coming with pact-provider -->
-        <netty-codec-http.version>4.2.13.Final</netty-codec-http.version>
+        <!-- Netty (test-scope, via Pact). Override Spring-managed version to clear netty CVEs.
+             Forces all netty artifacts via netty-bom: netty-handler (CVE-2026-44249, CVE-2026-45416),
+             netty-codec-http2 (CVE-2026-47244), netty-handler-proxy (CVE-2026-42578),
+             and earlier CVE-2026-42584/42587. -->
+        <netty.version>4.2.15.Final</netty.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Override the parent's hard-pinned netty versions (test-scope, via Pact) to clear netty CVEs.
+                 Covers netty-handler (CVE-2026-44249, CVE-2026-45416) and all other netty artifacts at once. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 
     <dependencies>
@@ -64,23 +81,12 @@
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
+                <!-- Unused gRPC plugin-driver transport (no Pact plugins here); drops netty-handler-proxy + netty-codec-socks -->
+                <exclusion>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-netty</artifactId>
+                </exclusion>
             </exclusions>
-        </dependency>
-        <!-- Netty is a dependency of au.com.dius.pact.provider:junit5 -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-http</artifactId>
-            <version>${netty-codec-http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-http2</artifactId>
-            <version>${netty-codec-http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-compression</artifactId>
-            <version>${netty-codec-http.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
