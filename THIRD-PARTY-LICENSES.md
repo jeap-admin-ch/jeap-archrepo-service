@@ -107,18 +107,11 @@ Apache License Version 2.0
  * micrometer-tracing - [io.micrometer:micrometer-tracing](https://github.com/micrometer-metrics/tracing)
  * micrometer-tracing-bridge-otel - [io.micrometer:micrometer-tracing-bridge-otel](https://github.com/micrometer-metrics/tracing)
  * Netty/Buffer - [io.netty:netty-buffer](https://netty.io/netty-buffer/)
- * Netty/Buffer - [io.netty:netty-buffer](https://netty.io/netty-buffer/)
- * Netty/Codec/Base - [io.netty:netty-codec-base](https://netty.io/netty-codec-base/)
  * Netty/Codec/Base - [io.netty:netty-codec-base](https://netty.io/netty-codec-base/)
  * Netty/Common - [io.netty:netty-common](https://netty.io/netty-common/)
- * Netty/Common - [io.netty:netty-common](https://netty.io/netty-common/)
- * Netty/Handler - [io.netty:netty-handler](https://netty.io/netty-handler/)
  * Netty/Handler - [io.netty:netty-handler](https://netty.io/netty-handler/)
  * Netty/Resolver - [io.netty:netty-resolver](https://netty.io/netty-resolver/)
- * Netty/Resolver - [io.netty:netty-resolver](https://netty.io/netty-resolver/)
  * Netty/Transport - [io.netty:netty-transport](https://netty.io/netty-transport/)
- * Netty/Transport - [io.netty:netty-transport](https://netty.io/netty-transport/)
- * Netty/Transport/Native/Unix/Common - [io.netty:netty-transport-native-unix-common](https://netty.io/netty-transport-native-unix-common/)
  * Netty/Transport/Native/Unix/Common - [io.netty:netty-transport-native-unix-common](https://netty.io/netty-transport-native-unix-common/)
  * OpenTelemetry Java - [io.opentelemetry:opentelemetry-api](https://github.com/open-telemetry/opentelemetry-java)
  * OpenTelemetry Java - [io.opentelemetry:opentelemetry-common](https://github.com/open-telemetry/opentelemetry-java)
@@ -382,6 +375,12 @@ Common Development and Distribution License (CDDL) v1.0
 
  * JavaBeans Activation Framework (JAF) - [javax.activation:activation](http://java.sun.com/products/javabeans/jaf/index.jsp)
 
+EPL-2.0
+-------------------------------
+
+ * Logback Classic Module - [ch.qos.logback:logback-classic](http://logback.qos.ch/logback-classic)
+ * Logback Core Module - [ch.qos.logback:logback-core](http://logback.qos.ch/logback-core)
+
 Eclipse Distribution License - v 1.0
 -------------------------------
 
@@ -397,8 +396,6 @@ Eclipse Distribution License - v 1.0
 Eclipse Public License v2.0
 -------------------------------
 
- * Logback Classic Module - [ch.qos.logback:logback-classic](http://logback.qos.ch/logback-classic)
- * Logback Core Module - [ch.qos.logback:logback-core](http://logback.qos.ch/logback-core)
  * Jakarta Annotations API - [jakarta.annotation:jakarta.annotation-api](https://projects.eclipse.org/projects/ee4j.ca)
  * Jakarta Persistence API - [jakarta.persistence:jakarta.persistence-api](https://github.com/jakartaee/persistence)
  * Jakarta Servlet - [jakarta.servlet:jakarta.servlet-api](https://projects.eclipse.org/projects/ee4j.servlet)
@@ -423,16 +420,16 @@ GNU General Public License, version 2 (GPL2), with the classpath exception
  * Jakarta Servlet - [jakarta.servlet:jakarta.servlet-api](https://projects.eclipse.org/projects/ee4j.servlet)
  * jakarta.transaction API - [jakarta.transaction:jakarta.transaction-api](https://projects.eclipse.org/projects/ee4j.jta)
 
-GNU Lesser General Public License
--------------------------------
-
- * Logback Classic Module - [ch.qos.logback:logback-classic](http://logback.qos.ch/logback-classic)
- * Logback Core Module - [ch.qos.logback:logback-core](http://logback.qos.ch/logback-core)
-
 GPLv2+CE
 -------------------------------
 
  * JavaMail API (compat) - [javax.mail:mail](http://kenai.com/projects/javamail/mail)
+
+LGPL-2.1-only
+-------------------------------
+
+ * Logback Classic Module - [ch.qos.logback:logback-classic](http://logback.qos.ch/logback-classic)
+ * Logback Core Module - [ch.qos.logback:logback-core](http://logback.qos.ch/logback-core)
 
 MIT License
 -------------------------------
