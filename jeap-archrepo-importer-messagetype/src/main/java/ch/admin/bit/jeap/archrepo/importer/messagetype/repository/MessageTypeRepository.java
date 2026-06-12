@@ -1,8 +1,5 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype.repository;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -10,6 +7,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.CredentialsProvider;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.Closeable;
 import java.io.File;
@@ -112,7 +113,7 @@ public abstract class MessageTypeRepository implements Closeable {
     private <T> T readDescriptor(File descriptorFile, Class<T> descriptorType) {
         try {
             return objectMapper.readValue(descriptorFile, descriptorType);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw MessageTypeRepoException.descriptorParsingFailed(descriptorFile.getAbsolutePath(), e);
         }
     }
