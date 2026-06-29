@@ -1,18 +1,24 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype.repository.github;
 
 import ch.admin.bit.jeap.archrepo.importer.messagetype.repository.MessageTypeRepository;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+@Slf4j
 public class GitHubMessageTypeRepository extends MessageTypeRepository {
 
     public GitHubMessageTypeRepository(String gitUri, Map<String, String> parameters) {
         super(gitUri);
-        assertRequiredParameters(parameters);
-        setCredentialsProvider(new GitHubAppCredentialsProvider(
-                parameters.get("GITHUB_APP_ID"),
-                parameters.get("GITHUB_PRIVATE_KEY_PEM")
-        ));
+        if (parameters == null || parameters.isEmpty()) {
+            log.info("No GitHub credentials set, will try to check out without credentials");
+        } else {
+            assertRequiredParameters(parameters);
+            setCredentialsProvider(new GitHubAppCredentialsProvider(
+                    parameters.get("GITHUB_APP_ID"),
+                    parameters.get("GITHUB_PRIVATE_KEY_PEM")
+            ));
+        }
     }
 
     // For tests
@@ -29,7 +35,7 @@ public class GitHubMessageTypeRepository extends MessageTypeRepository {
     }
 
     private void assertRequiredParameters(Map<String, String> parameters) {
-        if (parameters == null || !parameters.containsKey("GITHUB_APP_ID")) {
+        if (!parameters.containsKey("GITHUB_APP_ID")) {
             throw new IllegalArgumentException("Missing required parameter 'GITHUB_APP_ID' for GitHub repository");
         }
         if (!parameters.containsKey("GITHUB_PRIVATE_KEY_PEM")) {

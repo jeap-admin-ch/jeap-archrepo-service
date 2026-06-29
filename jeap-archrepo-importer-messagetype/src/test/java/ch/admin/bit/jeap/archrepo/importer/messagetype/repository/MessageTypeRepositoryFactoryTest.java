@@ -8,7 +8,11 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MessageTypeRepositoryFactoryTest {
 
@@ -62,19 +66,18 @@ class MessageTypeRepositoryFactoryTest {
     }
 
     @Test
-    void testWithGitHubRepositoryFailForNoGitHubAppId() {
+    void testWithGitHubRepositoryNoFailForNoGitHubAppIdAndNoPrivateKey() {
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties();
         Map<String, String> params = Map.of();
         RepositoryProperties props = new RepositoryProperties("https://github.com/jeap-admin-ch/jeap.git", RepositoryProperties.RepositoryType.GITHUB, params);
         properties.setRepositories(
                 List.of(props)
         );
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new MessageTypeRepositoryFactory(properties));
-        assertEquals("Missing required parameter 'GITHUB_APP_ID' for GitHub repository", exception.getMessage());
+        assertDoesNotThrow(() -> new MessageTypeRepositoryFactory(properties));
     }
 
     @Test
-    void testWithGitHubRepositoryFailForNoGitHubAppPrivateKey() {
+    void testWithGitHubRepositoryFailForGitHubAppIdButNoGitHubAppPrivateKey() {
         MessageTypeImporterProperties properties = new MessageTypeImporterProperties();
         Map<String, String> params = Map.of("GITHUB_APP_ID", "12345");
         RepositoryProperties props = new RepositoryProperties("https://github.com/jeap-admin-ch/jeap.git", RepositoryProperties.RepositoryType.GITHUB, params);
@@ -83,5 +86,17 @@ class MessageTypeRepositoryFactoryTest {
         );
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new MessageTypeRepositoryFactory(properties));
         assertEquals("Missing required parameter 'GITHUB_PRIVATE_KEY_PEM' for GitHub repository", exception.getMessage());
+    }
+
+    @Test
+    void testWithGitHubRepositoryFailForNoGitHubAppIdButGitHubAppPrivateKey() {
+        MessageTypeImporterProperties properties = new MessageTypeImporterProperties();
+        Map<String, String> params = Map.of("GITHUB_PRIVATE_KEY_PEM", "dummy");
+        RepositoryProperties props = new RepositoryProperties("https://github.com/jeap-admin-ch/jeap.git", RepositoryProperties.RepositoryType.GITHUB, params);
+        properties.setRepositories(
+                List.of(props)
+        );
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new MessageTypeRepositoryFactory(properties));
+        assertEquals("Missing required parameter 'GITHUB_APP_ID' for GitHub repository", exception.getMessage());
     }
 }
