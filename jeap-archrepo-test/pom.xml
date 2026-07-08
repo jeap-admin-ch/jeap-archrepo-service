@@ -7,7 +7,7 @@
     <parent>
         <groupId>ch.admin.bit.jeap</groupId>
         <artifactId>jeap-archrepo-service</artifactId>
-        <version>7.2.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>jeap-archrepo-test</artifactId>
@@ -18,7 +18,7 @@
              Forces all netty artifacts via netty-bom: netty-handler (CVE-2026-44249, CVE-2026-45416),
              netty-codec-http2 (CVE-2026-47244), netty-handler-proxy (CVE-2026-42578),
              and earlier CVE-2026-42584/42587. -->
-        <netty.version>4.2.15.Final</netty.version>
+        <netty.version>4.2.16.Final</netty.version>
     </properties>
 
     <dependencyManagement>
