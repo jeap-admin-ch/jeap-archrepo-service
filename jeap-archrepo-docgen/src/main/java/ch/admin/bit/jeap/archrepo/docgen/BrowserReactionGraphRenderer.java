@@ -15,7 +15,12 @@ final class BrowserReactionGraphRenderer {
     private final DocumentationGeneratorConfluenceProperties properties;
 
     ConfluenceReactionGraph render(RenderedReactionGraph graph) {
-        String id = "reaction-graph-" + UUID.nameUUIDFromBytes((graph.title() + graph.dot()).getBytes(StandardCharsets.UTF_8));
+        return render(graph, 0);
+    }
+
+    ConfluenceReactionGraph render(RenderedReactionGraph graph, int occurrence) {
+        String graphIdentity = graph.title() + "\0" + graph.dot() + "\0" + occurrence;
+        String id = "reaction-graph-" + UUID.nameUUIDFromBytes(graphIdentity.getBytes(StandardCharsets.UTF_8));
         String escapedDot = escapeHtml(graph.dot());
         String vizJsUrl = javascriptStringLiteral(properties.getVizJsUrl());
         String svgPanZoomJsUrl = javascriptStringLiteral(properties.getSvgPanZoomJsUrl());
@@ -111,6 +116,35 @@ final class BrowserReactionGraphRenderer {
                       fit: true,
                       center: true
                     });
+                    const idMap = new Map();
+                    for (const element of [svg, ...svg.querySelectorAll("[id]")]) {
+                      if (element.id) {
+                        const namespacedId = "%1$s-" + element.id;
+                        idMap.set(element.id, namespacedId);
+                        element.id = namespacedId;
+                      }
+                    }
+                    for (const element of svg.querySelectorAll("*")) {
+                      for (const attributeName of ["href", "xlink:href"]) {
+                        const reference = element.getAttribute(attributeName);
+                        if (reference?.startsWith("#") && idMap.has(reference.substring(1))) {
+                          element.setAttribute(attributeName, "#" + idMap.get(reference.substring(1)));
+                        }
+                      }
+                      for (const attributeName of ["fill", "stroke", "filter", "clip-path", "mask", "marker-start", "marker-mid", "marker-end", "style"]) {
+                        const value = element.getAttribute(attributeName);
+                        if (value?.includes("url(#")) {
+                          element.setAttribute(attributeName, value.replace(/url\\(#([^)]+)\\)/g,
+                            (match, referencedId) => idMap.has(referencedId) ? "url(#" + idMap.get(referencedId) + ")" : match));
+                        }
+                      }
+                      for (const attributeName of ["aria-labelledby", "aria-describedby"]) {
+                        const value = element.getAttribute(attributeName);
+                        if (value) {
+                          element.setAttribute(attributeName, value.split(/\\s+/).map(referencedId => idMap.get(referencedId) ?? referencedId).join(" "));
+                        }
+                      }
+                    }
                     const fitGraph = () => {
                       panZoom.resize();
                       panZoom.fit();

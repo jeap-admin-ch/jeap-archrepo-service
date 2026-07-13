@@ -22,6 +22,8 @@ class BrowserReactionGraphRendererTest {
                 .contains("window.__jeapArchRepoReactionGraphRuntime")
                 .contains("renderSVGElement(dot)")
                 .contains("mouseWheelZoomEnabled: true")
+                .contains("const idMap = new Map()")
+                .contains("svg.querySelectorAll(\"[id]\")")
                 .contains("panZoom.fit()")
                 .contains("panZoom.center()")
                 .contains("ResizeObserver")
@@ -33,6 +35,17 @@ class BrowserReactionGraphRendererTest {
                 .contains("svg > g.graph > polygon { fill: transparent; }")
                 .contains("a&lt;/textarea&gt;")
                 .doesNotContain("a</textarea>");
+    }
+
+    @Test
+    void assignsDifferentIdsToIdenticalGraphsOnTheSamePage() {
+        BrowserReactionGraphRenderer renderer = new BrowserReactionGraphRenderer(new DocumentationGeneratorConfluenceProperties());
+        RenderedReactionGraph graph = new RenderedReactionGraph("Default", "digraph G { a -> b }");
+
+        ConfluenceReactionGraph first = renderer.render(graph, 0);
+        ConfluenceReactionGraph second = renderer.render(graph, 1);
+
+        assertThat(first.cdata()).isNotEqualTo(second.cdata());
     }
 
     @Test

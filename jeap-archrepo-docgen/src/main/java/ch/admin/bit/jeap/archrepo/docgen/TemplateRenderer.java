@@ -148,14 +148,22 @@ class TemplateRenderer {
     String renderEventPage(Event event, List<RenderedReactionGraph> graphs) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", event);
-        context.setVariable("messageGraphs", graphs.stream().map(browserReactionGraphRenderer::render).toList());
+        context.setVariable("messageGraphs", renderReactionGraphs(graphs));
         return templateEngine.process("event", context).trim();
     }
 
     String renderCommandPage(Command command, List<RenderedReactionGraph> graphs) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", command);
-        context.setVariable("messageGraphs", graphs.stream().map(browserReactionGraphRenderer::render).toList());
+        context.setVariable("messageGraphs", renderReactionGraphs(graphs));
         return templateEngine.process("command", context).trim();
+    }
+
+    private List<ConfluenceReactionGraph> renderReactionGraphs(List<RenderedReactionGraph> graphs) {
+        List<ConfluenceReactionGraph> renderedGraphs = new ArrayList<>(graphs.size());
+        for (int i = 0; i < graphs.size(); i++) {
+            renderedGraphs.add(browserReactionGraphRenderer.render(graphs.get(i), i));
+        }
+        return renderedGraphs;
     }
 }
