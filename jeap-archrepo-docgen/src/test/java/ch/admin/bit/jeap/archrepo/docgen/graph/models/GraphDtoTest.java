@@ -33,6 +33,7 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
             // Act
             String dot = graph.toDot();
 
+            assertThat(dot).contains("graph [bgcolor=\"transparent\"]");
             // Assert: Cluster for trigger ID 1 and component "order" exists
             assertThat(dot).contains("subgraph \"cluster_trigger_1_order\"");
             assertThat(dot).contains("label=\"order\"");
@@ -123,5 +124,18 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
             assertThat(dot).doesNotContain("subgraph \"cluster_trigger");
             assertThat(r1.getPartOfCluster()).isFalse();
             assertThat(r2.getPartOfCluster()).isFalse();
+        }
+
+        @Test
+        void toDot_shouldAddLinksAndEscapeAttributeValues() {
+            MessageNodeDto message = new MessageNodeDto(1, "Order\"CreatedEvent", null, false);
+            ReactionNodeDto reaction = new ReactionNodeDto(2, "order-service", false, false);
+            GraphDto graph = new GraphDto(List.of(message, reaction), List.of());
+
+            String dot = graph.toDot(node -> "https://confluence/page?id=1&name=\"orders\"");
+
+            assertThat(dot).contains("label=\"Order\\\"Created\"");
+            assertThat(dot).contains("URL=\"https://confluence/page?id=1&name=\\\"orders\\\"\"");
+            assertThat(dot).contains("target=\"_top\"");
         }
     }

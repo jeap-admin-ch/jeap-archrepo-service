@@ -35,21 +35,16 @@ public class MessageGraph extends MutableDomainEntity {
 
     private String fingerprint;
 
-    @Column(name = "last_published_fingerprint")
-    private String lastPublishedFingerprint;
-
-
     protected MessageGraph() {
         super();
     }
 
     @Builder
-    public MessageGraph(String messageTypeName, String variant, byte[] graphData, String fingerprint, String lastPublishedFingerprint) {
+    public MessageGraph(String messageTypeName, String variant, byte[] graphData, String fingerprint) {
         this.id = Generators.timeBasedEpochGenerator().generate();
         this.messageTypeName = messageTypeName;
         this.variant = variant;
         this.graphData = graphData;
         this.fingerprint = fingerprint;
-        this.lastPublishedFingerprint = lastPublishedFingerprint;
     }
 }

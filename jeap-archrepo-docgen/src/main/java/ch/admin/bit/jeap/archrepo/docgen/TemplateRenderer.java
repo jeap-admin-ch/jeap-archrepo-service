@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.docgen.plantuml.PlantUmlRenderer;
 import ch.admin.bit.jeap.archrepo.docgen.plantuml.RenderedDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.docgen.graph.RenderedReactionGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
@@ -30,13 +31,14 @@ class TemplateRenderer {
 
     private final ITemplateEngine templateEngine;
     private final PlantUmlRenderer plantUmlRenderer;
+    private final BrowserReactionGraphRenderer browserReactionGraphRenderer;
 
     String renderIndexPage() {
         Context context = new Context(Locale.GERMAN);
         return templateEngine.process("index", context).trim();
     }
 
-    String renderSystemPage(ArchitectureModel model, System system, String graphAttachmentName) {
+    String renderSystemPage(ArchitectureModel model, System system, RenderedReactionGraph graph) {
         List<SystemEvent> systemEvents = system.getEvents().stream()
                 .map(e -> createSystemEvent(model, e))
                 .sorted(comparing(SystemEvent::getName))
@@ -56,7 +58,7 @@ class TemplateRenderer {
         String plantUmLSource = plantUmlRenderer.renderSystemContextView(systemContext);
         context.setVariable("contextViewPlantUml", plantUmLSource);
         context.setVariable("plantUmlMacroId", stableMacroUuid(system.getName()));
-        context.setVariable("systemGraphAttachmentName", graphAttachmentName);
+        context.setVariable("systemGraph", graph == null ? null : browserReactionGraphRenderer.render(graph));
         return templateEngine.process("system", context).trim();
     }
 
@@ -94,7 +96,7 @@ class TemplateRenderer {
                 .filter(r -> r.getCommandName().equals(command.getMessageTypeName()));
     }
 
-    String renderComponentPage(ArchitectureModel model, SystemComponent systemComponent, String graphAttachmentName) {
+    String renderComponentPage(ArchitectureModel model, SystemComponent systemComponent, RenderedReactionGraph graph) {
         ComponentContext componentContext = ComponentContext.of(model, systemComponent);
 
         Context context = new Context(Locale.GERMAN);
@@ -112,7 +114,7 @@ class TemplateRenderer {
         context.setVariable("receivedCommandRelations", componentContext.getReceivedCommandsGroupedByCommand());
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
-        context.setVariable("componentGraphAttachmentName", graphAttachmentName);
+        context.setVariable("componentGraph", graph == null ? null : browserReactionGraphRenderer.render(graph));
 
         Optional<SystemComponentDatabaseSchema> databaseSchema = getDatabaseSchema(componentContext);
 
@@ -143,17 +145,17 @@ class TemplateRenderer {
         return UUID.nameUUIDFromBytes(plantUmLSource.getBytes(StandardCharsets.UTF_8)).toString();
     }
 
-    String renderEventPage(Event event, List<String> uploadedAttachmentNames) {
+    String renderEventPage(Event event, List<RenderedReactionGraph> graphs) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", event);
-        context.setVariable("messageGraphAttachmentNames", uploadedAttachmentNames);
+        context.setVariable("messageGraphs", graphs.stream().map(browserReactionGraphRenderer::render).toList());
         return templateEngine.process("event", context).trim();
     }
 
-    String renderCommandPage(Command command, List<String> uploadedAttachmentNames) {
+    String renderCommandPage(Command command, List<RenderedReactionGraph> graphs) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", command);
-        context.setVariable("messageGraphAttachmentNames", uploadedAttachmentNames);
+        context.setVariable("messageGraphs", graphs.stream().map(browserReactionGraphRenderer::render).toList());
         return templateEngine.process("command", context).trim();
     }
 }

@@ -21,9 +21,4 @@ public interface ComponentGraphRepository extends JpaRepository<ComponentGraph, 
 
     ComponentGraph findByComponentNameIgnoreCase(String componentName);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE ComponentGraph g SET g.lastPublishedFingerprint = :fingerprint WHERE g.id = :id")
-    void updateLastPublishedFingerprint(UUID id, String fingerprint);
-
 }

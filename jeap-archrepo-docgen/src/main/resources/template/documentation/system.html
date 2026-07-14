@@ -152,17 +152,9 @@
     </table>
     <p th:if="${systemCommands.empty}">Keine</p>
 
-    <div th:if="${systemGraphAttachmentName != null}">
+    <div th:if="${systemGraph != null}">
         <p><br /></p>
         <h2>Graph</h2>
-        <ac:image ac:border="true">
-            <span th:utext="|<ri:attachment ri:filename='${systemGraphAttachmentName}' />|"></span>
-        </ac:image>
-        <style>
-            ac\:image img {
-                max-height: 400px;
-                height: auto;
-            }
-        </style>
+        <div th:replace="~{fragment/reaction-graph :: reaction-graph(graph=${systemGraph})}"></div>
     </div>
 </th:block>

@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.docgen.plantuml.PlantUmlRenderer;
 import ch.admin.bit.jeap.archrepo.docgen.plantuml.RenderedDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.docgen.graph.RenderedReactionGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
@@ -48,6 +49,7 @@ import static org.mockito.Mockito.when;
 class TemplateRendererTest {
 
     private static final Pattern PLANTUML_SOURCE_PATTERN = Pattern.compile("(@startuml.*?@enduml)|( ac:macro-id=\".*?\")", Pattern.DOTALL);
+    private static final Pattern REACTION_GRAPH_SECTION_PATTERN = Pattern.compile("<div>\\s*<p><br ?/></p>\\s*<h2>(Graph|Message Graphs)</h2>.*$", Pattern.DOTALL);
 
     @Autowired
     ApplicationContext applicationContext;
@@ -56,9 +58,22 @@ class TemplateRendererTest {
 
     private static void assertContent(String expectationResourceName, String actualContentWithUml) throws IOException {
         // ignore UML in comparisons to make the test more self-contained - UML source code is tested in separate unit tests
-        String actualContent = PLANTUML_SOURCE_PATTERN.matcher(actualContentWithUml).replaceAll("");
+        String actualContent = normalizeGeneratedContent(actualContentWithUml);
         assertThat(actualContent)
-                .isEqualToIgnoringWhitespace(loadExpectation(expectationResourceName));
+                .isEqualToIgnoringWhitespace(normalizeGeneratedContent(loadExpectation(expectationResourceName)));
+    }
+
+    private static String normalizeGeneratedContent(String content) {
+        String withoutUml = PLANTUML_SOURCE_PATTERN.matcher(content).replaceAll("");
+        return REACTION_GRAPH_SECTION_PATTERN.matcher(withoutUml).replaceAll("");
+    }
+
+    private static RenderedReactionGraph graph() {
+        return new RenderedReactionGraph("Default", "digraph G { message -> reaction }");
+    }
+
+    private static BrowserReactionGraphRenderer browserGraphRenderer() {
+        return new BrowserReactionGraphRenderer(new DocumentationGeneratorConfluenceProperties());
     }
 
     private static String loadExpectation(String name) throws IOException {
@@ -90,9 +105,33 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
+        String content = templateRenderer.renderSystemPage(model, system, graph());
 
+        assertThat(content)
+                .contains("<ac:structured-macro ac:name=\"html\" ac:schema-version=\"1\">")
+                .contains("<![CDATA[<style>")
+                .contains("class=\"reaction-graph\"")
+                .contains("renderSVGElement(dot)")
+                .doesNotContain("<ac:image");
         assertContent("system.expected", content);
+    }
+
+    @Test
+    void renderSystemPageWithGraphExceedingSpelStringLimit() {
+        System system = System.builder()
+                .name("System")
+                .description("Description")
+                .build();
+        String largeLabel = "a".repeat(100_000);
+        RenderedReactionGraph largeGraph = new RenderedReactionGraph(
+                "Large", "digraph G { label=\"" + largeLabel + "\" }");
+
+        String content = templateRenderer.renderSystemPage(buildModel(system), system, largeGraph);
+
+        assertThat(content)
+                .contains("<![CDATA[<style>")
+                .contains(largeLabel)
+                .contains("renderSVGElement(dot)");
     }
 
     @Test
@@ -138,7 +177,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
+        String content = templateRenderer.renderSystemPage(model, system, graph());
         assertContent("systemwithevent.expected", content);
     }
 
@@ -185,7 +224,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
+        String content = templateRenderer.renderSystemPage(model, system, graph());
         assertContent("systemwithcommand.expected", content);
     }
 
@@ -223,7 +262,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderSystemPage(model, system, "graph-System.png");
+        String content = templateRenderer.renderSystemPage(model, system, graph());
         assertContent("systemwithnullevent.expected", content);
     }
 
@@ -241,7 +280,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("component.expected", content);
     }
 
@@ -304,7 +343,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("componentwithevent.expected", content);
     }
 
@@ -357,7 +396,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("componentwithcommandevent.expected", content);
     }
 
@@ -449,7 +488,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("componentwithcommand.expected", content);
     }
 
@@ -505,7 +544,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, component, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, component, graph());
         assertContent("componentwithnullconsumerprovider.expected", content);
     }
 
@@ -568,7 +607,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("componentwithrestrelations.expected", content);
     }
 
@@ -612,7 +651,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("componentwithOpenApiUrl.expected", content);
     }
 
@@ -629,7 +668,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertThat(content).contains("Kein Datenbankschema bekannt.");
     }
 
@@ -640,7 +679,8 @@ class TemplateRendererTest {
         RenderedDatabaseSchema mockSchema = mock(RenderedDatabaseSchema.class);
         when(mockSchema.length()).thenReturn(50001);
         when(mockPlantUmlRenderer.renderDatabaseSchema(any())).thenReturn(mockSchema);
-        TemplateRenderer templateRendererWithMock = new TemplateRenderer(generatorConfig.templateEngine(applicationContext), mockPlantUmlRenderer);
+        TemplateRenderer templateRendererWithMock = new TemplateRenderer(
+                generatorConfig.templateEngine(applicationContext), mockPlantUmlRenderer, browserGraphRenderer());
         BackendService systemComponent = BackendService.builder()
                 .name("systemComponent")
                 .build();
@@ -659,7 +699,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRendererWithMock.renderComponentPage(model, systemComponent, "graph-system.png");
+        String content = templateRendererWithMock.renderComponentPage(model, systemComponent, graph());
         assertThat(content).contains("Datenbankschema zu gross (50001). Dokumentation wird nicht generiert.");
     }
 
@@ -697,7 +737,7 @@ class TemplateRendererTest {
 
         ArchitectureModel model = buildModel(system);
 
-        String content = templateRenderer.renderComponentPage(model, systemComponent, "graph-Component.png");
+        String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
         assertContent("componentwithDatabaseSchema.expected", content);
     }
 
@@ -733,9 +773,11 @@ class TemplateRendererTest {
                 .scope("public")
                 .build();
 
-        List<String> uploadedAttachmentNames = List.of("graph-event1-variant1.png", "graph-event1-variant2.png");
+        List<RenderedReactionGraph> graphs = List.of(
+                new RenderedReactionGraph("variant1", "digraph G { a -> b }"),
+                new RenderedReactionGraph("variant2", "digraph G { b -> c }"));
 
-        String content = templateRenderer.renderEventPage(event, uploadedAttachmentNames);
+        String content = templateRenderer.renderEventPage(event, graphs);
         assertContent("event.expected", content);
     }
 
@@ -771,15 +813,18 @@ class TemplateRendererTest {
                 .scope("public")
                 .build();
 
-        List<String> uploadedAttachmentNames = List.of("graph-Command1-variant1.png", "graph-Command1-variant2.png");
+        List<RenderedReactionGraph> graphs = List.of(
+                new RenderedReactionGraph("variant1", "digraph G { a -> b }"),
+                new RenderedReactionGraph("variant2", "digraph G { b -> c }"));
 
-        String content = templateRenderer.renderCommandPage(command, uploadedAttachmentNames);
+        String content = templateRenderer.renderCommandPage(command, graphs);
         assertContent("command.expected", content);
     }
 
     @BeforeEach
     void setUp() {
         DocumentationGeneratorConfiguration generatorConfig = new DocumentationGeneratorConfiguration();
-        templateRenderer = new TemplateRenderer(generatorConfig.templateEngine(applicationContext), new PlantUmlRenderer());
+        templateRenderer = new TemplateRenderer(
+                generatorConfig.templateEngine(applicationContext), new PlantUmlRenderer(), browserGraphRenderer());
     }
 }

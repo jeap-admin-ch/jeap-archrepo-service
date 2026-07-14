@@ -22,11 +22,17 @@ public class MessageNodeDto implements NodeDto {
 
     @Override
     public String toDot() {
+        return toDot(null);
+    }
+
+    @Override
+    public String toDot(String url) {
         String style = Boolean.TRUE.equals(highlighted) ? ", style=filled, fillcolor=lightblue" : "";
-        String messageNodeName = messageType.replaceAll("(Event|Command)$", "");
+        String messageNodeName = NodeDto.escapeDotString(messageType.replaceAll("(Event|Command)$", ""));
         String label = variant != null && !variant.isBlank()
-                ? String.format("%s\\n[%s]", messageNodeName, variant)
+                ? String.format("%s\\n[%s]", messageNodeName, NodeDto.escapeDotString(variant))
                 : messageNodeName;
-        return String.format("  \"%s\" [label=\"%s\", shape=ellipse%s];", getDotId(), label, style);
+        return String.format("  \"%s\" [label=\"%s\", shape=ellipse%s%s];",
+                getDotId(), label, style, NodeDto.linkAttributes(url));
     }
 }

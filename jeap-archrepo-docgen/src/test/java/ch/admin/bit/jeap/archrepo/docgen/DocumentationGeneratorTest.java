@@ -1,8 +1,8 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
-import ch.admin.bit.jeap.archrepo.docgen.graph.ComponentGraphAttachmentService;
-import ch.admin.bit.jeap.archrepo.docgen.graph.MessageGraphAttachmentService;
-import ch.admin.bit.jeap.archrepo.docgen.graph.SystemGraphAttachmentService;
+import ch.admin.bit.jeap.archrepo.docgen.graph.ComponentGraphService;
+import ch.admin.bit.jeap.archrepo.docgen.graph.MessageGraphService;
+import ch.admin.bit.jeap.archrepo.docgen.graph.SystemGraphService;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,13 +31,13 @@ class DocumentationGeneratorTest {
     private ConfluenceAdapter confluenceAdapter;
 
     @Mock
-    private MessageGraphAttachmentService messageGraphAttachmentService;
+    private MessageGraphService messageGraphService;
 
     @Mock
-    private SystemGraphAttachmentService systemGraphAttachmentService;
+    private SystemGraphService systemGraphService;
 
     @Mock
-    private ComponentGraphAttachmentService componentGraphAttachmentService;
+    private ComponentGraphService componentGraphService;
 
     @Mock
     private TemplateRenderer templateRenderer;
@@ -50,6 +51,7 @@ class DocumentationGeneratorTest {
     @BeforeEach
     void setUp() {
         when(props.getRootPageId()).thenReturn(ROOT_PAGE_ID);
+        when(props.getUrl()).thenReturn("https://confluence.example");
     }
 
     @Test
@@ -76,18 +78,10 @@ class DocumentationGeneratorTest {
                 .build();
 
         // ConfluenceAdapter mocks
-        when(confluenceAdapter.addOrUpdatePageUnderAncestor(anyString(), anyString(), anyString()))
+        when(confluenceAdapter.findOrCreatePageUnderAncestor(anyString(), anyString()))
                 .thenAnswer(invocation -> UUID.randomUUID().toString());
 
-        // Attachment mocks
-        when(systemGraphAttachmentService.getSystemAttachmentNameIfExists(eq(SYSTEM_NAME))).thenReturn("systemGraph.png");
-        doNothing().when(systemGraphAttachmentService).generateAttachment(eq(systemMock), anyString());
-
-        when(componentGraphAttachmentService.getComponentAttachmentNameIfExists(eq("ComponentA"))).thenReturn("componentGraph.png");
-        doNothing().when(componentGraphAttachmentService).generateAttachment(eq(componentMock), anyString());
-
-        when(messageGraphAttachmentService.getAttachmentNames(eq(eventMock))).thenReturn(List.of("eventGraph.png"));
-        doNothing().when(messageGraphAttachmentService).generateAttachments(eq(eventMock), anyString());
+        when(messageGraphService.getGraphs(any(), any())).thenReturn(List.of());
 
         // TemplateRenderer mocks
         when(templateRenderer.renderSystemPage(any(), eq(systemMock), any())).thenReturn("Rendered System Page");
@@ -100,15 +94,20 @@ class DocumentationGeneratorTest {
         documentationGenerator.generate(model);
 
         // Verification
-        verify(confluenceAdapter).addOrUpdatePageUnderAncestor(eq(ROOT_PAGE_ID), eq(SYSTEM_NAME + " (System)"), anyString());
+        InOrder pageOrder = inOrder(confluenceAdapter, systemGraphService);
+        pageOrder.verify(confluenceAdapter, times(7)).findOrCreatePageUnderAncestor(anyString(), anyString());
+        pageOrder.verify(systemGraphService).getGraph(eq(systemMock), any());
+        verify(confluenceAdapter).findOrCreatePageUnderAncestor(eq(ROOT_PAGE_ID), eq(SYSTEM_NAME + " (System)"));
         verify(templateRenderer).renderSystemPage(any(), eq(systemMock), any());
         verify(templateRenderer).renderIndexPage();
         verify(templateRenderer).renderComponentPage(any(), eq(componentMock), any());
         verify(templateRenderer).renderEventPage(eq(eventMock), any());
         verify(templateRenderer).renderCommandPage(eq(commandMock), any());
 
-        verify(systemGraphAttachmentService).generateAttachment(eq(systemMock), anyString());
-        verify(componentGraphAttachmentService).generateAttachment(eq(componentMock), anyString());
-        verify(messageGraphAttachmentService).generateAttachments(eq(eventMock), anyString());
+        verify(systemGraphService).getGraph(eq(systemMock), any());
+        verify(componentGraphService).getGraph(eq(componentMock), any());
+        verify(messageGraphService).getGraphs(eq(eventMock), any());
+        verify(messageGraphService).getGraphs(eq(commandMock), any());
+        verify(confluenceAdapter, times(7)).updatePage(anyString(), anyString(), anyString(), anyString());
     }
 }

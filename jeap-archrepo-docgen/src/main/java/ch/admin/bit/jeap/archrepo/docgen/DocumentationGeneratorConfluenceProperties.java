@@ -32,6 +32,10 @@ public class DocumentationGeneratorConfluenceProperties {
 
     private boolean mockConfluenceClient = false;
 
+    private String vizJsUrl = "https://cdn.jsdelivr.net/npm/@viz-js/viz@3.28.0/+esm";
+
+    private String svgPanZoomJsUrl = "https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.2/+esm";
+
     @PostConstruct
     void init() {
         log.info("Confluence configuration: {}", this);

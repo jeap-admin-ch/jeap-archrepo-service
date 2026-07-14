@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sahli.asciidoc.confluence.publisher.client.http.*;
 
-import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,71 +28,17 @@ class ConfluenceAdapterImpl implements ConfluenceAdapter {
     }
 
     @Override
-    public void deleteUnusedAttachments(String pageId, List<String> attachmentNamesToKeep) {
+    public String findOrCreatePageUnderAncestor(String ancestorId, String pageName) {
         try {
-            List<ConfluenceAttachment> attachments = confluenceClient.getAttachments(pageId);
-            Set<String> toBeKept = new HashSet<>(attachmentNamesToKeep);
-            List<ConfluenceAttachment> toBeDeleted = attachments.stream()
-                    .filter(att -> !toBeKept.contains(att.getTitle()))
-                    .toList();
-
-            for (ConfluenceAttachment confluenceAttachment : toBeDeleted) {
-                try {
-                    confluenceClient.deleteAttachment(confluenceAttachment.getId());
-                    log.info("Attachment '{}' deleted.", confluenceAttachment.getTitle());
-                } catch (RequestFailedException e) {
-                    if (e.getMessage().contains("not found")) {
-                        log.info("Attachment '{}' already deleted or not found (idempotent).", confluenceAttachment.getTitle());
-                    } else {
-                        log.error("Failed to delete attachment '{}': {}", confluenceAttachment.getTitle(), e.getMessage(), e);
-                        throw new RuntimeException("Deletion of unused attachments failed.", e);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error while deleting unused attachments: {}", e.getMessage(), e);
-            throw new RuntimeException("Deletion of unused attachments failed.", e);
-        }
-    }
-
-    @Override
-    public void addOrUpdateAttachment(String pageId, String attachmentFileName, InputStream contentStream) {
-        try {
-            List<ConfluenceAttachment> attachments = confluenceClient.getAttachments(pageId);
-            Optional<ConfluenceAttachment> match = attachments.stream()
-                    .filter(att -> att.getTitle().equals(attachmentFileName))
-                    .findFirst();
-
-            if (match.isPresent()) {
-                String attachmentId = match.get().getId();
-                confluenceClient.updateAttachmentContent(pageId, attachmentId, contentStream, false);
-                log.debug("Attachment '{}' updated at page '{}'.", attachmentFileName, pageId);
-            } else {
-                confluenceClient.addAttachment(pageId, attachmentFileName, contentStream);
-                log.debug("Attachment '{}' added at page '{}'.", attachmentFileName, pageId);
-            }
-        } catch (Exception e) {
-            log.error("Error while adding or updating the attachment '{}': {}", attachmentFileName, e.getMessage(), e);
-            throw new RuntimeException("Upload of attachment failed.", e);
-        }
-    }
-
-    @Override
-    public String addOrUpdatePageUnderAncestor(String ancestorId, String pageName, String content) {
-        String contentId;
-        try {
-            contentId = this.confluenceClient.getPageByTitle(props.getSpaceKey(), ancestorId, pageName);
-            updatePage(contentId, ancestorId, pageName, content);
+            return confluenceClient.getPageByTitle(props.getSpaceKey(), ancestorId, pageName);
         } catch (NotFoundException e) {
             log.info("Creating page {}", pageName);
-            contentId = this.confluenceClient.addPageUnderAncestor(props.getSpaceKey(), ancestorId, pageName, content, VERSION_MESSAGE);
-            this.confluenceClient.setPropertyByKey(contentId, CONTENT_HASH_PROPERTY_KEY, hash(content));
+            return confluenceClient.addPageUnderAncestor(props.getSpaceKey(), ancestorId, pageName, "", VERSION_MESSAGE);
         }
-
-        return contentId;
     }
 
-    private void updatePage(String contentId, String ancestorId, String pageName, String content) {
+    @Override
+    public void updatePage(String contentId, String ancestorId, String pageName, String content) {
         ConfluencePage existingPage = this.confluenceClient.getPageWithContentAndVersionById(contentId);
         String existingContentHash = this.confluenceClient.getPropertyByKey(contentId, CONTENT_HASH_PROPERTY_KEY);
         String newContentHash = hash(content);

@@ -85,18 +85,10 @@
     <h2>Empfangene Commands</h2>
     <div th:replace="~{fragment/grouped-relations-table :: grouped-relations-table(relations=${receivedCommandRelations}, counterpartLabel='Command Sender', label='Command')}"></div>
 
-    <div th:if="${componentGraphAttachmentName != null}">
+    <div th:if="${componentGraph != null}">
         <p><br /></p>
         <h2>Graph</h2>
-        <ac:image ac:border="true">
-            <span th:utext="|<ri:attachment ri:filename='${componentGraphAttachmentName}' />|"></span>
-        </ac:image>
-        <style>
-            ac\:image img {
-                max-height: 400px;
-                height: auto;
-            }
-        </style>
+        <div th:replace="~{fragment/reaction-graph :: reaction-graph(graph=${componentGraph})}"></div>
     </div>
 
 </th:block>

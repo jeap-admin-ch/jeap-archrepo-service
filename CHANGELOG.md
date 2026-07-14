@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.5.0] - 2026-07-13
+
+### Changed
+
+- Render reaction graphs as searchable, linked, theme-aware SVGs in Confluence using Viz.js with mouse zoom and panning.
+- Remove server-side Graphviz rendering and PNG graph attachments.
+
 ## [7.4.0] - 2026-07-13
 
 ### Dependencies

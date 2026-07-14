@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceAttachment;
 import org.sahli.asciidoc.confluence.publisher.client.http.ConfluenceClient;
 import org.sahli.asciidoc.confluence.publisher.client.http.ConfluencePage;
 import org.sahli.asciidoc.confluence.publisher.client.http.NotFoundException;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -30,24 +27,22 @@ class ConfluenceAdapterImplTest {
     private ConfluenceAdapterImpl confluenceAdapter;
 
     @Test
-    void addOrUpdatePageUnderAncestor_newPage() {
+    void findOrCreatePageUnderAncestor_newPage() {
         String pageId = "pageId";
         String pageName = "pageName";
         String ancestorId = "ancestorId";
-        String content = "content";
-        String contentHash = sha256Hex(content);
         doThrow(new NotFoundException()).when(confluenceClientMock).getPageByTitle(SPACE_KEY, ancestorId, pageName);
         doReturn(pageId)
                 .when(confluenceClientMock)
-                .addPageUnderAncestor(eq(SPACE_KEY), eq(ancestorId), eq(pageName), eq(content), nullable(String.class));
+                .addPageUnderAncestor(eq(SPACE_KEY), eq(ancestorId), eq(pageName), eq(""), nullable(String.class));
 
-        confluenceAdapter.addOrUpdatePageUnderAncestor(ancestorId, pageName, content);
+        String result = confluenceAdapter.findOrCreatePageUnderAncestor(ancestorId, pageName);
 
-        verify(confluenceClientMock).setPropertyByKey(pageId, CONTENT_HASH_PROPERTY_KEY, contentHash);
+        org.junit.jupiter.api.Assertions.assertEquals(pageId, result);
     }
 
     @Test
-    void addOrUpdatePageUnderAncestor_existingPageWithNewContent() {
+    void updatePage_existingPageWithNewContent() {
         String pageId = "pageId";
         String pageName = "pageName";
         String ancestorId = "ancestorId";
@@ -55,21 +50,19 @@ class ConfluenceAdapterImplTest {
         String contentHash = sha256Hex(content);
         int version = 1;
         ConfluencePage existingPage = new ConfluencePage(pageId, pageName, version);
-        doReturn(pageId)
-                .when(confluenceClientMock).getPageByTitle(SPACE_KEY, ancestorId, pageName);
         doReturn(existingPage)
                 .when(confluenceClientMock).getPageWithContentAndVersionById(pageId);
         doReturn("differenthash")
                 .when(confluenceClientMock).getPropertyByKey(pageId, CONTENT_HASH_PROPERTY_KEY);
 
-        confluenceAdapter.addOrUpdatePageUnderAncestor(ancestorId, pageName, content);
+        confluenceAdapter.updatePage(pageId, ancestorId, pageName, content);
 
         verify(confluenceClientMock).updatePage(eq(pageId), eq(ancestorId), eq(pageName), eq(content), eq(version + 1), nullable(String.class), eq(false));
         verify(confluenceClientMock).setPropertyByKey(pageId, CONTENT_HASH_PROPERTY_KEY, contentHash);
     }
 
     @Test
-    void addOrUpdatePageUnderAncestor_existingPageNoContentChange() {
+    void updatePage_existingPageNoContentChange() {
         String pageId = "pageId";
         String pageName = "pageName";
         String ancestorId = "ancestorId";
@@ -77,14 +70,12 @@ class ConfluenceAdapterImplTest {
         String contentHash = sha256Hex(content);
         int version = 1;
         ConfluencePage existingPage = new ConfluencePage(pageId, pageName, version);
-        doReturn(pageId)
-                .when(confluenceClientMock).getPageByTitle(SPACE_KEY, ancestorId, pageName);
         doReturn(existingPage)
                 .when(confluenceClientMock).getPageWithContentAndVersionById(pageId);
         doReturn(contentHash)
                 .when(confluenceClientMock).getPropertyByKey(pageId, CONTENT_HASH_PROPERTY_KEY);
 
-        confluenceAdapter.addOrUpdatePageUnderAncestor(ancestorId, pageName, content);
+        confluenceAdapter.updatePage(pageId, ancestorId, pageName, content);
 
         verifyNoMoreInteractions(confluenceClientMock);
     }
@@ -124,83 +115,6 @@ class ConfluenceAdapterImplTest {
         doReturn(pageId).when(page).getContentId();
         lenient().doReturn("Title " + pageId).when(page).getTitle();
         return page;
-    }
-
-    @Test
-    void addOrUpdateAttachment_existingAttachment() {
-        String pageId = "pageId";
-        String attachmentFileName = "file.txt";
-        String attachmentId = "attachmentId";
-        InputStream contentStream = new ByteArrayInputStream("new content".getBytes());
-
-        ConfluenceAttachment existingAttachment = mock(ConfluenceAttachment.class);
-        when(existingAttachment.getTitle()).thenReturn(attachmentFileName);
-        when(existingAttachment.getId()).thenReturn(attachmentId);
-
-        when(confluenceClientMock.getAttachments(pageId)).thenReturn(List.of(existingAttachment));
-
-        confluenceAdapter.addOrUpdateAttachment(pageId, attachmentFileName, contentStream);
-
-        verify(confluenceClientMock).updateAttachmentContent(pageId, attachmentId, contentStream, false);
-        verify(confluenceClientMock, never()).addAttachment(any(), any(), any());
-    }
-
-    @Test
-    void addOrUpdateAttachment_newAttachment() {
-        String pageId = "pageId";
-        String attachmentFileName = "newfile.txt";
-        InputStream contentStream = new ByteArrayInputStream("content".getBytes());
-
-        ConfluenceAttachment existingAttachment = mock(ConfluenceAttachment.class);
-        when(existingAttachment.getTitle()).thenReturn("otherfile.txt");
-
-        when(confluenceClientMock.getAttachments(pageId)).thenReturn(List.of(existingAttachment));
-
-        confluenceAdapter.addOrUpdateAttachment(pageId, attachmentFileName, contentStream);
-
-        verify(confluenceClientMock).addAttachment(pageId, attachmentFileName, contentStream);
-        verify(confluenceClientMock, never()).updateAttachmentContent(any(), any(), any(), anyBoolean());
-    }
-
-    @Test
-    void deleteUnusedAttachments_deletesCorrectAttachments() {
-        String pageId = "pageId";
-
-        ConfluenceAttachment keepAttachment = mock(ConfluenceAttachment.class);
-        when(keepAttachment.getTitle()).thenReturn("keep.txt");
-
-        ConfluenceAttachment deleteAttachment1 = mock(ConfluenceAttachment.class);
-        when(deleteAttachment1.getTitle()).thenReturn("delete1.txt");
-        when(deleteAttachment1.getId()).thenReturn("id1");
-
-        ConfluenceAttachment deleteAttachment2 = mock(ConfluenceAttachment.class);
-        when(deleteAttachment2.getTitle()).thenReturn("delete2.txt");
-        when(deleteAttachment2.getId()).thenReturn("id2");
-
-        when(confluenceClientMock.getAttachments(pageId)).thenReturn(List.of(keepAttachment, deleteAttachment1, deleteAttachment2));
-
-        confluenceAdapter.deleteUnusedAttachments(pageId, List.of("keep.txt"));
-
-        verify(confluenceClientMock).deleteAttachment("id1");
-        verify(confluenceClientMock).deleteAttachment("id2");
-        verify(confluenceClientMock, never()).deleteAttachment(null);
-    }
-
-    @Test
-    void deleteUnusedAttachments_noDeletionIfAllKept() {
-        String pageId = "pageId";
-
-        ConfluenceAttachment keepAttachment1 = mock(ConfluenceAttachment.class);
-        when(keepAttachment1.getTitle()).thenReturn("keep1.txt");
-
-        ConfluenceAttachment keepAttachment2 = mock(ConfluenceAttachment.class);
-        when(keepAttachment2.getTitle()).thenReturn("keep2.txt");
-
-        when(confluenceClientMock.getAttachments(pageId)).thenReturn(List.of(keepAttachment1, keepAttachment2));
-
-        confluenceAdapter.deleteUnusedAttachments(pageId, List.of("keep1.txt", "keep2.txt"));
-
-        verify(confluenceClientMock, never()).deleteAttachment(any());
     }
 
     @BeforeEach

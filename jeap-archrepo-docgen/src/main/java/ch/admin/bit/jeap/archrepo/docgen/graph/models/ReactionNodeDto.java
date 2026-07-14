@@ -22,8 +22,16 @@ public class ReactionNodeDto implements NodeDto {
 
     @Override
     public String toDot() {
+        return toDot(null);
+    }
+
+    @Override
+    public String toDot(String url) {
         String style = Boolean.TRUE.equals(highlighted) ? ", style=filled, fillcolor=lightblue" : "";
-        String label = Boolean.TRUE.equals(partOfCluster) ? String.valueOf(id) : component.replaceAll("(-scs|-service)$", "") + "\\n" + id;
-        return String.format("  \"%s\" [label=\"%s\", shape=box, style=rounded%s];", getDotId(), label, style);
+        String label = Boolean.TRUE.equals(partOfCluster)
+                ? String.valueOf(id)
+                : NodeDto.escapeDotString(component.replaceAll("(-scs|-service)$", "")) + "\\n" + id;
+        return String.format("  \"%s\" [label=\"%s\", shape=box, style=rounded%s%s];",
+                getDotId(), label, style, NodeDto.linkAttributes(url));
     }
 }

@@ -16,4 +16,23 @@ public interface NodeDto {
 
     @JsonIgnore
     String toDot();
+
+    @JsonIgnore
+    default String toDot(String url) {
+        return toDot();
+    }
+
+    static String escapeDotString(String value) {
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n");
+    }
+
+    static String linkAttributes(String url) {
+        if (url == null || url.isBlank()) {
+            return "";
+        }
+        return String.format(", URL=\"%s\", target=\"_top\"", escapeDotString(url));
+    }
 }

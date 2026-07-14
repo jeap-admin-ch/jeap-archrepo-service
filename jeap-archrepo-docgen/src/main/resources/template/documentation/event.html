@@ -74,20 +74,13 @@
     </table>
     <p th:if="${messageType.consumerContracts.empty}">Keine</p>
 
-    <div th:if="${messageGraphAttachmentNames}">
+    <div th:if="${messageGraphs}">
         <p><br /></p>
         <h2>Message Graphs</h2>
-        <div th:each="attachmentName : ${messageGraphAttachmentNames}">
-            <ac:image ac:border="true">
-                <span th:utext="|<ri:attachment ri:filename='${attachmentName}' />|"></span>
-            </ac:image>
+        <div th:each="graph : ${messageGraphs}">
+            <h3 th:text="${graph.title}"></h3>
+            <div th:replace="~{fragment/reaction-graph :: reaction-graph(graph=${graph})}"></div>
         </div>
-        <style>
-            ac\\:image img {
-                max-height: 400px;
-                height: auto;
-            }
-        </style>
     </div>
 
 </th:block>
