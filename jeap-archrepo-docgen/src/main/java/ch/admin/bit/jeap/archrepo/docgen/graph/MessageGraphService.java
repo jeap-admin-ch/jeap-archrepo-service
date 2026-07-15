@@ -43,8 +43,9 @@ public class MessageGraphService {
     private RenderedReactionGraph renderGraph(MessageType message, MessageGraph graph, Function<NodeDto, String> linkResolver) {
         GraphDto graphDto = objectMapper.readValue(graph.getGraphData(), GraphDto.class);
         highlightMessageNode(graphDto, message);
-        String variant = Optional.ofNullable(graph.getVariant()).filter(v -> !v.isBlank()).orElse("Default");
-        return new RenderedReactionGraph(variant, graphDto.toDot(linkResolver));
+        String navigationKey = MessageGraph.normalizeVariant(graph.getMessageTypeName(), graph.getVariant());
+        String title = Optional.of(navigationKey).filter(v -> !v.isBlank()).orElse("Default");
+        return new RenderedReactionGraph(title, graphDto.toDot(linkResolver));
     }
 
     void highlightMessageNode(GraphDto graph, MessageType message) {

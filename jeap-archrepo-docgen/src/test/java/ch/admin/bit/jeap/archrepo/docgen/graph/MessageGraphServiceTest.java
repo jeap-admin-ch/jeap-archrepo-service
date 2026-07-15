@@ -21,7 +21,7 @@ class MessageGraphServiceTest {
         MessageType message = mock(MessageType.class);
         when(message.getMessageTypeName()).thenReturn("OrderEvent");
         MessageGraph defaultGraph = graph("", "default".getBytes());
-        MessageGraph variantGraph = graph("v1", "variant".getBytes());
+        MessageGraph variantGraph = graph("OrderEvent/v1", "variant".getBytes());
         MessageGraphRepository repository = mock(MessageGraphRepository.class);
         when(repository.findAllByMessageTypeName("OrderEvent")).thenReturn(List.of(variantGraph, defaultGraph));
 

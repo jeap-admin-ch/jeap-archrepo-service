@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -22,5 +23,25 @@ public interface MessageGraphRepository extends JpaRepository<MessageGraph, UUID
     void updateGraphAndFingerprintByMessageTypeNameAndVariantIfFingerprintChanged(String messageTypeName, String variant, byte[] graphData, String fingerprint);
 
     List<MessageGraph> findAllByMessageTypeName(@NonNull String messageTypeName);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MessageGraph graph WHERE graph.messageTypeName = :messageTypeName AND graph.variant NOT IN :variants")
+    void deleteStaleVariants(String messageTypeName, Set<String> variants);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MessageGraph graph WHERE graph.messageTypeName = :messageTypeName")
+    void deleteAllVariants(String messageTypeName);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MessageGraph graph WHERE graph.messageTypeName NOT IN :messageTypeNames")
+    void deleteGraphsForMissingMessageTypes(Set<String> messageTypeNames);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MessageGraph")
+    void deleteAllMessageGraphs();
 
 }

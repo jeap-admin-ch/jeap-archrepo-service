@@ -302,7 +302,7 @@ class MessageGraphImporterWireMockTest {
 
         // Verify UserCreatedEvent with no variant graph
         MessageGraph userEventGraph = savedGraphs.stream()
-                .filter(g -> "UserCreatedEvent".equals(g.getMessageTypeName()))
+                .filter(g -> "UserCreatedEvent".equals(g.getMessageTypeName()) && g.getVariant().isEmpty())
                 .findFirst()
                 .orElseThrow();
         assertThat(userEventGraph.getMessageTypeName()).isEqualTo("UserCreatedEvent");
@@ -316,15 +316,18 @@ class MessageGraphImporterWireMockTest {
                 .contains("notification-service")
                 .contains("UserCreatedEvent");
 
-        // Verify OrderProcessedEvent graph
-        userEventGraph = savedGraphs.get(1);
+        // Verify UserCreatedEvent variant graph
+        userEventGraph = savedGraphs.stream()
+                .filter(g -> "UserCreatedEvent".equals(g.getMessageTypeName()) && "variant1".equals(g.getVariant()))
+                .findFirst()
+                .orElseThrow();
         assertThat(userEventGraph.getMessageTypeName()).isEqualTo("UserCreatedEvent");
         assertThat(userEventGraph.getVariant()).isEqualTo("variant1");
         assertThat(userEventGraph.getFingerprint()).isEqualTo("fingerprint-message2");
         assertThat(userEventGraph.getGraphData()).isNotNull();
 
         // Verify the serialized graph data contains expected content
-        assertThat(userEventGraphJson)
+        assertThat(new String(userEventGraph.getGraphData()))
                 .contains("notification-service")
                 .contains("UserCreatedEvent");
 

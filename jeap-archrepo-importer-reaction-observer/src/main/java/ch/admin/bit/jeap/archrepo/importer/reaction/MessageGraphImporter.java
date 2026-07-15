@@ -6,12 +6,21 @@ import ch.admin.bit.jeap.archrepo.importer.reaction.client.ReactionObserverServi
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
+import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.persistence.MessageGraphRepository;
 import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -25,8 +34,17 @@ class MessageGraphImporter implements ArchRepoImporter {
     @Override
     public void importIntoModel(ArchitectureModel model, String environment) {
         log.info("Getting message graphs from Reaction Observer Service...");
-        for (var messageType : model.getAllMessageTypes()) {
+        List<MessageType> messageTypes = model.getAllMessageTypes();
+        for (var messageType : messageTypes) {
             importMessageType(messageType.getMessageTypeName());
+        }
+        Set<String> messageTypeNames = messageTypes.stream()
+                .map(MessageType::getMessageTypeName)
+                .collect(Collectors.toSet());
+        if (messageTypeNames.isEmpty()) {
+            messageGraphRepository.deleteAllMessageGraphs();
+        } else {
+            messageGraphRepository.deleteGraphsForMissingMessageTypes(messageTypeNames);
         }
         log.info("Message graph import completed");
     }
@@ -46,41 +64,78 @@ class MessageGraphImporter implements ArchRepoImporter {
     }
 
     private void saveOrUpdateMessageGraph(String messageTypeName, MessageGraphDto messageGraphDto) throws Exception {
-        messageGraphDto.getVariants().forEach(v -> {
-            try {
-                GraphDto graphDto = messageGraphDto.get(v);
-                // 'No variant' is delivered as messageTypeName from Reaction Observer Service
-                String variant;
-                if (messageTypeName.equals(v)) {
-                    variant = "";
-                } else if (v.contains("/")) {
-                    variant = v.substring(v.indexOf("/") + 1);
-                } else {
-                    variant = v;
-                }
-                byte[] graphData = objectMapper.writeValueAsBytes(graphDto.graph());
-
-                if (messageGraphRepository.existsByMessageTypeNameAndVariant(messageTypeName, variant)) {
-                    messageGraphRepository.updateGraphAndFingerprintByMessageTypeNameAndVariantIfFingerprintChanged(
-                            messageTypeName, variant, graphData, graphDto.fingerprint());
-                    log.trace("Updated graph for message type: {} with fingerprint: {}",
-                            messageTypeName, graphDto.fingerprint());
-                } else {
-                    MessageGraph messageGraph = MessageGraph.builder()
-                            .messageTypeName(messageTypeName)
-                            .variant(variant)
-                            .graphData(graphData)
-                            .fingerprint(graphDto.fingerprint())
-                            .build();
-                    messageGraphRepository.save(messageGraph);
-                    log.trace("Saved new graph for message type: {} with fingerprint: {}",
-                            messageTypeName, graphDto.fingerprint());
-                }
-            } catch (JacksonException e) {
-                throw new RuntimeException(e);
+        Map<String, SerializedGraph> graphsByVariant = new LinkedHashMap<>();
+        List<String> variants = messageGraphDto.getVariants().stream()
+                .sorted(Comparator
+                        .comparingInt((String variant) -> variantPrecedence(messageTypeName, variant))
+                        .thenComparing(String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(Comparator.naturalOrder()))
+                .toList();
+        for (String rawVariant : variants) {
+            GraphDto graphDto = messageGraphDto.get(rawVariant);
+            String variant = MessageGraph.normalizeVariant(messageTypeName, rawVariant);
+            SerializedGraph graph = new SerializedGraph(objectMapper.writeValueAsBytes(graphDto.graph()), graphDto.fingerprint());
+            SerializedGraph previous = graphsByVariant.putIfAbsent(variant, graph);
+            if (previous != null && !previous.equals(graph)) {
+                log.warn("Ignoring conflicting message graph alias '{}' for message type '{}' and normalized variant '{}'",
+                        rawVariant, messageTypeName, variant);
             }
-        });
+        }
 
+        for (Map.Entry<String, SerializedGraph> entry : graphsByVariant.entrySet()) {
+            String variant = entry.getKey();
+            SerializedGraph graph = entry.getValue();
+            if (messageGraphRepository.existsByMessageTypeNameAndVariant(messageTypeName, variant)) {
+                messageGraphRepository.updateGraphAndFingerprintByMessageTypeNameAndVariantIfFingerprintChanged(
+                        messageTypeName, variant, graph.data(), graph.fingerprint());
+                log.trace("Updated graph for message type: {} with fingerprint: {}",
+                        messageTypeName, graph.fingerprint());
+            } else {
+                MessageGraph messageGraph = MessageGraph.builder()
+                        .messageTypeName(messageTypeName)
+                        .variant(variant)
+                        .graphData(graph.data())
+                        .fingerprint(graph.fingerprint())
+                        .build();
+                messageGraphRepository.save(messageGraph);
+                log.trace("Saved new graph for message type: {} with fingerprint: {}",
+                        messageTypeName, graph.fingerprint());
+            }
+        }
+
+        if (graphsByVariant.isEmpty()) {
+            messageGraphRepository.deleteAllVariants(messageTypeName);
+        } else {
+            messageGraphRepository.deleteStaleVariants(messageTypeName, graphsByVariant.keySet());
+        }
     }
 
+    private record SerializedGraph(byte[] data, String fingerprint) {
+
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof SerializedGraph graph &&
+                    Arrays.equals(data, graph.data) && Objects.equals(fingerprint, graph.fingerprint);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Arrays.hashCode(data) + Objects.hashCode(fingerprint);
+        }
+    }
+
+    private static int variantPrecedence(String messageTypeName, String rawVariant) {
+        String trimmed = rawVariant == null ? "" : rawVariant.trim();
+        String normalized = MessageGraph.normalizeVariant(messageTypeName, rawVariant);
+        if (trimmed.equals(normalized)) {
+            return 0;
+        }
+        if (trimmed.equalsIgnoreCase(messageTypeName)) {
+            return 1;
+        }
+        if ("default".equalsIgnoreCase(trimmed)) {
+            return 2;
+        }
+        return 3;
+    }
 }

@@ -19,6 +19,7 @@ import tools.jackson.core.JacksonException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -271,6 +272,7 @@ class MessageGraphImporterTest {
         // Assert
         verify(messageGraphRepository, never()).save(any());
         verify(messageGraphRepository, never()).updateGraphAndFingerprintByMessageTypeNameAndVariantIfFingerprintChanged(any(), any(), any(), any());
+        verify(messageGraphRepository).deleteAllMessageGraphs();
     }
 
     @Test
@@ -300,5 +302,33 @@ class MessageGraphImporterTest {
         // Assert
         verify(messageGraphRepository).existsByMessageTypeNameAndVariant(messageTypeName, expectedVariant);
         verify(messageGraphRepository).save(argThat(saved -> expectedVariant.equals(saved.getVariant())));
+        verify(messageGraphRepository).deleteStaleVariants(messageTypeName, Set.of(expectedVariant));
+    }
+
+    @Test
+    void importIntoModel_withNoUpstreamVariants_deletesAllPersistedVariants() {
+        String messageTypeName = "Event1";
+        when(messageType1.getMessageTypeName()).thenReturn(messageTypeName);
+        when(model.getAllMessageTypes()).thenReturn(List.of(messageType1));
+        when(reactionObserverService.getMessageGraph(messageTypeName)).thenReturn(new MessageGraphDto());
+
+        new MessageGraphImporter(reactionObserverService, messageGraphRepository, objectMapper)
+                .importIntoModel(model, "ref");
+
+        verify(messageGraphRepository).deleteAllVariants(messageTypeName);
+        verify(messageGraphRepository, never()).deleteStaleVariants(any(), any());
+    }
+
+    @Test
+    void importIntoModel_removesGraphsForMessageTypesMissingFromModel() {
+        when(messageType1.getMessageTypeName()).thenReturn("Event1");
+        when(model.getAllMessageTypes()).thenReturn(List.of(messageType1));
+        when(reactionObserverService.getMessageGraph("Event1")).thenReturn(new MessageGraphDto());
+
+        new MessageGraphImporter(reactionObserverService, messageGraphRepository, objectMapper)
+                .importIntoModel(model, "ref");
+
+        verify(messageGraphRepository).deleteGraphsForMissingMessageTypes(Set.of("Event1"));
+        verify(messageGraphRepository, never()).deleteAllMessageGraphs();
     }
 }

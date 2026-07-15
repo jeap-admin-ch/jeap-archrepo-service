@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.docgen;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
+import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.docgen.graph.models.MessageNodeDto;
@@ -15,6 +16,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Value
 class GeneratorContext {
@@ -55,14 +59,22 @@ class GeneratorContext {
                 .map(GeneratorContext::key)
                 .filter(nodeKey -> !(node instanceof MessageNodeDto) || !ambiguousMessagePageKeys.contains(nodeKey))
                 .map(pages::get)
-                .map(PageRef::id)
-                .map(this::pageUrl)
+                .map(page -> pageUrl(page.id(), node))
                 .orElse(null);
     }
 
-    private String pageUrl(String pageId) {
+    private String pageUrl(String pageId, NodeDto node) {
         String baseUrl = confluenceUrl.endsWith("/") ? confluenceUrl.substring(0, confluenceUrl.length() - 1) : confluenceUrl;
-        return baseUrl + "/pages/viewpage.action?pageId=" + pageId;
+        String encodedNodeId = encode(node.getDotId(), UTF_8);
+        String navigationQuery = "&archrepoGraphNode=" + encodedNodeId;
+        String fragment = "#archrepo-graph?node=" + encodedNodeId;
+        if (node instanceof MessageNodeDto message) {
+            String variant = MessageGraph.normalizeVariant(message.getMessageType(), message.getVariant());
+            String encodedVariant = encode(variant, UTF_8);
+            navigationQuery += "&archrepoGraphVariant=" + encodedVariant;
+            fragment += "&variant=" + encodedVariant;
+        }
+        return baseUrl + "/pages/viewpage.action?pageId=" + pageId + navigationQuery + fragment;
     }
 
     static String key(String name) {

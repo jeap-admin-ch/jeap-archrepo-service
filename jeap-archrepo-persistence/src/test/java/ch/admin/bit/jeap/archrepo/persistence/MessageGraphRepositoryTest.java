@@ -9,8 +9,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
 class MessageGraphRepositoryTest {
@@ -217,6 +219,45 @@ class MessageGraphRepositoryTest {
         assertThat(messageGraphRepository.existsByMessageTypeNameAndVariant("Event1", variant)).isTrue();
         assertThat(messageGraphRepository.existsByMessageTypeNameAndVariant("Event2", variant)).isTrue();
         assertThat(messageGraphRepository.existsByMessageTypeNameAndVariant("Event3", variant)).isFalse();
+    }
+
+    @Test
+    void deleteStaleVariants_removesOnlyVariantsMissingFromLatestImport() {
+        messageGraphRepository.save(createMessageGraph("Event1", "current", "{}", "fingerprint1"));
+        messageGraphRepository.save(createMessageGraph("Event1", "stale", "{}", "fingerprint2"));
+        messageGraphRepository.save(createMessageGraph("Event2", "stale", "{}", "fingerprint3"));
+        messageGraphRepository.flush();
+
+        messageGraphRepository.deleteStaleVariants("Event1", Set.of("current"));
+        entityManager.clear();
+
+        assertThat(messageGraphRepository.findAllByMessageTypeName("Event1"))
+                .extracting(MessageGraph::getVariant)
+                .containsExactly("current");
+        assertThat(messageGraphRepository.findAllByMessageTypeName("Event2"))
+                .extracting(MessageGraph::getVariant)
+                .containsExactly("stale");
+    }
+
+    @Test
+    void deleteAllVariants_removesAllVariantsForMessageType() {
+        messageGraphRepository.save(createMessageGraph("Event1", "default", "{}", "fingerprint1"));
+        messageGraphRepository.save(createMessageGraph("Event1", "priority", "{}", "fingerprint2"));
+        messageGraphRepository.flush();
+
+        messageGraphRepository.deleteAllVariants("Event1");
+        entityManager.clear();
+
+        assertThat(messageGraphRepository.findAllByMessageTypeName("Event1")).isEmpty();
+    }
+
+    @Test
+    void uniqueIndex_rejectsDuplicateMessageTypeVariant() {
+        messageGraphRepository.saveAndFlush(createMessageGraph("Event1", "priority", "{}", "fingerprint1"));
+
+        assertThatThrownBy(() -> messageGraphRepository.saveAndFlush(
+                createMessageGraph("Event1", "priority", "{}", "fingerprint2")))
+                .isInstanceOf(RuntimeException.class);
     }
 
     private MessageGraph createMessageGraph(String messageTypeName, String variant, String graphJson, String fingerprint) {
