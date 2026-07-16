@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 final class BrowserReactionGraphRenderer {
 
     private static final String RESOURCE_ROOT = "/template/browser-reaction-graph/";
+    private static final String GRAPH_ID_PLACEHOLDER = "@@GRAPH_ID@@";
     private static final Pattern PLACEHOLDER = Pattern.compile("@@[A-Z_]+@@");
     private static final String CSS = loadResource("graph.css");
     private static final String HTML = loadResource("graph.html");
@@ -39,15 +40,15 @@ final class BrowserReactionGraphRenderer {
         String graphIdentity = graph.title() + "\0" + graph.dot() + "\0" + occurrence;
         String id = "reaction-graph-" + UUID.nameUUIDFromBytes(graphIdentity.getBytes(StandardCharsets.UTF_8));
         String html = "<style>\n" + replace(CSS,
-                "@@GRAPH_ID@@", id) + "</style>\n" + replace(HTML,
-                "@@GRAPH_ID@@", id,
+                GRAPH_ID_PLACEHOLDER, id) + "</style>\n" + replace(HTML,
+                GRAPH_ID_PLACEHOLDER, id,
                 "@@ESCAPED_DOT@@", escapeHtml(graph.dot()),
                 "@@NODE_COUNT@@", "-1",
                 "@@INITIAL_HEIGHT@@", "220px",
                 "@@NAVIGATION_ATTRIBUTE@@", navigationAttribute(navigationKey),
                 "@@ARIA_LABEL@@", escapeHtmlAttribute("Interactive reaction graph: " + graph.title()))
                 + "<script type=\"module\">\n" + replace(JAVASCRIPT,
-                "@@GRAPH_ID@@", id,
+                GRAPH_ID_PLACEHOLDER, id,
                 "@@VIZ_JS_URL@@", javascriptStringLiteral(properties.getVizJsUrl()),
                 "@@SVG_PAN_ZOOM_JS_URL@@", javascriptStringLiteral(properties.getSvgPanZoomJsUrl()))
                 + "</script>\n";

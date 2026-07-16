@@ -254,9 +254,9 @@ class MessageGraphRepositoryTest {
     @Test
     void uniqueIndex_rejectsDuplicateMessageTypeVariant() {
         messageGraphRepository.saveAndFlush(createMessageGraph("Event1", "priority", "{}", "fingerprint1"));
+        MessageGraph duplicate = createMessageGraph("Event1", "priority", "{}", "fingerprint2");
 
-        assertThatThrownBy(() -> messageGraphRepository.saveAndFlush(
-                createMessageGraph("Event1", "priority", "{}", "fingerprint2")))
+        assertThatThrownBy(() -> messageGraphRepository.saveAndFlush(duplicate))
                 .isInstanceOf(RuntimeException.class);
     }
 

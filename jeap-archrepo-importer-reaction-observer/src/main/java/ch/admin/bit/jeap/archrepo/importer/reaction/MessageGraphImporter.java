@@ -122,6 +122,11 @@ class MessageGraphImporter implements ArchRepoImporter {
         public int hashCode() {
             return 31 * Arrays.hashCode(data) + Objects.hashCode(fingerprint);
         }
+
+        @Override
+        public String toString() {
+            return "SerializedGraph[data=" + Arrays.toString(data) + ", fingerprint=" + fingerprint + ']';
+        }
     }
 
     private static int variantPrecedence(String messageTypeName, String rawVariant) {
