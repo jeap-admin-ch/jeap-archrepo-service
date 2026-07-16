@@ -28,6 +28,19 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class MessageGraphImporterTest {
 
+    @Test
+    void serializedGraphUsesArrayContentForValueSemantics() {
+        MessageGraphImporter.SerializedGraph first = new MessageGraphImporter.SerializedGraph(
+                new byte[]{1, 2, 3}, "fingerprint");
+        MessageGraphImporter.SerializedGraph equivalent = new MessageGraphImporter.SerializedGraph(
+                new byte[]{1, 2, 3}, "fingerprint");
+
+        assertThat(first).isEqualTo(equivalent);
+        assertThat(first.hashCode()).isEqualTo(equivalent.hashCode());
+        assertThat(first.toString())
+                .isEqualTo("SerializedGraph[data=[1, 2, 3], fingerprint=fingerprint]");
+    }
+
     @Mock
     private ReactionObserverService reactionObserverService;
 

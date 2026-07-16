@@ -110,7 +110,7 @@ class MessageGraphImporter implements ArchRepoImporter {
         }
     }
 
-    private record SerializedGraph(byte[] data, String fingerprint) {
+    record SerializedGraph(byte[] data, String fingerprint) {
 
         @Override
         public boolean equals(Object other) {
