@@ -35,9 +35,9 @@ class MessageGraphImporterTest {
         MessageGraphImporter.SerializedGraph equivalent = new MessageGraphImporter.SerializedGraph(
                 new byte[]{1, 2, 3}, "fingerprint");
 
-        assertThat(first).isEqualTo(equivalent);
-        assertThat(first).hasSameHashCodeAs(equivalent);
         assertThat(first)
+                .isEqualTo(equivalent)
+                .hasSameHashCodeAs(equivalent)
                 .hasToString("SerializedGraph[data=[1, 2, 3], fingerprint=fingerprint]");
     }
 
