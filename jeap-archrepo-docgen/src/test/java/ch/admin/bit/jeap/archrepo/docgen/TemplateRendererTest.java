@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
 class TemplateRendererTest {
 
     private static final Pattern PLANTUML_SOURCE_PATTERN = Pattern.compile("(@startuml.*?@enduml)|( ac:macro-id=\".*?\")", Pattern.DOTALL);
-    private static final Pattern REACTION_GRAPH_SECTION_PATTERN = Pattern.compile("<div>\\s*<p><br ?/></p>\\s*<h2>(Graph|Message Graphs)</h2>.*$", Pattern.DOTALL);
+    private static final Pattern REACTION_GRAPH_SECTION_PATTERN = Pattern.compile("<div>\\s*<p><br ?/></p>\\s*<h2>(Graph|System Graph[^<]*|Service Graph[^<]*|Message Graphs)</h2>.*$", Pattern.DOTALL);
 
     @Autowired
     ApplicationContext applicationContext;
@@ -108,6 +108,7 @@ class TemplateRendererTest {
         String content = templateRenderer.renderSystemPage(model, system, graph());
 
         assertThat(content)
+                .contains("<h2>System Graph - System</h2>")
                 .contains("<ac:structured-macro ac:name=\"html\" ac:schema-version=\"1\">")
                 .contains("<![CDATA[<style>")
                 .contains("class=\"reaction-graph\"")
@@ -281,6 +282,7 @@ class TemplateRendererTest {
         ArchitectureModel model = buildModel(system);
 
         String content = templateRenderer.renderComponentPage(model, systemComponent, graph());
+        assertThat(content).contains("<h2>Service Graph - Component</h2>");
         assertContent("component.expected", content);
     }
 
@@ -673,7 +675,7 @@ class TemplateRendererTest {
     }
 
     @Test
-    void renderSystemComponentPageWithDatabaseSchemaTooBig_assertNoSchema() throws IOException {
+    void renderSystemComponentPageWithDatabaseSchemaTooBig_assertNoSchema() {
         DocumentationGeneratorConfiguration generatorConfig = new DocumentationGeneratorConfiguration();
         PlantUmlRenderer mockPlantUmlRenderer = mock(PlantUmlRenderer.class);
         RenderedDatabaseSchema mockSchema = mock(RenderedDatabaseSchema.class);
@@ -778,6 +780,9 @@ class TemplateRendererTest {
                 new RenderedReactionGraph("variant2", "digraph G { b -> c }"));
 
         String content = templateRenderer.renderEventPage(event, graphs);
+        assertThat(content)
+                .contains("<h3>Message Graph - TestEvent - variant1</h3>")
+                .contains("<h3>Message Graph - TestEvent - variant2</h3>");
         assertContent("event.expected", content);
     }
 
@@ -814,10 +819,14 @@ class TemplateRendererTest {
                 .build();
 
         List<RenderedReactionGraph> graphs = List.of(
-                new RenderedReactionGraph("variant1", "digraph G { a -> b }"),
+                new RenderedReactionGraph("Default", "digraph G { a -> b }"),
                 new RenderedReactionGraph("variant2", "digraph G { b -> c }"));
 
         String content = templateRenderer.renderCommandPage(command, graphs);
+        assertThat(content)
+                .contains("<h3>Message Graph - TestCommand</h3>")
+                .contains("<h3>Message Graph - TestCommand - variant2</h3>")
+                .doesNotContain("Message Graph - TestCommand - Default");
         assertContent("command.expected", content);
     }
 

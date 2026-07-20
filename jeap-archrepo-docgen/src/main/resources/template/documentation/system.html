@@ -154,7 +154,7 @@
 
     <div th:if="${systemGraph != null}">
         <p><br /></p>
-        <h2>Graph</h2>
+        <h2 th:text="${systemGraph.title}"></h2>
         <div th:replace="~{fragment/reaction-graph :: reaction-graph(graph=${systemGraph})}"></div>
     </div>
 </th:block>

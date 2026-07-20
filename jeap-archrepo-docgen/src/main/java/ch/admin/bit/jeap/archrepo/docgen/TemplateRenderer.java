@@ -58,7 +58,8 @@ class TemplateRenderer {
         String plantUmLSource = plantUmlRenderer.renderSystemContextView(systemContext);
         context.setVariable("contextViewPlantUml", plantUmLSource);
         context.setVariable("plantUmlMacroId", stableMacroUuid(system.getName()));
-        context.setVariable("systemGraph", graph == null ? null : browserReactionGraphRenderer.render(graph));
+        context.setVariable("systemGraph", graph == null ? null : renderReactionGraph(
+                graph, GraphTitleFormatter.systemGraph(system.getName())));
         return templateEngine.process("system", context).trim();
     }
 
@@ -114,7 +115,8 @@ class TemplateRenderer {
         context.setVariable("receivedCommandRelations", componentContext.getReceivedCommandsGroupedByCommand());
 
         context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
-        context.setVariable("componentGraph", graph == null ? null : browserReactionGraphRenderer.render(graph));
+        context.setVariable("componentGraph", graph == null ? null : renderReactionGraph(
+                graph, GraphTitleFormatter.serviceGraph(systemComponent.getName())));
 
         Optional<SystemComponentDatabaseSchema> databaseSchema = getDatabaseSchema(componentContext);
 
@@ -148,21 +150,29 @@ class TemplateRenderer {
     String renderEventPage(Event event, List<RenderedReactionGraph> graphs) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", event);
-        context.setVariable("messageGraphs", renderReactionGraphs(graphs));
+        context.setVariable("messageGraphs", renderReactionGraphs(graphs, event.getMessageTypeName()));
         return templateEngine.process("event", context).trim();
     }
 
     String renderCommandPage(Command command, List<RenderedReactionGraph> graphs) {
         Context context = new Context(Locale.GERMAN);
         context.setVariable("messageType", command);
-        context.setVariable("messageGraphs", renderReactionGraphs(graphs));
+        context.setVariable("messageGraphs", renderReactionGraphs(graphs, command.getMessageTypeName()));
         return templateEngine.process("command", context).trim();
     }
 
-    private List<ConfluenceReactionGraph> renderReactionGraphs(List<RenderedReactionGraph> graphs) {
+    private ConfluenceReactionGraph renderReactionGraph(RenderedReactionGraph graph, String displayTitle) {
+        ConfluenceReactionGraph renderedGraph = browserReactionGraphRenderer.render(graph);
+        return new ConfluenceReactionGraph(displayTitle, renderedGraph.cdata());
+    }
+
+    private List<ConfluenceReactionGraph> renderReactionGraphs(List<RenderedReactionGraph> graphs, String messageTypeName) {
         List<ConfluenceReactionGraph> renderedGraphs = new ArrayList<>(graphs.size());
         for (int i = 0; i < graphs.size(); i++) {
-            renderedGraphs.add(browserReactionGraphRenderer.render(graphs.get(i), i));
+            RenderedReactionGraph graph = graphs.get(i);
+            ConfluenceReactionGraph renderedGraph = browserReactionGraphRenderer.render(graph, i);
+            String displayTitle = GraphTitleFormatter.messageGraph(messageTypeName, graph.title());
+            renderedGraphs.add(new ConfluenceReactionGraph(displayTitle, renderedGraph.cdata()));
         }
         return renderedGraphs;
     }
