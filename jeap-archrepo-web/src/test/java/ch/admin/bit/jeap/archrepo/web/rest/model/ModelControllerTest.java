@@ -1,6 +1,9 @@
 package ch.admin.bit.jeap.archrepo.web.rest.model;
 
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
+import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
+import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.system.Gateway;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentType;
 import ch.admin.bit.jeap.archrepo.persistence.ArchitectureModelRepository;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
@@ -15,10 +18,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {ModelController.class, WebSecurityConfig.class})
@@ -53,6 +59,22 @@ class ModelControllerTest {
         assertEquals("Lagrev", systemComponentDto.getOwnedBy());
         assertEquals("desc", systemComponentDto.getDescription());
         assertEquals(SystemComponentType.BACKEND_SERVICE, systemComponentDto.getType());
+    }
+
+    @Test
+    void getModel_serializesGatewayType() throws Exception {
+        ArchitectureModel model = ArchitectureModel.builder()
+                .systems(List.of(System.builder()
+                        .name("gateway-system")
+                        .systemComponents(List.of(Gateway.builder().name("test-gateway").build()))
+                        .build()))
+                .build();
+        when(architectureModelRepository.load()).thenReturn(model);
+
+        mockMvc.perform(get("/api/model")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.systems[0].systemComponents[0].type").value("GATEWAY"));
     }
 
     @Test

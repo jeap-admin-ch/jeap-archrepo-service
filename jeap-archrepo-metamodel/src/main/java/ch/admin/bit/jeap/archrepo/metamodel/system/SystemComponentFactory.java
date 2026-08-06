@@ -4,6 +4,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import lombok.experimental.UtilityClass;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @UtilityClass
@@ -13,7 +14,7 @@ public class SystemComponentFactory {
         SystemComponent systemComponent = createByName(componentName);
         systemComponent.setImporter(importer);
         systemComponent.setOwnedBy(system.getDefaultOwner());
-        systemComponent.setLastSeenFromDate(ZonedDateTime.now());
+        systemComponent.setLastSeenFromDate(ZonedDateTime.now(ZoneId.systemDefault()));
         system.addSystemComponent(systemComponent);
         return systemComponent;
     }
@@ -21,6 +22,8 @@ public class SystemComponentFactory {
     private SystemComponent createByName(String componentName) {
         if (componentName.endsWith("-ui") || componentName.endsWith("-frontend") || componentName.endsWith("-webui")) {
             return new Frontend(componentName);
+        } else if (componentName.endsWith("-gateway")) {
+            return new Gateway(componentName);
         } else if (componentName.endsWith("-scs")) {
             return new SelfContainedSystem(componentName);
         } else {

@@ -46,6 +46,15 @@ class SystemComponentFactoryTest {
         assertComponent(SYSTEM, expectedScs, scs);
     }
 
+    @Test
+    void createSystemComponent_gateway() {
+        SystemComponent gateway = SystemComponentFactory.createSystemComponent(SYSTEM, "app-gateway", IMPORTER);
+
+        SystemComponent expectedGateway = new Gateway("app-gateway");
+
+        assertComponent(SYSTEM, expectedGateway, gateway);
+    }
+
     private void assertComponent(System system, SystemComponent expected, SystemComponent actual) {
         expected.setImporter(IMPORTER);
         expected.setParent(system);

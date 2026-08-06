@@ -27,6 +27,7 @@ class ArchitectureModelTest {
     private Frontend frontend;
     private BackendService backend;
     private BackendService backend2;
+    private Gateway gateway;
     private System otherSystem;
     private final BackendService otherBackendService1 = BackendService.builder().name("other-backend-service-1").build();
     private final BackendService otherBackendService2 = BackendService.builder().name("other-backend-service-2").build();
@@ -323,6 +324,9 @@ class ArchitectureModelTest {
         assertThat(restApiForSystemComponent)
                 .isPresent()
                 .contains("base-url/system1/backend2");
+
+        Optional<String> restApiForGateway = model.getRestApiForSystemComponent(gateway);
+        assertThat(restApiForGateway).isEmpty();
     }
 
     @Test
@@ -338,6 +342,7 @@ class ArchitectureModelTest {
         frontend = Frontend.builder().name("frontend").build();
         backend = BackendService.builder().name("backend").build();
         backend2 = BackendService.builder().name("backend2").build();
+        gateway = Gateway.builder().name("gateway").build();
         MobileApp mobileApp = MobileApp.builder().name("app").build();
         SelfContainedSystem scs = SelfContainedSystem.builder().name("scs").build();
         SelfContainedSystem scs2 = SelfContainedSystem.builder().name("scs2").build();
@@ -345,7 +350,7 @@ class ArchitectureModelTest {
         system1 = System.builder()
                 .name("system1")
                 .aliases(List.of("system1alias"))
-                .systemComponents(List.of(frontend, backend, backend2, mobileApp, scs, unknown, scs2))
+                .systemComponents(List.of(frontend, backend, backend2, gateway, mobileApp, scs, unknown, scs2))
                 .build();
         system1.addOpenApiSpec(OpenApiSpec.builder().provider(backend2).content("test".getBytes(StandardCharsets.UTF_8)).build());
         system1.addOpenApiSpec(OpenApiSpec.builder().provider(scs2).content("scs2".getBytes(StandardCharsets.UTF_8)).build());

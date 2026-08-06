@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum SystemComponentType {
     BACKEND_SERVICE(BackendService.class, "Backend Service"),
     FRONTEND(Frontend.class, "Frontend"),
+    GATEWAY(Gateway.class, "Gateway"),
     MOBILE_APP(MobileApp.class, "Mobile App"),
     SELF_CONTAINED_SYSTEM(SelfContainedSystem.class, "Self-Contained System"),
     UNKNOWN(UnknownSystemComponent.class, "Unknown System");

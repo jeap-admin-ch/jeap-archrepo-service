@@ -108,6 +108,18 @@ class AWSJeapRelationImporterTest {
         assertTrue(shared.getRelations().isEmpty());
     }
 
+    @Test
+    void importIntoModel_mobileAppConsumer_relationImported() {
+        List<JeapRelation> jeapRelations = List.of(
+                new JeapRelation("shared-agir-service", "jeap-mobile-app", "PUT", "http", "/api/tasks/{param}"));
+        when(awsPrometheusClient.apiRelations("ref")).thenReturn(jeapRelations);
+
+        importer.importIntoModel(model, "ref");
+
+        assertEquals(1, shared.getRestApis().size());
+        assertEquals(1, shared.getRelations().size());
+    }
+
     @BeforeEach
     void buildModel() {
         System jeap = System.builder()

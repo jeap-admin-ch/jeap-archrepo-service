@@ -3,7 +3,9 @@ package ch.admin.bit.jeap.archrepo.persistence;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
+import ch.admin.bit.jeap.archrepo.metamodel.system.Gateway;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -64,6 +66,27 @@ class SystemComponentRepositoryTest {
 
         assertThatThrownBy(() -> saveAndFlush(systemComponent))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void saveGateway_persistsDiscriminatorAndType() {
+        Team team = teamRepository.save(Team.builder().name("gateway-team").build());
+        System system = System.builder().name("GatewaySystem").defaultOwner(team).build();
+        Gateway gateway = Gateway.builder()
+                .id(UUID.randomUUID())
+                .name("test-gateway")
+                .ownedBy(team)
+                .build();
+        ReflectionTestUtils.setField(gateway, "createdAt", ZonedDateTime.now());
+        system.addSystemComponent(gateway);
+        systemRepository.saveAndFlush(system);
+
+        SystemComponent persistedGateway = systemComponentRepository.findByNameIgnoreCase("test-gateway").orElseThrow();
+
+        assertThat(persistedGateway)
+                .isInstanceOf(Gateway.class)
+                .extracting(SystemComponent::getType)
+                .isEqualTo(SystemComponentType.GATEWAY);
     }
 
     @Test
