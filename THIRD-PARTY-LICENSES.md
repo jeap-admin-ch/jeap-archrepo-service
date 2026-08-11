@@ -42,6 +42,8 @@ Apache License Version 2.0
  * ch.admin.bit.jeap:jeap-spring-boot-swagger - [ch.admin.bit.jeap:jeap-spring-boot-swagger](https://github.com/jeap-admin-ch/jeap-spring-boot-starters/tree/main/jeap-spring-boot-swagger)
  * ch.admin.bit.jeap:jeap-spring-boot-swagger-starter - [ch.admin.bit.jeap:jeap-spring-boot-swagger-starter](https://github.com/jeap-admin-ch/jeap-spring-boot-starters/tree/main/jeap-spring-boot-swagger-starter)
  * ch.admin.bit.jeap:jeap-spring-boot-tx - [ch.admin.bit.jeap:jeap-spring-boot-tx](https://github.com/jeap-admin-ch/jeap-spring-boot-starters/tree/main/jeap-spring-boot-tx)
+ * libGDX jnigen library - [com.badlogicgames.jnigen:jnigen-commons](https://github.com/libgdx/gdx-jnigen)
+ * libGDX jnigen library - [com.badlogicgames.jnigen:jnigen-loader](https://github.com/libgdx/gdx-jnigen)
  * ClassMate - [com.fasterxml:classmate](https://github.com/FasterXML/java-classmate)
  * Jackson-annotations - [com.fasterxml.jackson.core:jackson-annotations](https://github.com/FasterXML/jackson)
  * Jackson-core - [com.fasterxml.jackson.core:jackson-core](https://github.com/FasterXML/jackson-core)
@@ -159,6 +161,7 @@ Apache License Version 2.0
  * Apache Commons Collections - [org.apache.commons:commons-collections4](https://commons.apache.org/proper/commons-collections/)
  * Apache Commons Compress - [org.apache.commons:commons-compress](https://commons.apache.org/proper/commons-compress/)
  * Apache Commons Lang - [org.apache.commons:commons-lang3](https://commons.apache.org/proper/commons-lang/)
+ * Apache Commons Text - [org.apache.commons:commons-text](https://commons.apache.org/proper/commons-text)
  * Apache Commons Text - [org.apache.commons:commons-text](https://commons.apache.org/proper/commons-text)
  * Apache Groovy - [org.apache.groovy:groovy](https://groovy-lang.org)
  * Apache HttpClient - [org.apache.httpcomponents:httpclient](http://hc.apache.org/httpcomponents-client-ga)
@@ -372,7 +375,9 @@ BSD License 3
 Bouncy Castle Licence
 -------------------------------
 
+ * Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs - [org.bouncycastle:bcpkix-jdk18on](https://www.bouncycastle.org/download/bouncy-castle-java/)
  * Bouncy Castle Provider - [org.bouncycastle:bcprov-jdk18on](https://www.bouncycastle.org/download/bouncy-castle-java/)
+ * Bouncy Castle ASN.1 Extension and Utility APIs - [org.bouncycastle:bcutil-jdk18on](https://www.bouncycastle.org/download/bouncy-castle-java/)
 
 CDDL
 -------------------------------
@@ -457,6 +462,9 @@ MIT License
  * JUL to SLF4J bridge - [org.slf4j:jul-to-slf4j](http://www.slf4j.org)
  * SLF4J API Module - [org.slf4j:slf4j-api](http://www.slf4j.org)
  * webjars-locator-lite - [org.webjars:webjars-locator-lite](https://webjars.org)
+ * Lua 5.4 - [party.iroiro.luajava:lua54](https://github.com/gudzpoz/luajava)
+ * Lua 5.4 - [party.iroiro.luajava:lua54-platform](https://github.com/gudzpoz/luajava)
+ * LuaJava - [party.iroiro.luajava:luajava](https://github.com/gudzpoz/luajava)
 
 Mozilla Public License, Version 2.0
 -------------------------------
