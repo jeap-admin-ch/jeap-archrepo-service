@@ -67,7 +67,7 @@ class OpenApiControllerTests {
     private static final byte[] CONTENT = "some content".getBytes(StandardCharsets.UTF_8);
     private static final byte[] CONTENT_V2 = "some updated content".getBytes(StandardCharsets.UTF_8);
     private static final String GET_VERSIONS_PATH = "/api/openapi/versions";
-    private static final RequestPostProcessor BASIC_AUTH = SecurityMockMvcRequestPostProcessors.httpBasic("api", "secret");
+    private static final RequestPostProcessor BASIC_AUTH = SecurityMockMvcRequestPostProcessors.httpBasic("archrepo-admin", "secret");
 
     private static final String SUBJECT = "69368608-D736-43C8-5F76-55B7BF168299";
     private static final JeapAuthenticationContext CONTEXT = JeapAuthenticationContext.SYS;

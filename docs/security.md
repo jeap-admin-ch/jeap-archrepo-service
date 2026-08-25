@@ -21,8 +21,9 @@ whichever credential it has - but only one of them really accepts both:
 
 ## HTTP basic on `/api/**`
 
-`archrepo.api.secret` is the password of a single in-memory user named `api` holding the role `api`. Requests to
-`/api/**` that are not explicitly permitted need it.
+`archrepo.api.secret` is the password of a single in-memory user holding the role `api`; the username defaults to
+`archrepo-admin` and can be overridden via `archrepo.api.username`. Requests to `/api/**` that are not explicitly
+permitted need it.
 
 These endpoints are deliberately **public**, because they are read-only inventory queries consumed by dashboards:
 

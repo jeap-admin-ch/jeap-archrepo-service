@@ -58,7 +58,7 @@ whole picture.
 
 | Path                                         | Chain                                       | Credentials                                                  |
 | -------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
-| `/api/**`                                    | `WebSecurityConfig.apiSecurityFilterChain`  | HTTP basic as the user `api`, password `archrepo.api.secret` |
+| `/api/**`                                    | `WebSecurityConfig.apiSecurityFilterChain`  | HTTP basic as `archrepo.api.username` (default `archrepo-admin`), password `archrepo.api.secret` |
 | everything else, `/external-api/**` included | the jEAP security starter's resource server | An OAuth2 bearer token, plus a semantic role                 |
 
 On the basic chain these `GET`s are `permitAll()` and need no credentials at all:

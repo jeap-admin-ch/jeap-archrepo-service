@@ -13,7 +13,8 @@ Most `@ConfigurationProperties` classes bind with `ignoreUnknownFields = false`,
 | `archrepo-config.environment` | yes      | -       | The stage this instance describes: `DEV`, `REF`, `ABN` or `PROD`. Passed to every importer so environment-specific sources are queried for the right stage |
 | `archrepo.update-schedule`    | yes      | -       | Cron expression for the model update job. `-` disables it                                                                                                  |
 | `archrepo.openapi-base-url`   | yes      | -       | Prefix used to build the Swagger UI link of a component; the service **fails to start** when it is missing. `{system}/{component}` is appended, lowercased |
-| `archrepo.api.secret`         | yes      | -       | The password of the `api` user for HTTP basic on `/api/**` - see [Security](security.md). Use a password-encoder prefix, e.g. `{noop}` for a plain value   |
+| `archrepo.api.secret`         | yes      | -       | The password of the technical user for HTTP basic on `/api/**` - see [Security](security.md). Use a password-encoder prefix, e.g. `{noop}` for a plain value |
+| `archrepo.api.username`       | no       | `archrepo-admin` | The username of the technical user for HTTP basic on `/api/**` - see [Security](security.md)                                                              |
 
 ## Docs API
 

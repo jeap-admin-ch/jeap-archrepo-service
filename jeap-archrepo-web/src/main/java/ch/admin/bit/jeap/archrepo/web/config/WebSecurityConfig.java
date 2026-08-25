@@ -25,6 +25,9 @@ public class WebSecurityConfig {
     @Value("${archrepo.api.secret}")
     private String apiSecret;
 
+    @Value("${archrepo.api.username:archrepo-admin}")
+    private String apiUsername;
+
     //@formatter:off
     @Bean
     @Order(100) // same as on the deprecated WebSecurityConfigurerAdapter
@@ -69,7 +72,7 @@ public class WebSecurityConfig {
 
     private AuthenticationManager createApiAuthManager(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().
-                withUser("api").
+                withUser(apiUsername).
                 password(apiSecret).
                 roles("api");
         return auth.build();

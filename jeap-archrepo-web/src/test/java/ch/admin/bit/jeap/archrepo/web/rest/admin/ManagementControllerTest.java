@@ -63,7 +63,7 @@ class ManagementControllerTest {
     @MockitoBean
     RestApiRelationRepository restApiRelationRepository;
 
-    private static final String API_USER = "api";
+    private static final String API_USER = "archrepo-admin";
     private static final String API_SECRET = "secret";
 
 

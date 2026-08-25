@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **BREAKING**: The default Basic Auth username for `/api/**` is no longer `api` - it is now `archrepo-admin`.
+  Deployments that rely on the old default must either update the Jenkins/pipeline credential's username to
+  `archrepo-admin`, or pin `archrepo.api.username: api` explicitly to keep the old value
+
+## [11.1.0] - 2026-08-25
+
+### Changed
+
+- The Basic Auth username for the management/admin API is now configurable via `archrepo.api.username`, defaulting
+  to `api` to stay backward compatible
+
 ## [11.0.0] - 2026-08-25
 
 ### Added
