@@ -84,6 +84,8 @@ class OpenApiController {
             @ApiResponse(responseCode = "201", description = "The system component's OpenAPI documentation has been created."),
             @ApiResponse(responseCode = "200", description = "The system component's OpenAPI documentation has been updated.")
     })
+    // The TODO below is tracked as JEAP-6593 and is out of scope here; the marker stays until it is done
+    @SuppressWarnings("java:S1135")
     public ResponseEntity<String> handleFileUpload(
             @PathVariable("systemComponentName") @Size(max = COMPONENT_MAX_LENGTH) String systemComponentName,
             @RequestParam(name = "version", required = false) @Size(max = VERSION_MAX_LENGTH) String version,

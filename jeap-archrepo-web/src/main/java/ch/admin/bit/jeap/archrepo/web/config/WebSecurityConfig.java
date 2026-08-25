@@ -70,7 +70,7 @@ public class WebSecurityConfig {
         return isPost && isBearerAuth;
     }
 
-    private AuthenticationManager createApiAuthManager(AuthenticationManagerBuilder auth) throws Exception {
+    private AuthenticationManager createApiAuthManager(AuthenticationManagerBuilder auth) {
         auth.inMemoryAuthentication().
                 withUser(apiUsername).
                 password(apiSecret).

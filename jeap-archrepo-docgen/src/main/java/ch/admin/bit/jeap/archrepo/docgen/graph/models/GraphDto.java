@@ -101,8 +101,8 @@ public class GraphDto {
                                 Function<NodeDto, String> linkResolver) {
         StringBuilder cluster = new StringBuilder();
         String escapedComponentName = NodeDto.escapeDotString(componentName);
-        cluster.append(String.format("  subgraph \"cluster_trigger_%d_%s\" {\n", triggerId, escapedComponentName));
-        cluster.append(String.format("    label=\"%s\";\n", escapedComponentName));
+        cluster.append(String.format("  subgraph \"cluster_trigger_%d_%s\" {%n", triggerId, escapedComponentName));
+        cluster.append(String.format("    label=\"%s\";%n", escapedComponentName));
         cluster.append("    style=\"dashed,rounded\";\n");
         cluster.append("    color=\"#636363\";\n");
         cluster.append("    fontcolor=\"#636363\";\n");
@@ -124,7 +124,7 @@ public class GraphDto {
                 .collect(Collectors.toSet());
 
         nodes.stream()
-                .filter(n -> n instanceof ReactionNodeDto)
+                .filter(ReactionNodeDto.class::isInstance)
                 .map(n -> (ReactionNodeDto) n)
                 .filter(r -> !clusteredIds.contains(r.getId()))
                 .forEach(r -> {
@@ -135,7 +135,7 @@ public class GraphDto {
 
     private void appendMessageNodes(StringBuilder dot, Function<NodeDto, String> linkResolver) {
         nodes.stream()
-                .filter(n -> n instanceof MessageNodeDto)
+                .filter(MessageNodeDto.class::isInstance)
                 .forEach(n -> dot.append(n.toDot(linkResolver.apply(n))).append("\n"));
     }
 

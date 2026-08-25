@@ -31,7 +31,7 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
                     .toArray(Integer[]::new);
             return new SemanticVersion(parts[0], parts[1], parts[2]);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot convert " + version + " to a semantic version", e);
+            throw new SemanticVersionException("Cannot convert " + version + " to a semantic version", e);
         }
     }
 

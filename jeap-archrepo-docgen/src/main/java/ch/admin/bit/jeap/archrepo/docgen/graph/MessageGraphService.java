@@ -36,7 +36,7 @@ public class MessageGraphService {
                     .map(graph -> renderGraph(message, graph, linkResolver))
                     .toList();
         } catch (JacksonException e) {
-            throw new RuntimeException("Error generating message graphs", e);
+            throw new GraphRenderingException("Error generating message graphs", e);
         }
     }
 

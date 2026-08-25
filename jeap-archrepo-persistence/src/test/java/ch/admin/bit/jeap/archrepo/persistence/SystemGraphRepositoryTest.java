@@ -169,7 +169,7 @@ class SystemGraphRepositoryTest {
         // Create TRIGGER and ACTION edges
         first = true;
         nodeId = 100;
-        for (String componentName : componentNames) {
+        for (int i = 0; i < componentNames.length; i++) {
             if (!first) json.append(", ");
 
             int reactionId = nodeId + 1000;

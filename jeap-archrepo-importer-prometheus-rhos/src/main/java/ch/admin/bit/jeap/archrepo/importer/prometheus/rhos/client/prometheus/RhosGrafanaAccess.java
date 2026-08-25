@@ -94,7 +94,6 @@ public class RhosGrafanaAccess {
             log.warn("Error in Grafana call", e);
             throw PrometheusException.wrapConnectionException(e);
         }
-        //PrometheusHelper.validateResponse(response);
         return response;
     }
 

@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [12.0.1] - 2026-08-25
+
+### Fixed
+
+- Resolved the open SonarQube findings across the service: a possible `NullPointerException` in
+  `NonEmptyHostsCondition`, dedicated exception types instead of `RuntimeException` in the graph services and the
+  semantic version parser, and the deprecated `asText()` and `@PactTestFor(port)` usages
+- Code hygiene throughout: extracted duplicated literals, removed unused imports, locals and commented-out code,
+  split an over-complex query method, and replaced `@ApiResponses` wrappers with repeatable annotations
+
+## [12.0.0] - 2026-08-25
 
 ### Changed
 

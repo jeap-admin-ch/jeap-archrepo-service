@@ -28,7 +28,7 @@ public class NonEmptyHostsConditionTest {
     private NonEmptyHostsCondition nonEmptyHostsCondition;
 
     @Test
-    public void testConditionWithValidProperty() {
+    void testConditionWithValidProperty() {
         when(conditionContext.getEnvironment()).thenReturn(environment);
         when(environment.getProperty("prometheus-rhos.hosts[0].host")).thenReturn("dummy");
 
@@ -41,7 +41,7 @@ public class NonEmptyHostsConditionTest {
     }
 
     @Test
-    public void testConditionWithEmptyProperty() {
+    void testConditionWithEmptyProperty() {
         when(conditionContext.getEnvironment()).thenReturn(environment);
         when(environment.getProperty("prometheus-rhos.hosts[0].host")).thenReturn(null);
 
@@ -54,7 +54,7 @@ public class NonEmptyHostsConditionTest {
     }
 
     @Test
-    public void testConditionWithMultipleIndexedProperties() {
+    void testConditionWithMultipleIndexedProperties() {
         when(conditionContext.getEnvironment()).thenReturn(environment);
         when(environment.getProperty("prometheus-rhos.hosts[0].host")).thenReturn("host1");
         when(environment.getProperty("prometheus-rhos.hosts[1].host")).thenReturn("host2");
@@ -68,14 +68,10 @@ public class NonEmptyHostsConditionTest {
     }
 
     @Test
-    public void testConditionWithNoHosts() {
-        // Simulate the condition where no hosts are defined
-        when(conditionContext.getEnvironment()).thenReturn(environment);
-
-        when(environment.getProperty("prometheus-rhos.hosts[0].host")).thenReturn(null);  // Simulating no host defined
-
+    void testConditionWithoutAnnotationAttributes() {
+        // getAnnotationAttributes() is declared nullable; the condition must answer false rather than throw
         when(annotatedTypeMetadata.getAnnotationAttributes(ConditionalOnNonEmptyHosts.class.getName()))
-                .thenReturn(Map.of("propertyName", "prometheus-rhos.hosts"));
+                .thenReturn(null);
 
         boolean result = nonEmptyHostsCondition.matches(conditionContext, annotatedTypeMetadata);
 
@@ -83,7 +79,7 @@ public class NonEmptyHostsConditionTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         nonEmptyHostsCondition = new NonEmptyHostsCondition();
     }

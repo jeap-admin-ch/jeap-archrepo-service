@@ -4,7 +4,8 @@ import ch.admin.bit.jeap.archrepo.importer.prometheus.client.prometheus.dto.Prom
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -27,40 +28,17 @@ class AWSPrometheusProxyIT {
         awsPrometheusProxy = new AWSPrometheusProxy(properties);
     }
 
-    @Test
-    void up() {
-        List<PrometheusQueryResponseResult> results = awsPrometheusProxy.queryRange("up", 4);
-        log.info("results {}", results);
-        assertTrue(results.size() > 4, "There must be many results");
-    }
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {
+            "up",
+            "jeap_relation_total{stage=\"ref\"}",
+            "group by(account_id) (jeap_spring_app)",
+            "jeap_spring_app{stage=\"ref\", account_id=\"58264373351\"}"
+    })
+    void queryRangeReturnsResults(String query) {
+        List<PrometheusQueryResponseResult> results = awsPrometheusProxy.queryRange(query, 4);
 
-    @Test
-    void queryRange() {
-        List<PrometheusQueryResponseResult> results = awsPrometheusProxy.queryRange("jeap_relation_total{stage=\"ref\"}", 4);
-
-        log.info("results {}", results);
-
-        assertTrue(results.size() > 4, "There must be many results");
-    }
-
-    @Test
-    void queryAppOrgName(){
-
-        String query = """
-            group by(account_id) (jeap_spring_app)
-            """;
-
-        final List<PrometheusQueryResponseResult> results = awsPrometheusProxy.queryRange(query, 4);
-        log.info("Found {} organisations", results.size());
-
-        assertTrue(results.size() > 4, "There must be many results");
-    }
-
-    @Test
-    void querySpringApp() {
-        List<PrometheusQueryResponseResult> results = awsPrometheusProxy.queryRange("jeap_spring_app{stage=\"ref\", account_id=\"58264373351\"}", 4);
-
-        log.info("results {}", results);
+        log.info("query '{}' returned {} results", query, results.size());
 
         assertTrue(results.size() > 4, "There must be many results");
     }

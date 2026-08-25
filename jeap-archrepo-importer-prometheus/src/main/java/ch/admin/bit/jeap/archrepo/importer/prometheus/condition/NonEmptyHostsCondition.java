@@ -4,11 +4,17 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
+import java.util.Map;
+
 public class NonEmptyHostsCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        String propertyName = (String) metadata.getAnnotationAttributes(ConditionalOnNonEmptyHosts.class.getName()).get("propertyName");
+        Map<String, Object> attributes = metadata.getAnnotationAttributes(ConditionalOnNonEmptyHosts.class.getName());
+        if (attributes == null) {
+            return false;
+        }
+        String propertyName = (String) attributes.get("propertyName");
 
         int index = 0;
         while (true) {

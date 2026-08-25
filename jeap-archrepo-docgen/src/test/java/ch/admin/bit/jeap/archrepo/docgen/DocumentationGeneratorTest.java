@@ -97,7 +97,7 @@ class DocumentationGeneratorTest {
         InOrder pageOrder = inOrder(confluenceAdapter, systemGraphService);
         pageOrder.verify(confluenceAdapter, times(7)).findOrCreatePageUnderAncestor(anyString(), anyString());
         pageOrder.verify(systemGraphService).getGraph(eq(systemMock), any());
-        verify(confluenceAdapter).findOrCreatePageUnderAncestor(eq(ROOT_PAGE_ID), eq(SYSTEM_NAME + " (System)"));
+        verify(confluenceAdapter).findOrCreatePageUnderAncestor(ROOT_PAGE_ID, SYSTEM_NAME + " (System)");
         verify(templateRenderer).renderSystemPage(any(), eq(systemMock), any());
         verify(templateRenderer).renderIndexPage();
         verify(templateRenderer).renderComponentPage(any(), eq(componentMock), any());

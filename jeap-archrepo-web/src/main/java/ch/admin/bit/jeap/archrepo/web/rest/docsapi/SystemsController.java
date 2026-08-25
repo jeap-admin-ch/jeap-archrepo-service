@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -42,12 +41,11 @@ class SystemsController {
     @Operation(summary = "Every system with its team and aliases",
             description = "The index a documentation generation run iterates over. Deliberately light: no "
                           + "components and no relations.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The systems",
-                    content = @Content(schema = @Schema(implementation = SystemListDto.class))),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "401", description = "No or invalid token", content = @Content),
-            @ApiResponse(responseCode = "403", description = "The token lacks the architecture-model read role", content = @Content)})
+    @ApiResponse(responseCode = "200", description = "The systems",
+                    content = @Content(schema = @Schema(implementation = SystemListDto.class)))
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "401", description = "No or invalid token", content = @Content)
+    @ApiResponse(responseCode = "403", description = "The token lacks the architecture-model read role", content = @Content)
     public ResponseEntity<byte[]> getSystems(WebRequest request) {
         SystemListDto body = dtoFactory.createSystemList(architectureModelRepository.load());
         return respond(request, body);
@@ -58,11 +56,10 @@ class SystemsController {
     @Operation(summary = "One system with its components and relations",
             description = "Everything the system page and its component pages need, in one response. The system "
                           + "is matched by name or by alias, ignoring case.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The system",
-                    content = @Content(schema = @Schema(implementation = SystemDetailDto.class))),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "404", description = "No system of that name or alias")})
+    @ApiResponse(responseCode = "200", description = "The system",
+                    content = @Content(schema = @Schema(implementation = SystemDetailDto.class)))
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "404", description = "No system of that name or alias")
     public ResponseEntity<byte[]> getSystem(@PathVariable("system") String systemName, WebRequest request) {
         ArchitectureModel model = architectureModelRepository.load();
         System system = findSystem(model, systemName);
@@ -74,11 +71,10 @@ class SystemsController {
     @Operation(summary = "The events and commands defined by a system",
             description = "Kept apart from the system export because message sets are large and change on a "
                           + "different rhythm than the component topology.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The messages",
-                    content = @Content(schema = @Schema(implementation = MessageListDto.class))),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "404", description = "No system of that name or alias")})
+    @ApiResponse(responseCode = "200", description = "The messages",
+                    content = @Content(schema = @Schema(implementation = MessageListDto.class)))
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "404", description = "No system of that name or alias")
     public ResponseEntity<byte[]> getMessages(@PathVariable("system") String systemName, WebRequest request) {
         ArchitectureModel model = architectureModelRepository.load();
         System system = findSystem(model, systemName);

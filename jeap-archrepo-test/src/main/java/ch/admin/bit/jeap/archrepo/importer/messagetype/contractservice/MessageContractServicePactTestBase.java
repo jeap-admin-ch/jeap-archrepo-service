@@ -3,6 +3,7 @@ package ch.admin.bit.jeap.archrepo.importer.messagetype.contractservice;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
+import au.com.dius.pact.consumer.junit.MockServerConfig;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
@@ -10,21 +11,25 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import ch.admin.bit.jeap.archrepo.importer.messagetype.MessageTypeImporterProperties;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.web.client.RestClient;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static ch.admin.bit.jeap.archrepo.test.Pacticipants.ARCHREPO;
 import static ch.admin.bit.jeap.archrepo.test.Pacticipants.MCS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("WrongPropertyKeyValueDelimiter")
+// Not production code: a base class for pact tests, assertions are intended
+@SuppressWarnings({"WrongPropertyKeyValueDelimiter", "java:S5960"})
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(port = "8888", pactVersion = PactSpecVersion.V3)
+@PactTestFor(pactVersion = PactSpecVersion.V3)
+@MockServerConfig(port = "8888")
 public class MessageContractServicePactTestBase {
 
     private static final String API_PATH = "/api/contracts";
@@ -32,7 +37,7 @@ public class MessageContractServicePactTestBase {
     private static String dummyGitRepoUrl;
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll() throws IOException, GitAPIException {
         File repoDir = new File("target/dummy-git-repo");
         FileUtils.copyDirectory(new File("src/test/resources/dummy-git-repo"), repoDir);
         Git newRepo = Git.init()

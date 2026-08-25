@@ -35,8 +35,9 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
 
             assertThat(dot).contains("graph [bgcolor=\"transparent\"]");
             // Assert: Cluster for trigger ID 1 and component "order" exists
-            assertThat(dot).contains("subgraph \"cluster_trigger_1_order\"");
-            assertThat(dot).contains("label=\"order\"");
+            assertThat(dot)
+                    .contains("subgraph \"cluster_trigger_1_order\"")
+                    .contains("label=\"order\"");
             assertThat(r1.getPartOfCluster()).isTrue();
             assertThat(r2.getPartOfCluster()).isTrue();
 
@@ -45,15 +46,17 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
             assertThat(r3.getPartOfCluster()).isFalse();
 
             // Assert: "payment-service" has only 1 reaction → no cluster
-            assertThat(dot).doesNotContain("cluster_trigger_3_payment");
-            assertThat(dot).contains("\"REACTION-201\" [label=\"payment\\n201\"");
+            assertThat(dot)
+                    .doesNotContain("cluster_trigger_3_payment")
+                    .contains("\"REACTION-201\" [label=\"payment\\n201\"");
             assertThat(r4.getPartOfCluster()).isFalse();
 
             // Assert: Edges are correctly included
-            assertThat(dot).contains("\"MESSAGE-1\" -> \"REACTION-101\"");
-            assertThat(dot).contains("\"MESSAGE-1\" -> \"REACTION-102\"");
-            assertThat(dot).contains("\"MESSAGE-2\" -> \"REACTION-103\"");
-            assertThat(dot).contains("\"MESSAGE-3\" -> \"REACTION-201\"");
+            assertThat(dot)
+                    .contains("\"MESSAGE-1\" -> \"REACTION-101\"")
+                    .contains("\"MESSAGE-1\" -> \"REACTION-102\"")
+                    .contains("\"MESSAGE-2\" -> \"REACTION-103\"")
+                    .contains("\"MESSAGE-3\" -> \"REACTION-201\"");
         }
 
         @Test
@@ -117,8 +120,9 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
             String dot = graph.toDot();
 
             // Assert: Both reactions should appear in DOT
-            assertThat(dot).contains("\"REACTION-101\" [label=\"orphan\\n101\"");
-            assertThat(dot).contains("\"REACTION-102\" [label=\"standalone\\n102\"");
+            assertThat(dot)
+                    .contains("\"REACTION-101\" [label=\"orphan\\n101\"")
+                    .contains("\"REACTION-102\" [label=\"standalone\\n102\"");
 
             // Assert: No clusters created
             assertThat(dot).doesNotContain("subgraph \"cluster_trigger");
@@ -134,8 +138,9 @@ package ch.admin.bit.jeap.archrepo.docgen.graph.models;
 
             String dot = graph.toDot(node -> "https://confluence/page?id=1&name=\"orders\"");
 
-            assertThat(dot).contains("label=\"Order\\\"Created\"");
-            assertThat(dot).contains("URL=\"https://confluence/page?id=1&name=\\\"orders\\\"\"");
-            assertThat(dot).contains("target=\"_top\"");
+            assertThat(dot)
+                    .contains("label=\"Order\\\"Created\"")
+                    .contains("URL=\"https://confluence/page?id=1&name=\\\"orders\\\"\"")
+                    .contains("target=\"_top\"");
         }
     }

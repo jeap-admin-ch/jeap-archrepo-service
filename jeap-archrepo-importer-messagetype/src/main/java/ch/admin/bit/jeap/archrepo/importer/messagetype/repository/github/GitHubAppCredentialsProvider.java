@@ -160,7 +160,7 @@ public class GitHubAppCredentialsProvider extends CredentialsProvider {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 201) {
             JsonNode jsonNode = objectMapper.readTree(response.body());
-            return jsonNode.get("token").asText();
+            return jsonNode.get("token").stringValue();
         } else {
             log.warn("Failed to get installation access token: {} - {}", response.statusCode(), response.body());
         }

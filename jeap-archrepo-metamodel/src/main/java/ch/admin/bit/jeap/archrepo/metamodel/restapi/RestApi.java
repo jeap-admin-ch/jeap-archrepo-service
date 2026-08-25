@@ -85,7 +85,7 @@ public class RestApi extends MutableDomainEntity implements MultipleImportable {
     }
 
     private static String pathWithoutVariableNames(String path) {
-        String replaced = path.replaceAll("\\{.*?}", "{}");
+        String replaced = path.replaceAll("\\{[^}]*+}", "{}");
         if (!replaced.endsWith("/") || replaced.length() == 1) {
             return replaced;
         }

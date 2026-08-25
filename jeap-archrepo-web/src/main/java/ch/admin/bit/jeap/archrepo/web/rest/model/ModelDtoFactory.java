@@ -80,6 +80,7 @@ class ModelDtoFactory {
             case CommandRelation commandRelation -> builder
                     .messageType(commandRelation.getCommandName());
             default -> {
+                // Other relation types carry no extra attributes; the common fields above are all there is
             }
         }
 

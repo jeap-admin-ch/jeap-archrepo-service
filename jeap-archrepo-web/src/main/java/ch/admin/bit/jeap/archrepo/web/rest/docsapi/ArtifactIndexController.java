@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -55,11 +54,10 @@ class ArtifactIndexController {
     @RequiresArchitectureModelRead
     @Operation(summary = "Every published OpenAPI spec, with its entity tag",
             description = "One call tells a consumer which specs changed since it last replicated them.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The index",
-                    content = @Content(schema = @Schema(implementation = ArtifactIndexDto.class))),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "404", description = "The system filter names no known system or alias")})
+    @ApiResponse(responseCode = "200", description = "The index",
+                    content = @Content(schema = @Schema(implementation = ArtifactIndexDto.class)))
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "404", description = "The system filter names no known system or alias")
     public ResponseEntity<byte[]> getOpenApiSpecs(
             @Parameter(description = "Restrict the index to one system, by name or alias") @RequestParam(required = false) String system,
             WebRequest request) {
@@ -74,11 +72,10 @@ class ArtifactIndexController {
     @Operation(summary = "Every published database schema, with its entity tag",
             description = "The counterpart of the OpenAPI spec index, so that an ERD is only re-rendered when the "
                           + "schema actually changed.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The index",
-                    content = @Content(schema = @Schema(implementation = ArtifactIndexDto.class))),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "404", description = "The system filter names no known system or alias")})
+    @ApiResponse(responseCode = "200", description = "The index",
+                    content = @Content(schema = @Schema(implementation = ArtifactIndexDto.class)))
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "404", description = "The system filter names no known system or alias")
     public ResponseEntity<byte[]> getDatabaseSchemas(
             @Parameter(description = "Restrict the index to one system, by name or alias") @RequestParam(required = false) String system,
             WebRequest request) {

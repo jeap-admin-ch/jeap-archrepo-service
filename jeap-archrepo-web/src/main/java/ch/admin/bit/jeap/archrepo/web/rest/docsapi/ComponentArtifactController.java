@@ -11,7 +11,6 @@ import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -54,10 +53,9 @@ class ComponentArtifactController {
     @Operation(summary = "The OpenAPI spec of a component",
             description = "The stored spec itself, byte for byte. Always application/json: the push path parses a "
                           + "spec as JSON before storing it, so a stored spec is always JSON.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The spec"),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Unknown system or component, or no spec published")})
+    @ApiResponse(responseCode = "200", description = "The spec")
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Unknown system or component, or no spec published")
     public ResponseEntity<byte[]> getOpenApiSpec(@PathVariable("system") String systemName,
                                                  @PathVariable("component") String componentName,
                                                  WebRequest request) {
@@ -84,10 +82,9 @@ class ComponentArtifactController {
     @Operation(summary = "The database schema of a component",
             description = "The stored schema itself, byte for byte: structured JSON with the tables, their "
                           + "columns, primary key and foreign keys, which is what an ERD is generated from.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The schema"),
-            @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Unknown system or component, or no schema published")})
+    @ApiResponse(responseCode = "200", description = "The schema")
+    @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Unknown system or component, or no schema published")
     public ResponseEntity<byte[]> getDatabaseSchema(@PathVariable("system") String systemName,
                                                     @PathVariable("component") String componentName,
                                                     WebRequest request) {

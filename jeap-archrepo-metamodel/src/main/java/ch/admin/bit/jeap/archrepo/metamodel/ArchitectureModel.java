@@ -22,6 +22,8 @@ import static java.util.Collections.unmodifiableList;
 @EqualsAndHashCode
 @ToString
 public class ArchitectureModel {
+    // Read by the equals/hashCode/toString Lombok generates from the annotations above, which Sonar cannot see
+    @SuppressWarnings("java:S1068")
     private final List<Team> teams;
     private final List<System> systems;
     private final String openApiBaseUrl;

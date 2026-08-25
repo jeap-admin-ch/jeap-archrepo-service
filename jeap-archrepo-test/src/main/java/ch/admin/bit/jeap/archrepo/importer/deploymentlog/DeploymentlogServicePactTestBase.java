@@ -3,6 +3,7 @@ package ch.admin.bit.jeap.archrepo.importer.deploymentlog;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
+import au.com.dius.pact.consumer.junit.MockServerConfig;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
@@ -19,10 +20,14 @@ import static ch.admin.bit.jeap.archrepo.test.Pacticipants.ARCHREPO;
 import static ch.admin.bit.jeap.archrepo.test.Pacticipants.DEPLOYMENTLOG;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("java:S5960") // Not production code: a base class for pact tests, assertions are intended
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(port = "8888", pactVersion = PactSpecVersion.V3)
+@PactTestFor(pactVersion = PactSpecVersion.V3)
+@MockServerConfig(port = "8888")
 public class DeploymentlogServicePactTestBase {
 
+    // The path is part of the contract under test, not a configurable endpoint
+    @SuppressWarnings("java:S1075")
     private static final String API_PATH = "/api/environment/ref/components";
 
     @SuppressWarnings("DataFlowIssue")

@@ -56,6 +56,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(JeapOAuth2IntegrationTestResourceConfiguration.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+// The TODO markers point at JEAP-6593, which is a separate story; they stay until it is done
+@SuppressWarnings("java:S1135")
 class OpenApiControllerTests {
 
     private static final String SYSTEM = "system";
@@ -416,20 +418,20 @@ class OpenApiControllerTests {
     }
 
     private System createSystem() {
-        System system = System.builder()
+        System createdSystem = System.builder()
                 .name(SYSTEM)
                 .build();
         BackendService backendService = BackendService.builder()
                 .name(SERVICE)
                 .build();
-        system.addSystemComponent(backendService);
-        return system;
+        createdSystem.addSystemComponent(backendService);
+        return createdSystem;
     }
 
     private SystemComponent mockSystemComponent() {
-        System system = createSystem();
+        System createdSystem = createSystem();
         SystemComponent systemComponent = mock(SystemComponent.class);
-        when(systemComponent.getParent()).thenReturn(system);
+        when(systemComponent.getParent()).thenReturn(createdSystem);
         when(systemComponent.getName()).thenReturn(SERVICE);
         when(systemComponentService.findOrCreateSystemComponent(SERVICE)).thenReturn(systemComponent);
         return systemComponent;
@@ -437,9 +439,9 @@ class OpenApiControllerTests {
 
     //TODO: Delete after JEAP-6593
     private SystemComponent mockSystemComponentExists() {
-        System system = createSystem();
+        System createdSystem = createSystem();
         SystemComponent systemComponent = mock(SystemComponent.class);
-        when(systemComponent.getParent()).thenReturn(system);
+        when(systemComponent.getParent()).thenReturn(createdSystem);
         when(systemComponent.getName()).thenReturn(SERVICE);
         when(systemComponentService.findSystemComponent(SERVICE)).thenReturn(Optional.of(systemComponent));
         return systemComponent;

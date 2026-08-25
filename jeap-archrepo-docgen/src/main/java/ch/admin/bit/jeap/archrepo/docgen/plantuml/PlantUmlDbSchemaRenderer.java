@@ -64,7 +64,7 @@ class PlantUmlDbSchemaRenderer {
             .forEach(column ->
                     renderColumn(plantUml, column, true, fkColumns.contains(column.name())));
 
-        if (!pkColumns.isEmpty() && !(table.columns().size() == pkColumns.size())) {
+        if (!pkColumns.isEmpty() && table.columns().size() != pkColumns.size()) {
             plantUml.append("    --\n");
         }
 

@@ -175,7 +175,7 @@ class MessageGraphImporterWireMockTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(userEventGraph.getMessageTypeName()).isEqualTo("UserCreatedEvent");
-        assertThat(userEventGraph.getVariant()).isEqualTo("");
+        assertThat(userEventGraph.getVariant()).isEmpty();
         assertThat(userEventGraph.getFingerprint()).isEqualTo("fingerprint-message1");
         assertThat(userEventGraph.getGraphData()).isNotNull();
 
@@ -192,7 +192,7 @@ class MessageGraphImporterWireMockTest {
                 .orElseThrow();
         assertThat(orderEventGraph.getMessageTypeName()).isEqualTo("OrderProcessedEvent");
         assertThat(orderEventGraph.getFingerprint()).isEqualTo("fingerprint-message2");
-        assertThat(orderEventGraph.getVariant()).isEqualTo("");
+        assertThat(orderEventGraph.getVariant()).isEmpty();
         assertThat(orderEventGraph.getGraphData()).isNotNull();
 
         // Verify the serialized graph data contains expected content
@@ -306,7 +306,7 @@ class MessageGraphImporterWireMockTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(userEventGraph.getMessageTypeName()).isEqualTo("UserCreatedEvent");
-        assertThat(userEventGraph.getVariant()).isEqualTo("");
+        assertThat(userEventGraph.getVariant()).isEmpty();
         assertThat(userEventGraph.getFingerprint()).isEqualTo("fingerprint-message1");
         assertThat(userEventGraph.getGraphData()).isNotNull();
 

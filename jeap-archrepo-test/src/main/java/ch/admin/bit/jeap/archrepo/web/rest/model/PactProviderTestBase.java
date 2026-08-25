@@ -47,6 +47,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @IgnoreNoPactsToVerify
 @AllowOverridePactUrl
 public class PactProviderTestBase {
+    private static final String TEST_SYSTEM = "test-system";
+    private static final String TEST_COMPONENT = "test-component";
+    private static final String TEST_VERSION = "1.2.3";
+    private static final String COLUMN_A = "column_a";
 
     @LocalServerPort
     private int localServerPort;
@@ -109,19 +113,19 @@ public class PactProviderTestBase {
     @State("A model with one component with an OpenAPI documentation")
     void openApiDocumentationVersions() {
         when(openApiSpecRepository.getApiDocVersions()).thenReturn(
-                List.of(new ApiDocVersionImpl("test-system", "test-component", "1.2.3")));
+                List.of(new ApiDocVersionImpl(TEST_SYSTEM, TEST_COMPONENT, TEST_VERSION)));
     }
 
     @State("A model with one component with a database schema")
     void databaseSchemaVersions() {
         when(systemComponentDatabaseSchemaRepository.getDatabaseSchemaVersions()).thenReturn(
-                List.of(new DatabaseSchemaVersionImpl("test-system", "test-component", "1.2.3")));
+                List.of(new DatabaseSchemaVersionImpl(TEST_SYSTEM, TEST_COMPONENT, TEST_VERSION)));
     }
 
     @State("A database schema exists for the component 'test-component' in the system 'test-system'")
     @SneakyThrows
     void databaseSchemaExists() {
-        SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
+        SystemComponent systemComponent = mockSystemAndComponent(TEST_SYSTEM, TEST_COMPONENT);
         DatabaseSchema databaseSchema = getFullDatabaseSchema();
         SystemComponentDatabaseSchema systemComponentDatabaseSchema = SystemComponentDatabaseSchema.builder().
                 systemComponent(systemComponent)
@@ -134,15 +138,15 @@ public class PactProviderTestBase {
 
     @State("No database schema exists for the component 'test-component' in the system 'test-system'")
     void noDatabaseSchemaExists() {
-        SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
+        SystemComponent systemComponent = mockSystemAndComponent(TEST_SYSTEM, TEST_COMPONENT);
         when(systemComponentDatabaseSchemaRepository.findBySystemComponent(systemComponent)).
                 thenReturn(Optional.empty());
     }
 
     @State("A REST API documentation for the component 'test-component' in the system 'test-system' exists")
     void restApiDocumentationExists() {
-        SystemComponent systemComponent = mockSystemAndComponent("test-system", "test-component");
-        when(systemComponentRepository.findByNameIgnoreCase("test-component")).thenReturn(Optional.of(systemComponent));
+        SystemComponent systemComponent = mockSystemAndComponent(TEST_SYSTEM, TEST_COMPONENT);
+        when(systemComponentRepository.findByNameIgnoreCase(TEST_COMPONENT)).thenReturn(Optional.of(systemComponent));
 
         ApiDocDto apiDocDto = mock(ApiDocDto.class);
         when(apiDocDto.getServerUrl()).thenReturn("https://api.example.com");
@@ -183,8 +187,8 @@ public class PactProviderTestBase {
     private DatabaseSchema getFullDatabaseSchema() {
         Table tableA = Table.builder()
                 .name("table_a")
-                .columns(List.of(new TableColumn("column_a", "text", false)))
-                .primaryKey(new TablePrimaryKey("pk_a", List.of("column_a")))
+                .columns(List.of(new TableColumn(COLUMN_A, "text", false)))
+                .primaryKey(new TablePrimaryKey("pk_a", List.of(COLUMN_A)))
                 .build();
         Table tableB = Table.builder()
                 .name("table_b")
@@ -193,12 +197,12 @@ public class PactProviderTestBase {
                 .foreignKeys(List.of(TableForeignKey.builder().
                                 name("fk_a_b")
                                 .columnNames(List.of("column_b"))
-                                .referencedColumnNames(List.of("column_a"))
+                                .referencedColumnNames(List.of(COLUMN_A))
                                 .build()))
                 .build();
         return DatabaseSchema.builder()
                 .name("test-schema")
-                .version("1.2.3")
+                .version(TEST_VERSION)
                 .tables(List.of(tableA, tableB))
                 .build();
     }

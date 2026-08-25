@@ -13,6 +13,11 @@ import java.util.List;
 
 class ModelStub {
 
+    private static final String CONSUMER = "consumer";
+
+    private ModelStub() {
+    }
+
     static final String SYSTEM = "system";
     static final String ALIAS = "sysalias";
     static final String COMPONENT = "system-context-service";
@@ -41,7 +46,7 @@ class ModelStub {
                 .importer(Importer.GRAFANA)
                 .build();
         BackendService consumerService = BackendService.builder()
-                .name("consumer")
+                .name(CONSUMER)
                 .importer(Importer.GRAFANA)
                 .build();
         System system = System.builder()
@@ -56,7 +61,7 @@ class ModelStub {
                 .importer(Importer.GRAFANA)
                 .build();
         RestApiRelation restApiRelation = RestApiRelation.builder()
-                .consumerName("consumer")
+                .consumerName(CONSUMER)
                 .restApi(restApi)
                 .lastSeen(ZonedDateTime.now())
                 .importer(Importer.GRAFANA)
@@ -69,7 +74,7 @@ class ModelStub {
                 .importer(Importer.GRAFANA)
                 .build();
         RestApiRelation restApiRelationDeleted = RestApiRelation.builder()
-                .consumerName("consumer")
+                .consumerName(CONSUMER)
                 .restApi(restApiDeleted)
                 .lastSeen(ZonedDateTime.now())
                 .importer(Importer.GRAFANA)

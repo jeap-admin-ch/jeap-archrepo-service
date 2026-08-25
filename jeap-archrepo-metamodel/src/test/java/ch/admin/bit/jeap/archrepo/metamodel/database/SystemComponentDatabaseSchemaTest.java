@@ -76,7 +76,7 @@ class SystemComponentDatabaseSchemaTest {
                 ", systemComponent=test-system-component" +
                 ", schemaVersion=1.2.3" +
                 '}';
-        assertThat(dbSchema.toString()).isEqualTo(expectedString);
+        assertThat(dbSchema).hasToString(expectedString);
     }
 
     private SystemComponent mockSystemComponent() {

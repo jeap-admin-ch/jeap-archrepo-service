@@ -130,7 +130,9 @@ public class ComponentContext {
         Map<RelationView, List<RelationView>> result = new TreeMap<>(comparing(o -> o.getLabel().toLowerCase()));
         for (Map.Entry<String, List<RelationView>> entry : relationViews.stream().collect(groupingBy(RelationView::getLabel)).entrySet()) {
             RelationView relationView = entry.getValue().getFirst();
-            result.put(relationView, entry.getValue().stream().distinct().collect(Collectors.toList()));
+            // Not Stream.toList(): it returns a non-public immutable class, and the Thymeleaf templates read
+            // 'relation.value.size' reflectively, which then fails. Sonar's java:S6204 does not apply here.
+            result.put(relationView, entry.getValue().stream().distinct().collect(Collectors.toCollection(ArrayList::new)));
         }
         return result;
     }

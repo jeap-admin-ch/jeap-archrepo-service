@@ -70,25 +70,24 @@ public class RhosGrafanaClient {
     private void executeQuery(String query, String stageName, Consumer<Map<String, String>> labelConsumer) {
         final List<RhosGrafanaQueryResponseData> dataResults = rhosGrafanaAccess.queryRange(query, stageName, DAYS_TO_IMPORT);
 
-        for (RhosGrafanaQueryResponseData data : dataResults) {
-            Map<String, RhosGrafanaQueryResult> queryResults = data.getResults();
-            for (RhosGrafanaQueryResult queryResult : queryResults.values()) {
-                if (queryResult.getStatus() == 200) {
-                    List<RhosGrafanaFrame> frames = queryResult.getFrames();
-                    for (RhosGrafanaFrame frame : frames) {
-                        RhosGrafanaSchema schema = frame.getSchema();
-                        Optional<RhosGrafanaField> metricsFieldOptional = schema.getMetricsField();
-                        if (metricsFieldOptional.isPresent()) {
-                            RhosGrafanaField metricsField = metricsFieldOptional.get();
-                            Map<String, String> labels = metricsField.getLabels();
-                            labelConsumer.accept(labels);
-                        }
-                    }
-                } else {
-                    log.info("Got result with status {}, ignoring it", queryResult.getStatus());
-                }
-            }
+        dataResults.stream()
+                .map(RhosGrafanaQueryResponseData::getResults)
+                .flatMap(queryResults -> queryResults.values().stream())
+                .forEach(queryResult -> consumeLabels(queryResult, labelConsumer));
+    }
+
+    private void consumeLabels(RhosGrafanaQueryResult queryResult, Consumer<Map<String, String>> labelConsumer) {
+        if (queryResult.getStatus() != 200) {
+            log.info("Got result with status {}, ignoring it", queryResult.getStatus());
+            return;
         }
+        queryResult.getFrames().stream()
+                .map(RhosGrafanaFrame::getSchema)
+                .map(RhosGrafanaSchema::getMetricsField)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(RhosGrafanaField::getLabels)
+                .forEach(labelConsumer);
     }
 
     static String getStageName(String environment) {

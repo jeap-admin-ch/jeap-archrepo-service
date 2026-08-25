@@ -33,7 +33,7 @@ public class SystemGraphService {
             highlightOtherSystemsMessageNodes(graphDto, system);
             return new RenderedReactionGraph(system.getName(), graphDto.toDot(linkResolver));
         } catch (JacksonException e) {
-            throw new RuntimeException("Error generating system graph", e);
+            throw new GraphRenderingException("Error generating system graph", e);
         }
     }
 

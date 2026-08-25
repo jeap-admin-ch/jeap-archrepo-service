@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.reaction;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
+import au.com.dius.pact.consumer.junit.MockServerConfig;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
@@ -26,25 +27,37 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("java:S5960") // This is not production code, but a base class for pact tests, we allow assertions
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(port = "8888", pactVersion = PactSpecVersion.V3)
+@PactTestFor(pactVersion = PactSpecVersion.V3)
+@MockServerConfig(port = "8888")
 public class ReactionObserverServicePactTestBase {
 
     private static final String BASE_API_PATH = "/api";
     private static final String GRAPHS_API_PATH = BASE_API_PATH + "/graphs";
+    private static final String CREDENTIALS = "user:secret";
+    private static final String SECRET = "secret";
+    private static final String MOCK_SERVER_URL = "http://localhost:8888";
+    private static final String GET_REQUEST_TO = "A GET request to ";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BASIC_PREFIX = "Basic ";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String NODES_PATH = "$.nodes";
+    private static final String EDGES_PATH = "$.edges";
+    private static final String MESSAGE_NODE_TYPE = "MESSAGE";
 
     private final ObjectMapper objectMapper = new JsonMapper();
 
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getSystemNamesComponentInteraction(PactDslWithProvider builder) {
-        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        String basicAuth = Base64.getEncoder().encodeToString(CREDENTIALS.getBytes());
         return builder.given("System names are available")
-                .uponReceiving("A GET request to " + BASE_API_PATH + "/systems/names")
+                .uponReceiving(GET_REQUEST_TO + BASE_API_PATH + "/systems/names")
                 .path(BASE_API_PATH + "/systems/names")
                 .method("GET")
-                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .matchHeader(AUTHORIZATION_HEADER, BASIC_PREFIX + basicAuth, BASIC_PREFIX + basicAuth)
                 .willRespondWith()
                 .status(200)
-                .matchHeader("Content-Type", "application/json")
+                .matchHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                 .body("""
                         [
                           "system-1",
@@ -59,9 +72,9 @@ public class ReactionObserverServicePactTestBase {
     void testGetSystemNames() {
         // given
         ReactionObserverServiceProperties props = new ReactionObserverServiceProperties();
-        props.setUrl("http://localhost:8888");
+        props.setUrl(MOCK_SERVER_URL);
         props.setUsername("user");
-        props.setPassword("secret");
+        props.setPassword(SECRET);
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
@@ -75,15 +88,15 @@ public class ReactionObserverServicePactTestBase {
 
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getComponentNamesInteraction(PactDslWithProvider builder) {
-        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        String basicAuth = Base64.getEncoder().encodeToString(CREDENTIALS.getBytes());
         return builder.given("Component names are available")
-                .uponReceiving("A GET request to " + BASE_API_PATH + "/components/names")
+                .uponReceiving(GET_REQUEST_TO + BASE_API_PATH + "/components/names")
                 .path(BASE_API_PATH + "/components/names")
                 .method("GET")
-                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .matchHeader(AUTHORIZATION_HEADER, BASIC_PREFIX + basicAuth, BASIC_PREFIX + basicAuth)
                 .willRespondWith()
                 .status(200)
-                .matchHeader("Content-Type", "application/json")
+                .matchHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                 .body("""
                         [
                           "component-1",
@@ -98,9 +111,9 @@ public class ReactionObserverServicePactTestBase {
     void testGetComponentNames() {
         // given
         ReactionObserverServiceProperties props = new ReactionObserverServiceProperties();
-        props.setUrl("http://localhost:8888");
+        props.setUrl(MOCK_SERVER_URL);
         props.setUsername("user");
-        props.setPassword("secret");
+        props.setPassword(SECRET);
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
@@ -115,15 +128,15 @@ public class ReactionObserverServicePactTestBase {
     @SuppressWarnings("DataFlowIssue")
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getSystemGraphComponentInteraction(PactDslWithProvider builder) {
-        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        String basicAuth = Base64.getEncoder().encodeToString(CREDENTIALS.getBytes());
         return builder.given("System graphs are available")
-                .uponReceiving("A GET request to " + GRAPHS_API_PATH + "/systems/sys1")
+                .uponReceiving(GET_REQUEST_TO + GRAPHS_API_PATH + "/systems/sys1")
                 .path(GRAPHS_API_PATH + "/systems/sys1")
                 .method("GET")
-                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .matchHeader(AUTHORIZATION_HEADER, BASIC_PREFIX + basicAuth, BASIC_PREFIX + basicAuth)
                 .willRespondWith()
                 .status(200)
-                .matchHeader("Content-Type", "application/json")
+                .matchHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                 .body("""
                                 {
                                   "graph": {
@@ -161,9 +174,9 @@ public class ReactionObserverServicePactTestBase {
     void testGetSystemGraph() {
         // given
         ReactionObserverServiceProperties props = new ReactionObserverServiceProperties();
-        props.setUrl("http://localhost:8888");
+        props.setUrl(MOCK_SERVER_URL);
         props.setUsername("user");
-        props.setPassword("secret");
+        props.setPassword(SECRET);
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
@@ -178,15 +191,15 @@ public class ReactionObserverServicePactTestBase {
             assertThat(jsonValue).isNotEmpty();
 
             // JsonPath checks for graph structure
-            assertThat(JsonPath.<List<Object>>read(jsonValue, "$.nodes")).hasSize(2);
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].nodeType")).isEqualTo("MESSAGE");
+            assertThat(JsonPath.<List<Object>>read(jsonValue, NODES_PATH)).hasSize(2);
+            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].nodeType")).isEqualTo(MESSAGE_NODE_TYPE);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.nodes[0].id")).isEqualTo(2);
             assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].messageType")).isEqualTo("Command2");
 
-            assertThat(JsonPath.<List<Object>>read(jsonValue, "$.edges")).hasSize(1);
+            assertThat(JsonPath.<List<Object>>read(jsonValue, EDGES_PATH)).hasSize(1);
             assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].edgeType")).isEqualTo("TRIGGER");
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].sourceId")).isEqualTo(2);
-            assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo("MESSAGE");
+            assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo(MESSAGE_NODE_TYPE);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].targetReactionId")).isEqualTo(1);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].median")).isEqualTo(5);
         } catch (JacksonException e) {
@@ -197,15 +210,15 @@ public class ReactionObserverServicePactTestBase {
     @SuppressWarnings("DataFlowIssue")
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getComponentGraphComponentInteraction(PactDslWithProvider builder) {
-        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        String basicAuth = Base64.getEncoder().encodeToString(CREDENTIALS.getBytes());
         return builder.given("Component graphs are available")
-                .uponReceiving("A GET request to " + GRAPHS_API_PATH + "/components/service1")
+                .uponReceiving(GET_REQUEST_TO + GRAPHS_API_PATH + "/components/service1")
                 .path(GRAPHS_API_PATH + "/components/service1")
                 .method("GET")
-                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .matchHeader(AUTHORIZATION_HEADER, BASIC_PREFIX + basicAuth, BASIC_PREFIX + basicAuth)
                 .willRespondWith()
                 .status(200)
-                .matchHeader("Content-Type", "application/json")
+                .matchHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                 .body("""
                                 {
                                   "graph": {
@@ -243,9 +256,9 @@ public class ReactionObserverServicePactTestBase {
     void testGetComponentGraph() {
         // given
         ReactionObserverServiceProperties props = new ReactionObserverServiceProperties();
-        props.setUrl("http://localhost:8888");
+        props.setUrl(MOCK_SERVER_URL);
         props.setUsername("user");
-        props.setPassword("secret");
+        props.setPassword(SECRET);
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
@@ -260,15 +273,15 @@ public class ReactionObserverServicePactTestBase {
             assertThat(jsonValue).isNotEmpty();
 
             // JsonPath checks for graph structure
-            assertThat(JsonPath.<List<Object>>read(jsonValue, "$.nodes")).hasSize(2);
-            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].nodeType")).isEqualTo("MESSAGE");
+            assertThat(JsonPath.<List<Object>>read(jsonValue, NODES_PATH)).hasSize(2);
+            assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].nodeType")).isEqualTo(MESSAGE_NODE_TYPE);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.nodes[0].id")).isEqualTo(2);
             assertThat(JsonPath.<String>read(jsonValue, "$.nodes[0].messageType")).isEqualTo("Command2");
 
-            assertThat(JsonPath.<List<Object>>read(jsonValue, "$.edges")).hasSize(1);
+            assertThat(JsonPath.<List<Object>>read(jsonValue, EDGES_PATH)).hasSize(1);
             assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].edgeType")).isEqualTo("TRIGGER");
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].sourceId")).isEqualTo(2);
-            assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo("MESSAGE");
+            assertThat(JsonPath.<String>read(jsonValue, "$.edges[0].sourceNodeType")).isEqualTo(MESSAGE_NODE_TYPE);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].targetReactionId")).isEqualTo(1);
             assertThat(JsonPath.<Integer>read(jsonValue, "$.edges[0].median")).isEqualTo(5);
         } catch (JacksonException e) {
@@ -279,15 +292,15 @@ public class ReactionObserverServicePactTestBase {
     @SuppressWarnings("DataFlowIssue")
     @Pact(provider = REACTION_OBSERVER_SERVICE, consumer = ARCHREPO)
     private RequestResponsePact getMessageGraphComponentInteraction(PactDslWithProvider builder) {
-        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        String basicAuth = Base64.getEncoder().encodeToString(CREDENTIALS.getBytes());
         return builder.given("Message graphs are available")
-                .uponReceiving("A GET request to " + GRAPHS_API_PATH + "/messages/ExistingEvent")
+                .uponReceiving(GET_REQUEST_TO + GRAPHS_API_PATH + "/messages/ExistingEvent")
                 .path(GRAPHS_API_PATH + "/messages/ExistingEvent")
                 .method("GET")
-                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .matchHeader(AUTHORIZATION_HEADER, BASIC_PREFIX + basicAuth, BASIC_PREFIX + basicAuth)
                 .willRespondWith()
                 .status(200)
-                .matchHeader("Content-Type", "application/json")
+                .matchHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                 .body("""
                                 {
                                   "ExistingEvent/default": {
@@ -333,9 +346,9 @@ public class ReactionObserverServicePactTestBase {
     void testGetMessageGraph() {
         // given
         ReactionObserverServiceProperties props = new ReactionObserverServiceProperties();
-        props.setUrl("http://localhost:8888");
+        props.setUrl(MOCK_SERVER_URL);
         props.setUsername("user");
-        props.setPassword("secret");
+        props.setPassword(SECRET);
         ReactionObserverService reactionObserverService = new ReactionsObserverImporterConfiguration().reactionObserverService(props);
 
         // when
@@ -354,7 +367,7 @@ public class ReactionObserverServicePactTestBase {
             assertThat(jsonValue).isNotEmpty();
 
             // Check that there are exactly 2 nodes
-            assertThat(JsonPath.<List<Object>>read(jsonValue, "$.nodes")).hasSize(2);
+            assertThat(JsonPath.<List<Object>>read(jsonValue, NODES_PATH)).hasSize(2);
 
             // Find the MESSAGE node with id 123
             List<Map<String, Object>> messageNodes = JsonPath.read(jsonValue, "$.nodes[?(@.nodeType == 'MESSAGE' && @.id == 123)]");
@@ -367,12 +380,12 @@ public class ReactionObserverServicePactTestBase {
             assertThat(reactionNodes).hasSize(1);
 
             // Check that there are exactly 2 edges
-            assertThat(JsonPath.<List<Object>>read(jsonValue, "$.edges")).hasSize(2);
+            assertThat(JsonPath.<List<Object>>read(jsonValue, EDGES_PATH)).hasSize(2);
 
             // Find the TRIGGER edge with specific source and target
             List<Map<String, Object>> triggerEdges = JsonPath.read(jsonValue, "$.edges[?(@.edgeType == 'TRIGGER' && @.sourceId == 123 && @.targetReactionId == 77)]");
             assertThat(triggerEdges).hasSize(1);
-            assertThat(triggerEdges.getFirst().get("sourceNodeType")).isEqualTo("MESSAGE");
+            assertThat(triggerEdges.getFirst().get("sourceNodeType")).isEqualTo(MESSAGE_NODE_TYPE);
             assertThat(triggerEdges.getFirst().get("median")).isEqualTo(10);
 
         } catch (JacksonException e) {

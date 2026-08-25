@@ -100,7 +100,14 @@ public class AWSPrometheusProxy {
                 .rawQueryParameters(queryParameters)
                 .build();
 
-        // Sign the request
+        // Sign the request.
+        // Aws4Signer is deprecated in favour of AwsV4HttpSigner. That migration is deliberately NOT done here:
+        // the replacement returns a SignedRequest carrying an SdkHttpRequest, while HttpExecuteRequest needs an
+        // SdkHttpFullRequest, so the call has to be reshaped - and nothing in this repository can verify the
+        // resulting signature (AWSPrometheusProxyIT is @Disabled and needs real AWS credentials). A wrong
+        // signature would fail silently with a 403 in production. It wants its own change, with a test against
+        // AWS behind it.
+        @SuppressWarnings("java:S1874")
         Aws4Signer signer = Aws4Signer.create();
         Aws4SignerParams signerParams = Aws4SignerParams.builder()
                 .awsCredentials(retrieveAwsSessionCredentials())

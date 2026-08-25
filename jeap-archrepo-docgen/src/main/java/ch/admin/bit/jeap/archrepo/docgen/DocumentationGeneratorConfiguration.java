@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 @ComponentScan
 class DocumentationGeneratorConfiguration {
 
+    // A classpath location of templates shipped with this module, not a configurable endpoint
+    @SuppressWarnings("java:S1075")
     private static final String CV_TEMPLATE_PATH = "/template/documentation/";
 
     @Bean

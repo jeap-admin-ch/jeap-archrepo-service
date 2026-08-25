@@ -25,9 +25,10 @@ public class JobsController {
     @ApiResponse(responseCode = "200", description = "Job successfully created and started asynchronously")
     @Async
     public void triggerUpdate(@RequestBody JobDto jobDto) {
-        switch (jobDto.getType()) {
-            case GENERATE_DOC -> updateService.generateDocumentation();
-            case UPDATE_MODEL -> updateService.updateModel();
+        if (jobDto.getType() == JobType.GENERATE_DOC) {
+            updateService.generateDocumentation();
+        } else {
+            updateService.updateModel();
         }
     }
 

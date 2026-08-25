@@ -34,7 +34,7 @@ class RequestResponseInteractionImporter implements RestApiResolver {
      * </ul>
      */
     private static final Pattern PATH_WITH_CONTEXT_PREFIX_PATTERN =
-            Pattern.compile("(?<context>/.*?)(?<path>/(?<segregatedapi>.+?-)?api/.*)");
+            Pattern.compile("(?<context>/.*?)(?<path>/(?<segregatedapi>[^-]++-)?api/.*)");
 
     private final SystemComponent consumer;
     private final SystemComponent provider;

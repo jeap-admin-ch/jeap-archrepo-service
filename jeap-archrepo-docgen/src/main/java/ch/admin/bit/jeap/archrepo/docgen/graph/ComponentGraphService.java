@@ -33,7 +33,7 @@ public class ComponentGraphService {
             highlightOtherSystemsMessageNodes(graphDto, graph.getSystemName());
             return new RenderedReactionGraph(component.getName(), graphDto.toDot(linkResolver));
         } catch (JacksonException e) {
-            throw new RuntimeException("Error generating component graph", e);
+            throw new GraphRenderingException("Error generating component graph", e);
         }
     }
 

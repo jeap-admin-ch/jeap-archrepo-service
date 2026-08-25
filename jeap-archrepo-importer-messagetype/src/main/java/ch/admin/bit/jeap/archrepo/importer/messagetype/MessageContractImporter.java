@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype;
 
 
+import ch.admin.bit.jeap.archrepo.importer.messagetype.contractservice.MessageContractRole;
 import ch.admin.bit.jeap.archrepo.importer.messagetype.contractservice.ContractServiceClient;
 import ch.admin.bit.jeap.archrepo.importer.messagetype.contractservice.MessageContractDto;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
@@ -35,17 +36,19 @@ public class MessageContractImporter {
 
     private void importEventContract(Event event, MessageContractDto messageContractDto) {
         MessageContract messageContract = messageContractDto.toModelObject();
-        switch (messageContractDto.role()) {
-            case CONSUMER -> event.addConsumerContract(messageContract);
-            case PRODUCER -> event.addPublisherContract(messageContract);
+        if (messageContractDto.role() == MessageContractRole.CONSUMER) {
+            event.addConsumerContract(messageContract);
+        } else {
+            event.addPublisherContract(messageContract);
         }
     }
 
     private void importCommandContract(Command command, MessageContractDto messageContractDto) {
         MessageContract messageContract = messageContractDto.toModelObject();
-        switch (messageContractDto.role()) {
-            case CONSUMER -> command.addReceiverContract(messageContract);
-            case PRODUCER -> command.addSenderContract(messageContract);
+        if (messageContractDto.role() == MessageContractRole.CONSUMER) {
+            command.addReceiverContract(messageContract);
+        } else {
+            command.addSenderContract(messageContract);
         }
     }
 }

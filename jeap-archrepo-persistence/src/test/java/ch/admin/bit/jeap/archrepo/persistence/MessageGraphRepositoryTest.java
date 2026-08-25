@@ -307,7 +307,7 @@ class MessageGraphRepositoryTest {
         // Create TRIGGER and ACTION edges
         first = true;
         nodeId = 100;
-        for (String serviceName : serviceNames) {
+        for (int i = 0; i < serviceNames.length; i++) {
             if (!first) json.append(", ");
 
             int reactionId = nodeId + 1000;

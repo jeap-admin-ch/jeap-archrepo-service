@@ -64,8 +64,7 @@ class SystemComponentDatabaseSchemaRepositoryTest {
 
         Optional<SystemComponentDatabaseSchema> dbSchemaRead = repository.findBySystemComponent(systemComponent);
 
-        assertThat(dbSchemaRead).isPresent();
-        assertThat(dbSchemaRead.get()).isEqualTo(dbSchema);
+        assertThat(dbSchemaRead).contains(dbSchema);
     }
 
     @Test

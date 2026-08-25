@@ -96,14 +96,13 @@ public class JeapRelationImporter implements RestApiResolver {
                 // Match provided REST API to path
                 matcher = Pattern.compile(UrlHelper.convertPathToRegex(path), Pattern.CASE_INSENSITIVE)
                         .matcher(UrlHelper.removeTrailingSlash(currentRestApi.getPath()));
-                if (matcher.matches()) {
-                    // Do not match generic endpoints to specific ones
-                    if (!UrlHelper.hasPathVariable(path) || UrlHelper.hasPathVariable(currentRestApi.getPath())) {
-                        log.debug("Found matching rest api with regex from jeap ('{}') with the pact relation '{}'",
-                                currentRestApi.getPath(),
-                                path);
-                        return Optional.of(currentRestApi);
-                    }
+                // Do not match generic endpoints to specific ones
+                if (matcher.matches()
+                    && (!UrlHelper.hasPathVariable(path) || UrlHelper.hasPathVariable(currentRestApi.getPath()))) {
+                    log.debug("Found matching rest api with regex from jeap ('{}') with the pact relation '{}'",
+                            currentRestApi.getPath(),
+                            path);
+                    return Optional.of(currentRestApi);
                 }
 
             }

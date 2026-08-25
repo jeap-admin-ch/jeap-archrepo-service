@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 @SuppressWarnings("findbugs:NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 @Slf4j
 public abstract class MessageTypeRepository implements Closeable {
+
+    private static final String DESCRIPTOR_DIR = "descriptor";
     private static final String COMMON = "_common";
 
     private final ObjectMapper objectMapper;
@@ -87,7 +89,7 @@ public abstract class MessageTypeRepository implements Closeable {
     }
 
     private Stream<File> getSystemDirs() {
-        File descriptorDir = new File(gitRepoPath, "descriptor");
+        File descriptorDir = new File(gitRepoPath, DESCRIPTOR_DIR);
         return Arrays.stream(Objects.requireNonNull(descriptorDir.list()))
                 .filter(name -> !name.equals(COMMON))
                 .map(name -> new File(descriptorDir, name));
@@ -128,7 +130,7 @@ public abstract class MessageTypeRepository implements Closeable {
     }
 
     public String getSchemaUrl(MessageTypeDescriptor descriptor, String schemaName) {
-        File descriptorDir = new File(gitRepoPath, "descriptor");
+        File descriptorDir = new File(gitRepoPath, DESCRIPTOR_DIR);
         File commonDir = new File(descriptorDir, COMMON);
         File globalDirSchemaFile = new File(commonDir, schemaName);
         if (globalDirSchemaFile.exists()) {
@@ -161,7 +163,7 @@ public abstract class MessageTypeRepository implements Closeable {
     }
 
     public File getSchemaFile(MessageTypeDescriptor descriptor, String schemaName) {
-        File descriptorDir = new File(gitRepoPath, "descriptor");
+        File descriptorDir = new File(gitRepoPath, DESCRIPTOR_DIR);
         File commonDir = new File(descriptorDir, COMMON);
         File globalDirSchemaFile = new File(commonDir, schemaName);
         if (globalDirSchemaFile.exists()) {
