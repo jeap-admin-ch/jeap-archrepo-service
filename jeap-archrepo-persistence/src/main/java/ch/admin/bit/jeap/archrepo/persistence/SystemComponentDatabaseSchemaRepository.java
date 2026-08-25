@@ -18,4 +18,23 @@ public interface SystemComponentDatabaseSchemaRepository extends JpaRepository<S
     @Query("select s.system.name as system, s.systemComponent.name as component, s.schemaVersion as version from SystemComponentDatabaseSchema s")
     List<DatabaseSchemaVersion> getDatabaseSchemaVersions();
 
+    @Query("""
+            select s.system.name as system, s.systemComponent.name as component, s.schemaVersion as version,
+                   s.contentHash as contentHash,
+                   coalesce(s.modifiedAt, s.createdAt) as lastModifiedAt
+            from SystemComponentDatabaseSchema s
+            order by s.system.name, s.systemComponent.name
+            """)
+    List<ArtifactIndexEntry> findIndexEntries();
+
+    @Query("""
+            select s.system.name as system, s.systemComponent.name as component, s.schemaVersion as version,
+                   s.contentHash as contentHash,
+                   coalesce(s.modifiedAt, s.createdAt) as lastModifiedAt
+            from SystemComponentDatabaseSchema s
+            where lower(s.system.name) = lower(:systemName)
+            order by s.systemComponent.name
+            """)
+    List<ArtifactIndexEntry> findIndexEntriesBySystemName(String systemName);
+
 }

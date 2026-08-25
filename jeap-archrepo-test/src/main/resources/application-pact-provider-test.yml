@@ -35,6 +35,14 @@ archrepo:
 
 pactbroker:
   url: "https://foo.bar"
+
+jeap:
+  security:
+    oauth2:
+      resourceserver:
+        # Required: the docs API authorizes every resource with a semantic role, which the jEAP security starter
+        # only activates when the system name is configured.
+        system-name: "application-platform"
 archrepo-config:
   environment: dev
 

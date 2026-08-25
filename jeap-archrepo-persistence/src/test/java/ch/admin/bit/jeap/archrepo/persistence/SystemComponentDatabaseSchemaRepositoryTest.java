@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.persistence;
 
+import ch.admin.bit.jeap.archrepo.metamodel.ContentHash;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
@@ -115,5 +116,38 @@ class SystemComponentDatabaseSchemaRepositoryTest {
         return systemComponent;
     }
 
-}
+    @Test
+    void findIndexEntries_returnsHashAndVersionPerComponent() {
+        final SystemComponent systemComponent = createPersistentSystemComponent();
+        repository.saveAndFlush(
+                createSystemComponentDatabaseSchema(systemComponent, SCHEMA_VERSION, SERIALIZED_SCHEMA));
 
+        List<ArtifactIndexEntry> entries = repository.findIndexEntries();
+
+        assertThat(entries).hasSize(1);
+        ArtifactIndexEntry entry = entries.getFirst();
+        assertThat(entry.getSystem()).isEqualTo(SYSTEM_NAME);
+        assertThat(entry.getComponent()).isEqualTo(COMPONENT_NAME);
+        assertThat(entry.getVersion()).isEqualTo(SCHEMA_VERSION);
+        assertThat(entry.getContentHash()).isEqualTo(ContentHash.of(SERIALIZED_SCHEMA));
+        assertThat(entry.getLastModifiedAt()).isNotNull();
+    }
+
+    @Test
+    void findIndexEntries_isEmptyWithoutSchemas() {
+        createPersistentSystemComponent();
+
+        assertThat(repository.findIndexEntries()).isEmpty();
+    }
+
+    @Test
+    void findIndexEntriesBySystemName_filtersIgnoringCase() {
+        final SystemComponent systemComponent = createPersistentSystemComponent();
+        repository.saveAndFlush(
+                createSystemComponentDatabaseSchema(systemComponent, SCHEMA_VERSION, SERIALIZED_SCHEMA));
+
+        assertThat(repository.findIndexEntriesBySystemName(SYSTEM_NAME.toUpperCase())).hasSize(1);
+        assertThat(repository.findIndexEntriesBySystemName("no-such-system")).isEmpty();
+    }
+
+}

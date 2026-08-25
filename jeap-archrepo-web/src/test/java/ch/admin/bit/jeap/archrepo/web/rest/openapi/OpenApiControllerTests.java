@@ -139,6 +139,23 @@ class OpenApiControllerTests {
     }
 
     @Test
+    void testUploadOpenApiDocumentation_WhenCreated_ThenTheServerUrlIsStored() throws Exception {
+        // The server URL is derived from the spec on every push, but used to be written only on an update - so a
+        // component's first spec was stored without it, and stayed without it until the next push
+        mockSystemComponentExists();
+        when(openApiImporter.getServerUrl(CONTENT)).thenReturn("https://foo-bar.example.com");
+        final String bearerAuth = createBearerAuthForUserRoles(OPEN_API_DOC_WRITE_ROLE);
+        MockMultipartFile file = createMockMultipartFile();
+
+        mockMvc.perform(multipart(UPLOAD_PATH + "?version=" + VERSION)
+                .file(file)
+                .header(HttpHeaders.AUTHORIZATION, bearerAuth)
+        ).andExpect(status().isCreated());
+
+        assertThat(openApiSpecArgumentCaptor.getValue().getServerUrl()).isEqualTo("https://foo-bar.example.com");
+    }
+
+    @Test
     //TODO JEAP-6593: remove test
     void testUploadOpenApiDocumentation_WhenComponentNotExists_ThenDoNothingAndRespondsWithOk() throws Exception {
         mockSystemComponent();

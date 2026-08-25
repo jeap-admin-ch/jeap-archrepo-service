@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.0] - 2026-08-25
+
+### Added
+
+- New segregated read API `/docs-api` for the jEAP Doc Service: the system list, the per-system model export with
+  components and relations, the message export, and the OpenAPI spec and database schema of a component
+- Replication indexes `GET /docs-api/openapi-specs` and `GET /docs-api/database-schemas` listing every available
+  artifact with its ETag, so a consumer reloads only what changed; every resource answers conditional requests
+- Documentation: the repository now ships a `docs/` directory published to the jEAP documentation site
+
+### Changed
+
+- Read-only endpoints are annotated `@TransactionalReadReplica`, so an instance configured with a read replica
+  routes them there
+- `content_hash` on `open_api_spec` and `system_component_database_schema` (`V2_5_0`), backfilled once by the
+  `V2_6_0` migration - a one-off pass over both tables on the first start of this version
+
+### Fixed
+
+- The server URL of an OpenAPI spec is now stored on the **first** push of a component as well; it was written
+  only when an existing spec was updated, so a component's spec carried no server URL until its second push
+
+### Breaking
+
+- **`jeap.security.oauth2.resourceserver.system-name` is now required** - the docs API authorizes every resource
+  with a semantic role, and semantic authorization is only active when the system name is configured, so the
+  service does not start without it
+- Instances have to grant the new semantic role `architecture-model` / `read` to their doc service client
+
 ## [10.1.0] - 2026-08-24
 
 ### Dependencies

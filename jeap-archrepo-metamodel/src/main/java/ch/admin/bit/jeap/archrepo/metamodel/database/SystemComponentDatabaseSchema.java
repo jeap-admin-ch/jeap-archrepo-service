@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.metamodel.database;
 
+import ch.admin.bit.jeap.archrepo.metamodel.ContentHash;
 import ch.admin.bit.jeap.archrepo.metamodel.MutableDomainEntity;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -38,6 +39,13 @@ public class SystemComponentDatabaseSchema extends MutableDomainEntity {
     @NotNull
     private String schemaVersion;
 
+    /**
+     * SHA-256 of {@link #schema}, kept so that the docs API can serve an entity tag and answer a conditional
+     * request without reading the blob. Null for schemas stored before the column existed; those are backfilled
+     * lazily on first read.
+     */
+    private String contentHash;
+
     @Builder
     @SuppressWarnings("unused")
     public SystemComponentDatabaseSchema(@NonNull SystemComponent systemComponent, byte[] schema, @NonNull String schemaVersion) {
@@ -46,6 +54,7 @@ public class SystemComponentDatabaseSchema extends MutableDomainEntity {
         this.system = systemComponent.getParent();
         this.systemComponent = systemComponent;
         this.schema = schema;
+        this.contentHash = ContentHash.of(schema);
         this.schemaVersion = schemaVersion;
     }
 
@@ -53,6 +62,7 @@ public class SystemComponentDatabaseSchema extends MutableDomainEntity {
         Objects.requireNonNull(schema, "schema cannot be null");
         Objects.requireNonNull(version, "version cannot be null");
         this.schema = schema;
+        this.contentHash = ContentHash.of(schema);
         this.schemaVersion = version;
         return this;
     }

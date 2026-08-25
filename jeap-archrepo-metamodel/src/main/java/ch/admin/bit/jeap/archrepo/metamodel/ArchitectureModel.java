@@ -47,11 +47,10 @@ public class ArchitectureModel {
                 .findFirst();
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Relation> List<T> getAllRelationsByType(Class<T> relationClass) {
         return systems.stream()
                 .flatMap(system -> system.getRelations().stream().filter(relation -> relationClass.isAssignableFrom(relation.getClass())))
-                .map(rel -> (T) rel)
+                .map(relationClass::cast)
                 .toList();
     }
 
@@ -155,8 +154,13 @@ public class ArchitectureModel {
                 .toList();
     }
 
-    private String createOpenApiSpecSwaggerUrl(SystemComponent systemComponent) {
-        return (openApiBaseUrl + systemComponent.getParent().getName() + "/" + systemComponent.getName()).toLowerCase();
+    /**
+     * The Swagger UI deep link of a component - an absolute URL, because a browser follows it. Built from
+     * {@code archrepo.openapi-base-url}, which every instance configures with the browser-reachable prefix.
+     */
+    public String createOpenApiSpecSwaggerUrl(SystemComponent systemComponent) {
+        return (openApiBaseUrl + systemComponent.getParent().getName() + "/" + systemComponent.getName())
+                .toLowerCase(Locale.ROOT);
     }
 
     public void remove(SystemComponent component) {

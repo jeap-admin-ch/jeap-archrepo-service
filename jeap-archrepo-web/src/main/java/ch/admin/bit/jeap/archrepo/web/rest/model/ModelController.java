@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.web.rest.model;
 
+import ch.admin.bit.jeap.db.tx.TransactionalReadReplica;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.persistence.ArchitectureModelRepository;
@@ -14,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "model", description = "Architecture meta model")
 @Slf4j
-@Transactional(readOnly = true)
+@TransactionalReadReplica
 class ModelController {
 
     private final ArchitectureModelRepository repository;

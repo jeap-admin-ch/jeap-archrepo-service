@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.web.rest.database;
 
+import ch.admin.bit.jeap.db.tx.TransactionalReadReplica;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.DatabaseSchemaVersion;
@@ -75,7 +76,7 @@ class DatabaseSchemaController {
         }
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     @GetMapping(value = "/versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the database schema versions of all system components.")
     @ApiResponses(value = {

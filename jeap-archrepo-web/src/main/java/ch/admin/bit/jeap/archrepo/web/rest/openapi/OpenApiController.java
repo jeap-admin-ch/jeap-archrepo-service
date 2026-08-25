@@ -8,6 +8,7 @@ import ch.admin.bit.jeap.archrepo.persistence.*;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiDto;
 import ch.admin.bit.jeap.archrepo.web.rest.model.RestApiResultDto;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
+import ch.admin.bit.jeap.db.tx.TransactionalReadReplica;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.ServletSemanticAuthorization;
 import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationToken;
 import io.swagger.v3.oas.annotations.Operation;
@@ -113,7 +114,7 @@ class OpenApiController {
             String serverUrl = openApiImporter.getServerUrl(content);
 
             if (openApiSpecOptional.isEmpty()) {
-                saveNewOpenApiDocumentation(systemComponent, version, content);
+                saveNewOpenApiDocumentation(systemComponent, version, content, serverUrl);
                 openApiImporter.importIntoModel(systemComponent, content);
                 return ResponseEntity.status(HttpStatus.CREATED).build();
             } else {
@@ -129,17 +130,19 @@ class OpenApiController {
         }
     }
 
-    private void saveNewOpenApiDocumentation(SystemComponent systemComponent, String version, byte[] content) {
+    private void saveNewOpenApiDocumentation(SystemComponent systemComponent, String version, byte[] content,
+                                             String serverUrl) {
         OpenApiSpec openApiSpec = OpenApiSpec.builder()
                 .provider(systemComponent)
                 .version(version)
                 .content(content)
+                .serverUrl(serverUrl)
                 .build();
         log.debug("Saving new OpenAPI documentation for component '{}': {}", systemComponent.getName(), openApiSpec);
         openApiSpecRepository.save(openApiSpec);
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     @GetMapping("/{systemName}/{systemComponentName}")
     @Operation(summary = "Get the OpenApi Spec of a systemComponent")
     public ResponseEntity<String> getOpenApiJsonWithSystemName(
@@ -148,7 +151,7 @@ class OpenApiController {
         return getOpenApiJson(systemComponentName);
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     @GetMapping("/{systemComponentName}")
     @Operation(summary = "Get the OpenApi Spec of a systemComponent")
     public ResponseEntity<String> getOpenApiJson(
@@ -170,7 +173,7 @@ class OpenApiController {
         return ResponseEntity.ok(new String(openApiSpecOptional.get().getContent(), StandardCharsets.UTF_8));
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     @GetMapping(value = "/versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get the API documentation versions of all system components.")
     @ApiResponses(value = {
@@ -184,7 +187,7 @@ class OpenApiController {
         return apiDocVersions;
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     @GetMapping("/{systemName}/{systemComponentName}/rest-apis")
     @Operation(
             summary = "All rest apis imported from open api spec",
@@ -196,7 +199,7 @@ class OpenApiController {
         return getRestApiForService(systemComponentName);
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     @GetMapping("/{systemComponentName}/rest-apis")
     @Operation(
             summary = "All rest apis imported from open api spec",

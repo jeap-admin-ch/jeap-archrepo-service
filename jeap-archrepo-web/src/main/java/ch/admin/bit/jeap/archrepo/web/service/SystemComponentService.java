@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.web.service;
 
+import ch.admin.bit.jeap.db.tx.TransactionalReadReplica;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
@@ -39,7 +40,7 @@ public class SystemComponentService {
         return systemComponentRepository.findByNameIgnoreCase(componentName).orElseGet(() -> createSystemComponent(componentName));
     }
 
-    @Transactional(readOnly = true)
+    @TransactionalReadReplica
     public Optional<SystemComponent> findSystemComponent(String componentName) {
         log.info("Retrieve system component: {}", componentName);
         return systemComponentRepository.findByNameIgnoreCase(componentName);

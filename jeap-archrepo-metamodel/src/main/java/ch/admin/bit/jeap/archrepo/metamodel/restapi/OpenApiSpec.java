@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.metamodel.restapi;
 
+import ch.admin.bit.jeap.archrepo.metamodel.ContentHash;
 import ch.admin.bit.jeap.archrepo.metamodel.MutableDomainEntity;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -38,6 +39,13 @@ public class OpenApiSpec extends MutableDomainEntity {
     @ToString.Exclude
     private byte[] content;
 
+    /**
+     * SHA-256 of {@link #content}, kept so that the docs API can serve an entity tag and answer a conditional
+     * request without reading the blob. Null for specs stored before the column existed; those are backfilled
+     * lazily on first read.
+     */
+    private String contentHash;
+
     @Builder
     @SuppressWarnings("unused")
     public OpenApiSpec(@NonNull SystemComponent provider, String version, byte[] content, String serverUrl) {
@@ -46,11 +54,13 @@ public class OpenApiSpec extends MutableDomainEntity {
         this.provider = provider;
         this.version = version;
         this.content = content;
+        this.contentHash = ContentHash.of(content);
         this.serverUrl = serverUrl;
     }
 
     public void update(byte[] content, String version, String serverUrl) {
         this.content = content;
+        this.contentHash = ContentHash.of(content);
         this.version = version;
         this.serverUrl = serverUrl;
     }

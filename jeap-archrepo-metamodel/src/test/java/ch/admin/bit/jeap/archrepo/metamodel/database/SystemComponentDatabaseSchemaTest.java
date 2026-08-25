@@ -1,9 +1,9 @@
 package ch.admin.bit.jeap.archrepo.metamodel.database;
 
+import ch.admin.bit.jeap.archrepo.metamodel.ContentHash;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import org.junit.jupiter.api.Test;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,7 +14,6 @@ class SystemComponentDatabaseSchemaTest {
 
     private static final byte[] SCHEMA = "dummy_schema".getBytes();
     private static final String SCHEMA_VERSION = "1.2.3";
-
 
     @Test
     void testBuilder() {
@@ -95,7 +94,23 @@ class SystemComponentDatabaseSchemaTest {
                 .build();
     }
 
+    @Test
+    void contentHash_isSetOnConstruction() {
+        final SystemComponentDatabaseSchema dbSchema = createSystemComponentDatabaseSchema(mockSystemComponent());
+
+        assertThat(dbSchema.getContentHash()).isEqualTo(ContentHash.of(SCHEMA));
+    }
+
+    @Test
+    void contentHash_followsUpdate() {
+        final SystemComponentDatabaseSchema dbSchema = createSystemComponentDatabaseSchema(mockSystemComponent());
+        final byte[] newSchema = "another_schema".getBytes();
+
+        dbSchema.update(newSchema, "4.5.6");
+
+        assertThat(dbSchema.getContentHash())
+                .isEqualTo(ContentHash.of(newSchema))
+                .isNotEqualTo(ContentHash.of(SCHEMA));
+    }
+
 }
-
-
-

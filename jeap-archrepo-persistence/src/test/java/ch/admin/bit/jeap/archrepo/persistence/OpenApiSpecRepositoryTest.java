@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.persistence;
 
+import ch.admin.bit.jeap.archrepo.metamodel.ContentHash;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
@@ -123,5 +124,64 @@ class OpenApiSpecRepositoryTest {
         return systemComponent;
     }
 
-}
+    @Test
+    void findIndexEntries_returnsHashAndVersionPerComponent() {
+        final SystemComponent component = createPersistentSystemComponent();
+        openApiSpecRepository.saveAndFlush(createOpenApiSpec(component, "1.2.3"));
 
+        List<ArtifactIndexEntry> entries = openApiSpecRepository.findIndexEntries();
+
+        assertThat(entries).hasSize(1);
+        ArtifactIndexEntry entry = entries.getFirst();
+        assertThat(entry.getSystem()).isEqualTo(SYSTEM_NAME);
+        assertThat(entry.getComponent()).isEqualTo(COMPONENT_NAME);
+        assertThat(entry.getVersion()).isEqualTo("1.2.3");
+        assertThat(entry.getContentHash())
+                .isEqualTo(ContentHash.of("test".getBytes(StandardCharsets.UTF_8)));
+        assertThat(entry.getLastModifiedAt()).isNotNull();
+    }
+
+    @Test
+    void findIndexEntries_isEmptyWithoutSpecs() {
+        createPersistentSystemComponent();
+
+        assertThat(openApiSpecRepository.findIndexEntries()).isEmpty();
+    }
+
+    @Test
+    void findIndexEntriesBySystemName_filtersIgnoringCase() {
+        final SystemComponent component = createPersistentSystemComponent();
+        openApiSpecRepository.saveAndFlush(createOpenApiSpec(component, "1.2.3"));
+
+        assertThat(openApiSpecRepository.findIndexEntriesBySystemName(SYSTEM_NAME.toUpperCase())).hasSize(1);
+        assertThat(openApiSpecRepository.findIndexEntriesBySystemName("no-such-system")).isEmpty();
+    }
+
+    @Test
+    void findIndexEntries_lastModifiedAtFollowsAnUpdate() {
+        final SystemComponent component = createPersistentSystemComponent();
+        OpenApiSpec spec = openApiSpecRepository.saveAndFlush(createOpenApiSpec(component, "1.2.3"));
+        ZonedDateTime created = openApiSpecRepository.findIndexEntries().getFirst().getLastModifiedAt();
+
+        spec.update("changed".getBytes(StandardCharsets.UTF_8), "1.2.4", "url2");
+        openApiSpecRepository.saveAndFlush(spec);
+
+        ArtifactIndexEntry entry = openApiSpecRepository.findIndexEntries().getFirst();
+        assertThat(entry.getVersion()).isEqualTo("1.2.4");
+        assertThat(entry.getContentHash())
+                .isEqualTo(ContentHash.of("changed".getBytes(StandardCharsets.UTF_8)));
+        assertThat(entry.getLastModifiedAt()).isAfterOrEqualTo(created);
+    }
+
+    @Test
+    void findIndexEntries_skipsAnArtifactWithoutContent() {
+        // The content resource answers 404 for such a row, so listing it would send a consumer to a dead link
+        final SystemComponent component = createPersistentSystemComponent();
+        OpenApiSpec spec = createOpenApiSpec(component, "1.2.3");
+        ReflectionTestUtils.setField(spec, "content", null);
+        openApiSpecRepository.saveAndFlush(spec);
+
+        assertThat(openApiSpecRepository.findIndexEntries()).isEmpty();
+        assertThat(openApiSpecRepository.findIndexEntriesBySystemName(SYSTEM_NAME)).isEmpty();
+    }
+}
