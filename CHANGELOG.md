@@ -21,18 +21,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   routes them there
 - `content_hash` on `open_api_spec` and `system_component_database_schema` (`V2_5_0`), backfilled once by the
   `V2_6_0` migration - a one-off pass over both tables on the first start of this version
+- `jeap.security.oauth2.resourceserver.system-name` is now required - the docs API authorizes every resource
+  with a semantic role, and semantic authorization is only active when the system name is configured, so the
+  service does not start without it
 
 ### Fixed
 
 - The server URL of an OpenAPI spec is now stored on the **first** push of a component as well; it was written
   only when an existing spec was updated, so a component's spec carried no server URL until its second push
-
-### Breaking
-
-- **`jeap.security.oauth2.resourceserver.system-name` is now required** - the docs API authorizes every resource
-  with a semantic role, and semantic authorization is only active when the system name is configured, so the
-  service does not start without it
-- Instances have to grant the new semantic role `architecture-model` / `read` to their doc service client
 
 ## [10.1.0] - 2026-08-24
 
