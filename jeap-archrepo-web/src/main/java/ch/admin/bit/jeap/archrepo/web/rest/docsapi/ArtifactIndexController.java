@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -61,7 +60,7 @@ class ArtifactIndexController {
     public ResponseEntity<byte[]> getOpenApiSpecs(
             @Parameter(description = "Restrict the index to one system, by name or alias") @RequestParam(required = false) String system,
             WebRequest request) {
-        return respond(request, index(system,
+        return etagSupport.respond(request, index(system,
                 openApiSpecRepository::findIndexEntries,
                 openApiSpecRepository::findIndexEntriesBySystemName,
                 DocsApiPaths::openApiContentPath));
@@ -79,7 +78,7 @@ class ArtifactIndexController {
     public ResponseEntity<byte[]> getDatabaseSchemas(
             @Parameter(description = "Restrict the index to one system, by name or alias") @RequestParam(required = false) String system,
             WebRequest request) {
-        return respond(request, index(system,
+        return etagSupport.respond(request, index(system,
                 databaseSchemaRepository::findIndexEntries,
                 databaseSchemaRepository::findIndexEntriesBySystemName,
                 DocsApiPaths::databaseSchemaContentPath));
@@ -115,17 +114,5 @@ class ArtifactIndexController {
         return systemRepository.findByNameOrAliasIgnoreCase(systemFilter)
                 .map(System::getName)
                 .orElseThrow(() -> DocsApiException.systemNotFound(systemFilter));
-    }
-
-    private ResponseEntity<byte[]> respond(WebRequest request, ArtifactIndexDto body) {
-        byte[] serialized = etagSupport.serialize(body);
-        String entityTag = etagSupport.entityTagOf(serialized);
-        if (etagSupport.isNotModified(request, entityTag)) {
-            return null;
-        }
-        return ResponseEntity.ok()
-                .eTag(entityTag)
-                .cacheControl(CacheControl.noCache())
-                .body(serialized);
     }
 }

@@ -2,8 +2,11 @@ package ch.admin.bit.jeap.archrepo.web.rest.docsapi;
 
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import java.util.List;
+import java.util.UUID;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
+import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RelationType;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -186,6 +189,34 @@ class DocsApiDtoFactoryTest {
     void messageVersionsAreSorted() {
         // The versions come from a JPA element collection with no @OrderBy, so the payload has to impose an order
         assertThat(message(DocsApiModelStub.EVENT_NAME).versions()).containsExactly("1.0.0", "2.0.0");
+    }
+
+    @Test
+    void messageVersionsAreOrderedAsNumbers() {
+        // The same order the message type index applies: as text, 10.0.0 would stand between 1.0.0 and 2.0.0,
+        // and a generator reading both resources would get two orders for one fact
+        System system = System.builder().name("ordering").build();
+        system.addEvent(Event.builder()
+                .id(UUID.randomUUID())
+                .messageTypeName("OrderingEvent")
+                .scope("ordering")
+                .descriptorUrl("https://registry.example.com/ordering.json")
+                .messageVersions(List.of(version("1.0.0"), version("10.0.0"), version("2.0.0")))
+                .build());
+        ArchitectureModel orderingModel = ArchitectureModel.builder().systems(List.of(system)).build();
+
+        MessageListDto messages = factory.createMessageList(orderingModel, system);
+
+        assertThat(messages.messages().getFirst().versions()).containsExactly("1.0.0", "2.0.0", "10.0.0");
+    }
+
+    private static MessageVersion version(String version) {
+        return MessageVersion.builder()
+                .version(version)
+                .valueSchemaName("Value.avdl")
+                .valueSchemaUrl("https://registry.example.com/Value.avdl")
+                .valueSchemaResolved("{}")
+                .build();
     }
 
     @Test

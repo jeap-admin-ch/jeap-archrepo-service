@@ -123,6 +123,13 @@ erDiagram
 receivers - so exactly one of them is set per row. `versions` is a comma-separated list, read back by
 `MessageContract.versionList()`.
 
+The `*_schema_resolved` columns of `message_type_versions` hold a **rendering** of the Avro IDL file, produced by
+`SchemaImportResolver` when the message type is imported: imports inlined and marked with comments, base types
+dropped, namespaces and enclosing braces removed. The file itself is not stored - `*_schema_url` is where it can
+be read - so the rendering cannot be changed without importing the message types again. It is what the
+[docs API](docs-api.md) serves as `resolvedSchema`, which is the only consumer of these six columns besides the
+Confluence documentation generator.
+
 ## REST APIs and relations
 
 A relation is an edge between two components. It is stored by **name**, not by foreign key, because the consumer

@@ -38,6 +38,14 @@ public class DocsApiException extends RuntimeException {
                 "No OpenAPI spec has been published for the component '" + componentName + "'");
     }
 
+    public static DocsApiException messageTypeVersionNotFound(String systemName, String messageName,
+                                                             String version) {
+        return new DocsApiException(HttpStatus.NOT_FOUND, "message-type-version-not-found",
+                "Message type version not found",
+                "System '" + systemName + "' has no message type '" + messageName + "' in version '" + version
+                + "'");
+    }
+
     public static DocsApiException databaseSchemaNotFound(String componentName) {
         return new DocsApiException(HttpStatus.NOT_FOUND, "database-schema-not-found", "Database schema not found",
                 "No database schema has been published for the component '" + componentName + "'");

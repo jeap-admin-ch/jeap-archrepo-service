@@ -4,6 +4,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.ContentHash;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -50,6 +51,27 @@ public class DocsApiEtagSupport {
      */
     public String entityTagOf(byte[] serializedBody) {
         return entityTag(ContentHash.of(serializedBody));
+    }
+
+    /**
+     * Answers with the body and its entity tag, or with {@code 304} when the caller already has it.
+     * <p>
+     * Every resource of this API answers this way, and it lives here rather than in each controller because a
+     * slip in the sequence - tagging bytes other than the ones written, or forgetting the directive on the
+     * {@code 304} - would break conditional requests on one resource only, quietly.
+     *
+     * @return the response, or null when the prepared {@code 304} is to be sent
+     */
+    public ResponseEntity<byte[]> respond(WebRequest request, Object body) {
+        byte[] serialized = serialize(body);
+        String entityTag = entityTagOf(serialized);
+        if (isNotModified(request, entityTag)) {
+            return null;
+        }
+        return ResponseEntity.ok()
+                .eTag(entityTag)
+                .cacheControl(CacheControl.noCache())
+                .body(serialized);
     }
 
     /**

@@ -9,6 +9,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageContract;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageType;
 import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
+import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersionOrder;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
@@ -188,7 +189,12 @@ class DocsApiDtoFactory {
                 messageType.getDescriptorUrl(),
                 messageType.getDocumentationUrl(),
                 messageType.getDescription(),
-                messageType.getMessageVersions().stream().map(MessageVersion::getVersion).sorted().toList(),
+                // The same order the message type index uses: two orders for one fact would be worse
+                // than either, and a version list is read by people
+                messageType.getMessageVersions().stream()
+                        .map(MessageVersion::getVersion)
+                        .sorted(MessageVersionOrder.INSTANCE)
+                        .toList(),
                 createContracts(componentToSystem, messageType));
     }
 

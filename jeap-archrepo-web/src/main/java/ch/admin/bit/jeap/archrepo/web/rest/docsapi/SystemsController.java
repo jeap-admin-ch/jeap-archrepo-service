@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +47,7 @@ class SystemsController {
     @ApiResponse(responseCode = "403", description = "The token lacks the architecture-model read role", content = @Content)
     public ResponseEntity<byte[]> getSystems(WebRequest request) {
         SystemListDto body = dtoFactory.createSystemList(architectureModelRepository.load());
-        return respond(request, body);
+        return etagSupport.respond(request, body);
     }
 
     @GetMapping("/{system}")
@@ -63,7 +62,7 @@ class SystemsController {
     public ResponseEntity<byte[]> getSystem(@PathVariable("system") String systemName, WebRequest request) {
         ArchitectureModel model = architectureModelRepository.load();
         System system = findSystem(model, systemName);
-        return respond(request, dtoFactory.createSystemDetail(model, system));
+        return etagSupport.respond(request, dtoFactory.createSystemDetail(model, system));
     }
 
     @GetMapping("/{system}/messages")
@@ -78,7 +77,7 @@ class SystemsController {
     public ResponseEntity<byte[]> getMessages(@PathVariable("system") String systemName, WebRequest request) {
         ArchitectureModel model = architectureModelRepository.load();
         System system = findSystem(model, systemName);
-        return respond(request, dtoFactory.createMessageList(model, system));
+        return etagSupport.respond(request, dtoFactory.createMessageList(model, system));
     }
 
     private System findSystem(ArchitectureModel model, String systemName) {
@@ -91,21 +90,5 @@ class SystemsController {
     private boolean matchesNameOrAlias(System system, String systemName) {
         return system.getName().equalsIgnoreCase(systemName)
                || system.getAliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(systemName));
-    }
-
-    /**
-     * Answers with the body and its entity tag, or with {@code 304} when the caller already has it. The tag is
-     * computed over the serialized body, so it changes exactly when the response would.
-     */
-    private ResponseEntity<byte[]> respond(WebRequest request, Object body) {
-        byte[] serialized = etagSupport.serialize(body);
-        String entityTag = etagSupport.entityTagOf(serialized);
-        if (etagSupport.isNotModified(request, entityTag)) {
-            return null;
-        }
-        return ResponseEntity.ok()
-                .eTag(entityTag)
-                .cacheControl(CacheControl.noCache())
-                .body(serialized);
     }
 }

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.4.0] - 2026-09-01
+
+### Added
+- Docs API: `GET /docs-api/message-types` lists every message type of the model with the versions it has, and
+  `GET /docs-api/message-types/{system}/{message}/versions/{version}` serves one version with its key and value
+  Avro schemas, their links into the message type registry and the compatibility it declares.
+
 ## [12.3.0] - 2026-08-28
 
 ### Dependencies

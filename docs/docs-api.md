@@ -6,7 +6,7 @@ its own root, its own payloads, its own authentication and its own error format.
 
 Nothing under `/api/**` or `/external-api/**` is changed by it. See [API](api.md) for those.
 
-This page first states the rules that hold for every resource, then documents each of the seven resources on its
+This page first states the rules that hold for every resource, then documents each of the nine resources on its
 own - request, payload and every status it can answer with.
 
 ## Why it is separate
@@ -19,7 +19,7 @@ own - request, payload and every status it can answer with.
 
 ## The resources
 
-All seven are `GET`, read-only, and require the same role.
+All nine are `GET`, read-only, and require the same role.
 
 | Method and resource                                                     | Purpose                                                       |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -30,32 +30,48 @@ All seven are `GET`, read-only, and require the same role.
 | `GET /docs-api/systems/{system}/components/{component}/database-schema` | The database schema of a component                            |
 | `GET /docs-api/openapi-specs`                                           | Index of every published OpenAPI spec, with its entity tag    |
 | `GET /docs-api/database-schemas`                                        | Index of every published database schema, with its entity tag |
+| `GET /docs-api/message-types`                                           | Every message type with the versions it has                   |
+| `GET /docs-api/message-types/{system}/{message}/versions/{version}`     | One version of one message type, with its Avro schemas        |
 
-`{system}` is matched by **name or alias**, ignoring case; `{component}` is matched by name, ignoring case, and
-must belong to the system in the path. The same resolution applies to the `system` query parameter of the two
-indexes.
+`{system}` is matched by **name or alias**, ignoring case; `{component}` and `{message}` are matched by name,
+ignoring case, and must belong to the system in the path. The same resolution applies to the `system` query
+parameter of the three indexes.
 
-A generation run costs: the system list once, the export and the messages per system, the two indexes once, and a
-content resource only for an artifact whose entity tag actually moved.
+A generation run costs: the system list once, the export and the messages per system, the three indexes once, a
+content resource only for an artifact whose entity tag actually moved, and one request per message type version:
+either the first fetch, or a conditional one answered with `304`. What a consumer must not do is store a version
+once and never ask again - see the caveat under *Conditional requests*.
 
 > **All four model resources assemble the whole architecture model per request** - the system list too, even
 > though its payload is small: it is light in what it returns, not in what it costs. The per-system resources need
 > the full model because a system's relations include those defined by other systems and the payload names the
 > owning system of every component. The cost therefore grows with systems x landscape size. That is acceptable at
 > the current size and for a generation run that happens a few times a day; it is the first thing to change if
-> either grows. The two content resources and the two indexes do not load the model.
+> either grows. The two content resources, the three indexes and the message type version resource do not
+> load the model - they read exactly the rows they answer with.
 
 ## Conditional requests
 
 Every resource carries a strong `ETag` and honours `If-None-Match` with `304 Not Modified`, which has an empty
 body. `Cache-Control` is `no-cache`: a consumer revalidates, but an unchanged resource costs no payload.
 
-The tag is `"sha256:<hex>"`. For the five model resources it is computed over the serialized response body, so it
+A **message type version** is nearly, but not quite, a fixed thing, and it is served like everything else for
+that reason - which also means a consumer that stores one should revalidate it rather than assume it is final. A changed schema is published as a new version, so a version's payload rarely moves - but
+`compatibleVersion` is derived from the version list when the descriptor declares none, so publishing an
+intermediate version changes what an already-published version answers, and every import re-renders the schemas
+from the registry. A long `max-age` or `immutable` would therefore promise more than the importer delivers.
+
+The tag is `"sha256:<hex>"`. For the model resources it is computed over the serialized response body, so it
 changes exactly when the response would. For the two content resources it is the hash of the **stored bytes** of
 the artifact, which is what makes the following contract hold:
 
-> The `etag` of an entry in an index is **byte-identical** to the `ETag` header of the resource its `contentUrl`
-> names.
+> The `etag` of an entry in an **artifact** index is **byte-identical** to the `ETag` header of the resource its
+> `contentUrl` names.
+
+That contract is about the OpenAPI spec and database schema indexes only. The message type index carries no
+`etag` per version - a tag would have to be computed from the schemas, which is exactly what that index exists
+not to read - so a consumer that keeps its copies current revalidates each stored version with `If-None-Match`
+and pays a `304` for the ones that did not move.
 
 That is the point of the indexes: a consumer compares the two without making a request, and fetches only what
 changed. It can also send the stored value as `If-None-Match`, so an artifact that changes between the index call
@@ -148,8 +164,9 @@ keep their plain-text errors.
 | `404`  | `component-not-found`       | The system has no such component, or the component exists but belongs to another system |
 | `404`  | `openapi-spec-not-found`    | The component has published no spec, or the stored row has no content                   |
 | `404`  | `database-schema-not-found` | The component has published no schema                                                   |
+| `404`  | `message-type-version-not-found` | The system has no such message type, or that message type has no such version      |
 
-The four `404` kinds are named apart because a generator has to tell a mistake ("no such system") from a normal
+The five `404` kinds are named apart because a generator has to tell a mistake ("no such system") from a normal
 state ("this component has no OpenAPI spec").
 
 `401`, `403` and `406` are decided by the filter chain and by content negotiation, before the docs API's own
@@ -756,6 +773,168 @@ There is exactly one schema per component, updated in place by the push path.
 | `403`  | -                  | The token does not carry `architecture-model` / `read` for this system |
 | `404`  | `system-not-found` | The `system` parameter names no known system or alias                  |
 | `406`  | -                  | `Accept` allows neither `application/json` nor `*/*`                   |
+
+## `GET /docs-api/message-types`
+
+Every message type of the model with the versions it has, and **without their schemas** - the index a consumer
+diffs against what it has already replicated. The schemas are the largest columns in the model, so deciding what
+to fetch must not read one. The entries are sorted by system, then by message type; the versions of a message
+type keep that order too.
+
+### Request
+
+`GET /docs-api/message-types`
+
+No path parameters.
+
+| Query parameter | Required | Meaning                                                                                                                                                 | Default                              |
+| --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `system`        | no       | Restrict the index to one system, **by name or alias**, ignoring case. An unknown value answers `404 system-not-found` rather than an empty index      | absent or blank: the whole landscape |
+
+| Request header  | Required | Value                                                              |
+| --------------- | -------- | ------------------------------------------------------------------ |
+| `Authorization` | yes      | `Bearer` token carrying the role below                             |
+| `Accept`        | no       | `application/json` or `*/*`; anything else is `406`                |
+| `If-None-Match` | no       | An `ETag` from an earlier response; a match is answered with `304` |
+
+Role: `architecture-model` / `read`.
+
+### Response
+
+`200 OK`, `application/json`.
+
+| Response header | Value                                     |
+| --------------- | ----------------------------------------- |
+| `ETag`          | `"sha256:<hex>"` over the serialized body |
+| `Cache-Control` | `no-cache`                                |
+
+```json
+{
+  "messageTypes": [
+    {
+      "system": "wvs",
+      "message": "WvsDeclarationAcceptedEvent",
+      "kind": "EVENT",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "contentUrl": "/my-archrepo-service/docs-api/message-types/wvs/WvsDeclarationAcceptedEvent/versions/1.0.0"
+        },
+        {
+          "version": "2.0.0",
+          "contentUrl": "/my-archrepo-service/docs-api/message-types/wvs/WvsDeclarationAcceptedEvent/versions/2.0.0"
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field                                 | Type   | Meaning                                                            | Absent when                                    |
+| ------------------------------------- | ------ | -------------------------------------------------------------------- | ---------------------------------------------- |
+| `messageTypes`                        | array  | Every message type, sorted by system then message type             | never - an empty landscape is an empty array   |
+| `messageTypes[].system`               | string | The system that defines the message type                           | never                                          |
+| `messageTypes[].message`              | string | The message type name, and what `{message}` matches                | never                                          |
+| `messageTypes[].kind`                 | string | `EVENT` or `COMMAND`                                               | never                                          |
+| `messageTypes[].versions`             | array  | Every version of the message type, sorted                          | never - a message type without versions is absent from the index entirely |
+| `messageTypes[].versions[].version`   | string | The version, and what `{version}` matches **exactly**              | never                                          |
+| `messageTypes[].versions[].contentUrl`| string | Path of the version resource, context path included, no host       | never                                          |
+
+A message type with no version at all does not appear: the index lists versions, and an entry without any would
+name nothing to fetch.
+
+Unlike the two artifact indexes, this one carries **no entity tag per version**: computing one would mean reading
+the schemas, which is what this index exists not to do. So it answers *which versions exist*, not *which of them
+changed* - a consumer diffs it against what it has stored to find the new ones, and revalidates the ones it
+already holds against the version resource itself.
+
+| Status | `type`             | When                                                                   |
+| ------ | ------------------ | ---------------------------------------------------------------------- |
+| `304`  | -                  | `If-None-Match` matched                                                |
+| `401`  | -                  | No token, or one the resource server rejects                           |
+| `403`  | -                  | The token does not carry `architecture-model` / `read` for this system |
+| `404`  | `system-not-found` | The `system` parameter names no known system or alias                  |
+| `406`  | -                  | `Accept` allows neither `application/json` nor `*/*`                   |
+
+## `GET /docs-api/message-types/{system}/{message}/versions/{version}`
+
+Everything the arch repo knows about one version of one message type: both Avro schemas and the compatibility the
+version declares. This is what a message page in the generated documentation shows.
+
+### Request
+
+`GET /docs-api/message-types/wvs/WvsDeclarationAcceptedEvent/versions/2.0.0`
+
+| Path parameter | Matched                                                                    |
+| -------------- | ---------------------------------------------------------------------------- |
+| `{system}`     | By name or alias, ignoring case                                            |
+| `{message}`    | By message type name, ignoring case, within that system. The payload names it **as it is stored**, not as it was addressed |
+| `{version}`    | Exactly - a version string is data, not a name, and is not normalised      |
+
+| Request header  | Required | Value                                                              |
+| --------------- | -------- | ------------------------------------------------------------------ |
+| `Authorization` | yes      | `Bearer` token carrying the role below                             |
+| `Accept`        | no       | `application/json` or `*/*`; anything else is `406`                |
+| `If-None-Match` | no       | An `ETag` from an earlier response; a match is answered with `304` |
+
+Role: `architecture-model` / `read`.
+
+### Response
+
+`200 OK`, `application/json`.
+
+| Response header | Value                                     |
+| --------------- | ----------------------------------------- |
+| `ETag`          | `"sha256:<hex>"` over the serialized body |
+| `Cache-Control` | `no-cache`                                |
+
+```json
+{
+  "system": "wvs",
+  "message": "WvsDeclarationAcceptedEvent",
+  "version": "2.0.0",
+  "compatibilityMode": "BACKWARD",
+  "compatibleVersion": "1.0.0",
+  "key": {
+    "schemaName": "WvsDeclarationAcceptedEventKey.avdl",
+    "schemaUrl": "https://github.com/example/message-type-registry/blob/master/descriptor/wvs/event/WvsDeclarationAcceptedEvent/WvsDeclarationAcceptedEventKey.avdl",
+    "resolvedSchema": "//-- Start WvsDeclarationAcceptedEventKey.avdl\n..."
+  },
+  "value": {
+    "schemaName": "WvsDeclarationAcceptedEventValue.avdl",
+    "schemaUrl": "https://github.com/example/message-type-registry/blob/master/descriptor/wvs/event/WvsDeclarationAcceptedEvent/WvsDeclarationAcceptedEventValue.avdl",
+    "resolvedSchema": "//-- Start WvsDeclarationAcceptedEventValue.avdl\n..."
+  }
+}
+```
+
+| Field                | Type   | Meaning                                                                        | Absent when                                              |
+| -------------------- | ------ | -------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `system`             | string | The system as it is stored, not as it was addressed - an alias resolves to it  | never                                                    |
+| `message`            | string | The message type name as it is stored - a differently-cased path resolves to it | never                                                    |
+| `version`            | string | The version                                                                    | never                                                    |
+| `compatibilityMode`  | string | The Avro compatibility declared against `compatibleVersion`, e.g. `BACKWARD`   | the descriptor declares none, typically the first version |
+| `compatibleVersion`  | string | The version this one is compatible with                                        | there is no predecessor                                  |
+| `key`                | object | The key schema                                                                 | the message type has no key schema                       |
+| `value`              | object | The value schema                                                               | never - a version without a value schema cannot be imported |
+| `*.schemaName`       | string | The schema file's name in the message type registry                            | the importer stored none                                 |
+| `*.schemaUrl`        | string | Where the file can be browsed in the registry                                  | the importer stored none                                 |
+| `*.resolvedSchema`   | string | The schema as a person reads it, see below                                     | the importer stored none                                 |
+
+**`resolvedSchema` is a rendering, not the file.** It is produced when the message type is imported: every
+`import idl` is inlined and marked with comments, the messaging base types are dropped, and namespaces, the
+`record` keyword and the enclosing braces are removed. It is meant to be read, and it is deliberately **not valid
+Avro IDL** - `schemaUrl` is where the file itself is. The rendering cannot be changed for schemas that are already
+imported without importing them again.
+
+| Status | `type`                           | When                                                                   |
+| ------ | -------------------------------- | ---------------------------------------------------------------------- |
+| `304`  | -                                | `If-None-Match` matched                                                |
+| `401`  | -                                | No token, or one the resource server rejects                           |
+| `403`  | -                                | The token does not carry `architecture-model` / `read` for this system |
+| `404`  | `system-not-found`               | `{system}` names no known system or alias                              |
+| `404`  | `message-type-version-not-found` | The system has no such message type, or it has no such version         |
+| `406`  | -                                | `Accept` allows neither `application/json` nor `*/*`                   |
 
 ## Configuration
 

@@ -17,8 +17,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Guards the rule that <em>every</em> resource of the docs API is behind the semantic role: a role on six of
- * seven resources is worse than none, because it reads as protected.
+ * Guards the rule that <em>every</em> resource of the docs API is behind the semantic role: a role on all but
+ * one resource is worse than none, because it reads as protected.
  * <p>
  * A handler method added without {@link RequiresArchitectureModelRead} fails the build here, naming the method,
  * instead of being discovered in production.
@@ -51,7 +51,7 @@ class DocsApiRoleCoverageTest {
         assertThat(docsApiControllers())
                 .extracting(Class::getSimpleName)
                 .containsExactlyInAnyOrder("SystemsController", "ComponentArtifactController",
-                        "ArtifactIndexController");
+                        "ArtifactIndexController", "MessageTypesController");
     }
 
     @Test

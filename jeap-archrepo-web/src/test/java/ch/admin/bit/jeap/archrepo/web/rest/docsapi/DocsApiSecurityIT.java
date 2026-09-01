@@ -49,7 +49,9 @@ class DocsApiSecurityIT extends DocsApiControllerTestBase {
                 DocsApiPaths.openApiContentPath("wvs", "wvs-foo-bar-service"),
                 DocsApiPaths.databaseSchemaContentPath("wvs", "wvs-foo-bar-service"),
                 DocsApiPaths.OPENAPI_SPECS,
-                DocsApiPaths.DATABASE_SCHEMAS);
+                DocsApiPaths.DATABASE_SCHEMAS,
+                DocsApiPaths.MESSAGE_TYPES,
+                DocsApiPaths.messageTypeVersionPath("wvs", "WvsDeclarationAcceptedEvent", "1.0.0"));
     }
 
     @ParameterizedTest(name = "{0} without a token is 401")

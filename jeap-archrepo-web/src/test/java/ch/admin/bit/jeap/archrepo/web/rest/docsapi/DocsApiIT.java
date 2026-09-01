@@ -3,6 +3,9 @@ package ch.admin.bit.jeap.archrepo.web.rest.docsapi;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
+import ch.admin.bit.jeap.archrepo.metamodel.message.MessageVersion;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
@@ -53,6 +56,8 @@ class DocsApiIT extends DocsApiControllerTestBase {
 
     private static final String SYSTEM = "wvs";
     private static final String COMPONENT = "wvs-foo-bar-service";
+    private static final String EVENT_NAME = "WvsDeclarationAcceptedEvent";
+    private static final String COMMAND_NAME = "WvsCheckNctsReferabilityV2Command";
     private static final byte[] SPEC = "{\"openapi\":\"3.0.0\"}".getBytes(StandardCharsets.UTF_8);
 
     @Autowired
@@ -181,6 +186,127 @@ class DocsApiIT extends DocsApiControllerTestBase {
         mockMvc.perform(get(contentUrl).header("If-None-Match", etagOfContent)
                         .with(authentication(tokenWithArchitectureModelRead())))
                 .andExpect(status().isNotModified());
+    }
+
+    @Test
+    void getMessageTypes_listsEveryVersionOfEveryMessageType() throws Exception {
+        seedMessageTypes();
+
+        mockMvc.perform(get(DocsApiPaths.MESSAGE_TYPES)
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(jsonPath("$.messageTypes", hasSize(2)))
+                // Sorted by system, message type and version, across the two entities that hold them
+                .andExpect(jsonPath("$.messageTypes[0].message").value(COMMAND_NAME))
+                .andExpect(jsonPath("$.messageTypes[0].kind").value("COMMAND"))
+                .andExpect(jsonPath("$.messageTypes[1].message").value(EVENT_NAME))
+                .andExpect(jsonPath("$.messageTypes[1].kind").value("EVENT"))
+                .andExpect(jsonPath("$.messageTypes[1].versions", hasSize(3)))
+                // Ordered as numbers: as text, 10.0.0 would stand between 1.0.0 and 2.0.0
+                .andExpect(jsonPath("$.messageTypes[1].versions[0].version").value("1.0.0"))
+                .andExpect(jsonPath("$.messageTypes[1].versions[1].version").value("2.0.0"))
+                .andExpect(jsonPath("$.messageTypes[1].versions[2].version").value("10.0.0"));
+    }
+
+    @Test
+    void getMessageTypes_filteredBySystemResolvesAnAlias() throws Exception {
+        seedMessageTypes();
+
+        mockMvc.perform(get(DocsApiPaths.MESSAGE_TYPES).param("system", "WVS-ALIAS")
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.messageTypes", hasSize(2)));
+    }
+
+    @Test
+    void getMessageTypeVersion_namesTheMessageTypeAsItIsStored() throws Exception {
+        seedMessageTypes();
+
+        // Addressed in the wrong case, answered with the stored spelling - as the system name is
+        mockMvc.perform(get(DocsApiPaths.messageTypeVersionPath("WVS-ALIAS", EVENT_NAME.toLowerCase(), "2.0.0"))
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.system").value(SYSTEM))
+                .andExpect(jsonPath("$.message").value(EVENT_NAME));
+    }
+
+    @Test
+    void getMessageTypeVersion_servesTheStoredSchemas() throws Exception {
+        seedMessageTypes();
+
+        mockMvc.perform(get(DocsApiPaths.messageTypeVersionPath(SYSTEM, EVENT_NAME, "2.0.0"))
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.version").value("2.0.0"))
+                .andExpect(jsonPath("$.compatibilityMode").value("BACKWARD"))
+                .andExpect(jsonPath("$.compatibleVersion").value("1.0.0"))
+                .andExpect(jsonPath("$.key.schemaName").value("Key-2.0.0.avdl"))
+                .andExpect(jsonPath("$.value.resolvedSchema").value("value schema 2.0.0"));
+    }
+
+    /**
+     * That the index is walkable: every version it lists can be fetched at the path it carries, context path
+     * and encoding included.
+     */
+    @Test
+    void everyVersionInTheIndexCanBeFetched() throws Exception {
+        seedMessageTypes();
+
+        String index = mockMvc.perform(get(DocsApiPaths.MESSAGE_TYPES)
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<String> contentUrls = JsonPath.read(index, "$.messageTypes[*].versions[*].contentUrl");
+        assertThat(contentUrls).hasSize(4);
+        for (String contentUrl : contentUrls) {
+            mockMvc.perform(get(contentUrl).with(authentication(tokenWithArchitectureModelRead())))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.value.resolvedSchema").exists());
+        }
+    }
+
+    /**
+     * The message types are seeded per test rather than in {@link #seedLandscape()}: the resources above assert
+     * a landscape without messages, and this test class writes inside its own transaction anyway.
+     */
+    private void seedMessageTypes() {
+        System system = systemRepository.findByNameIgnoreCase(SYSTEM).orElseThrow();
+        system.addEvent(Event.builder()
+                .id(UUID.randomUUID())
+                .messageTypeName(EVENT_NAME)
+                .scope(SYSTEM)
+                .topic("wvs-declaration-event")
+                .descriptorUrl("https://registry.example.com/declaration.json")
+                .messageVersions(List.of(messageVersion("1.0.0", null), messageVersion("2.0.0", "1.0.0"),
+                        messageVersion("10.0.0", "2.0.0")))
+                .build());
+        system.addCommand(Command.builder()
+                .id(UUID.randomUUID())
+                .messageTypeName(COMMAND_NAME)
+                .scope(SYSTEM)
+                .topic("wvs-ncts-command")
+                .descriptorUrl("https://registry.example.com/ncts.json")
+                .messageVersions(List.of(messageVersion("1.0.0", null)))
+                .build());
+        systemRepository.saveAndFlush(system);
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    private static MessageVersion messageVersion(String version, String compatibleVersion) {
+        return MessageVersion.builder()
+                .version(version)
+                .keySchemaName("Key-" + version + ".avdl")
+                .keySchemaUrl("https://registry.example.com/Key-" + version + ".avdl")
+                .keySchemaResolved("key schema " + version)
+                .valueSchemaName("Value-" + version + ".avdl")
+                .valueSchemaUrl("https://registry.example.com/Value-" + version + ".avdl")
+                .valueSchemaResolved("value schema " + version)
+                .compatibilityMode(compatibleVersion == null ? null : "BACKWARD")
+                .compatibleVersion(compatibleVersion)
+                .build();
     }
 
     // The backfill of a hash that predates the column is proven in DocsApiRequestScopeIT: it is written with a

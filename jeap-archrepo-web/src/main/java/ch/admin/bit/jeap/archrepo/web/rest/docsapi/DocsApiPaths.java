@@ -7,6 +7,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * The routes of the docs API. Kept in one place so that no path is spelled twice - the controllers, the OpenAPI
@@ -24,10 +25,12 @@ public final class DocsApiPaths {
     public static final String SYSTEMS = DOCS_API + "/systems";
     public static final String OPENAPI_SPECS = DOCS_API + "/openapi-specs";
     public static final String DATABASE_SCHEMAS = DOCS_API + "/database-schemas";
+    public static final String MESSAGE_TYPES = DOCS_API + "/message-types";
 
     private static final String OPENAPI_CONTENT_TEMPLATE = SYSTEMS + "/{system}/components/{component}/openapi";
     private static final String DATABASE_SCHEMA_CONTENT_TEMPLATE =
             SYSTEMS + "/{system}/components/{component}/database-schema";
+    static final String MESSAGE_TYPE_VERSION_TEMPLATE = MESSAGE_TYPES + "/{system}/{message}/versions/{version}";
 
     private DocsApiPaths() {
     }
@@ -47,20 +50,29 @@ public final class DocsApiPaths {
     }
 
     /**
+     * @return the path of one version of one message type, relative to the service root
+     */
+    public static String messageTypeVersionPath(String systemName, String messageName, String version) {
+        return contentPath(MESSAGE_TYPE_VERSION_TEMPLATE, systemName, messageName, version);
+    }
+
+    /**
      * The path of a content resource, carrying the service's context path so that resolving it against the base
      * URL a consumer called yields the resource again. Without the context path the resolution would strip it -
      * instances run under {@code server.servlet.context-path} - which is why this is not simply
      * {@code /docs-api/...}. The host is deliberately left out: service-to-service traffic and a browser may
      * reach the arch repo under different hosts, so no single absolute URL is right for both.
      * <p>
-     * System and component names come from the importers rather than from a validated vocabulary, so each is
-     * encoded as a path segment before it is placed into the template. Encoding after expansion would not be
-     * enough: a slash is legal in a path, so it would pass through and the link would name another resource.
+     * System, component and message type names come from the importers rather than from a validated
+     * vocabulary, so each is encoded as a path segment before it is placed into the template. Encoding after
+     * expansion would not be enough: a slash is legal in a path, so it would pass through and the link would
+     * name another resource.
      */
-    private static String contentPath(String template, String systemName, String componentName) {
+    private static String contentPath(String template, String... segments) {
+        Object[] encoded = Arrays.stream(segments).map(DocsApiPaths::encodeSegment).toArray();
         return contextPath() + UriComponentsBuilder.fromPath(template)
                 .build()
-                .expand(encodeSegment(systemName), encodeSegment(componentName))
+                .expand(encoded)
                 .toUriString();
     }
 
