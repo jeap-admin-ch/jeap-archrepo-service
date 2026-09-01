@@ -117,11 +117,6 @@ class MessageTypesController {
         return new MessageTypeIndexDto(messageTypes);
     }
 
-    /**
-     * The message type is named as it is <b>stored</b> and not as it was addressed, the way the system is: the
-     * path matches ignoring case, and echoing the caller's spelling would give one resource two bodies and two
-     * entity tags.
-     */
     private static MessageTypeVersionDto version(String systemName, MessageTypeVersionDetail detail) {
         return new MessageTypeVersionDto(systemName, detail.message(), detail.version(),
                 detail.compatibilityMode(), detail.compatibleVersion(),
@@ -129,10 +124,6 @@ class MessageTypesController {
                 schema(detail.valueSchemaName(), detail.valueSchemaUrl(), detail.valueSchemaResolved()));
     }
 
-    /**
-     * A side of a version, or null when there is none - the key schema is optional, and an object of three
-     * nulls would say something different from its absence.
-     */
     private static MessageSchemaDto schema(String schemaName, String schemaUrl, String resolvedSchema) {
         if (schemaName == null && schemaUrl == null && resolvedSchema == null) {
             return null;
@@ -141,9 +132,7 @@ class MessageTypesController {
     }
 
     /**
-     * Resolves a system the way every other resource does - by name or alias, ignoring case - and rejects an
-     * unknown one. Matching the stored name alone would answer an alias with an empty index or a {@code 404}
-     * on a version that exists.
+     * Resolves a system by name or alias, ignoring case
      */
     private String resolveSystemName(String systemName) {
         return systemRepository.findByNameOrAliasIgnoreCase(systemName)

@@ -189,8 +189,6 @@ class DocsApiDtoFactory {
                 messageType.getDescriptorUrl(),
                 messageType.getDocumentationUrl(),
                 messageType.getDescription(),
-                // The same order the message type index uses: two orders for one fact would be worse
-                // than either, and a version list is read by people
                 messageType.getMessageVersions().stream()
                         .map(MessageVersion::getVersion)
                         .sorted(MessageVersionOrder.INSTANCE)
