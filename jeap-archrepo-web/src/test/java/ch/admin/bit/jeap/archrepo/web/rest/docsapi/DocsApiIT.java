@@ -110,10 +110,24 @@ class DocsApiIT extends DocsApiControllerTestBase {
         mockMvc.perform(get(DocsApiPaths.SYSTEMS).with(authentication(tokenWithArchitectureModelRead())))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("ETag"))
-                .andExpect(jsonPath("$.systems", hasSize(1)))
-                .andExpect(jsonPath("$.systems[0].name").value(SYSTEM))
-                .andExpect(jsonPath("$.systems[0].aliases[0]").value("WVS-ALIAS"))
-                .andExpect(jsonPath("$.systems[0].team.name").value("Team Blue"));
+                .andExpect(jsonPath(seededSystem(), hasSize(1)))
+                .andExpect(jsonPath(seededSystem() + ".name").value(SYSTEM))
+                .andExpect(jsonPath(seededSystem() + ".aliases[0]").value("WVS-ALIAS"))
+                .andExpect(jsonPath(seededSystem() + ".team.name").value("Team Blue"));
+    }
+
+    /**
+     * The seeded system within the answer, rather than {@code $.systems[0]} and a total count.
+     * <p>
+     * This class is {@code @Transactional} and rolls its own writes back, but it reads the same database as the
+     * integration tests that are deliberately <b>not</b> - {@code DocsApiRequestScopeIT} and
+     * {@code ImportersOverHttpIT} both have to commit, because a request has to find the landscape in the
+     * database rather than in a persistence context shared with the test. What they commit stays there, so
+     * whether this class sees only its own system depends on the order Surefire happens to run the classes in.
+     * It once passed locally and failed on the build server for exactly that reason.
+     */
+    private static String seededSystem() {
+        return "$.systems[?(@.name == '%s')]".formatted(SYSTEM);
     }
 
     @Test
@@ -165,14 +179,19 @@ class DocsApiIT extends DocsApiControllerTestBase {
     }
 
     private void assertIndexEtagMatchesContent(String indexPath) throws Exception {
+        // Scoped to the seeded system for the reason given on seededSystem(): the index lists every artifact of
+        // every system, including those a non-transactional test class committed before this one ran
+        String seededArtifact = "$.artifacts[?(@.system == '%s')]".formatted(SYSTEM);
+
         String indexBody = mockMvc.perform(get(indexPath)
                         .with(authentication(tokenWithArchitectureModelRead())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.artifacts", hasSize(1)))
+                .andExpect(jsonPath(seededArtifact, hasSize(1)))
                 .andReturn().getResponse().getContentAsString();
 
-        String etagInIndex = JsonPath.read(indexBody, "$.artifacts[0].etag");
-        String contentUrl = JsonPath.read(indexBody, "$.artifacts[0].contentUrl");
+        // A filter expression is an indefinite path, so JsonPath answers with the matches rather than the value
+        String etagInIndex = JsonPath.<List<String>>read(indexBody, seededArtifact + ".etag").getFirst();
+        String contentUrl = JsonPath.<List<String>>read(indexBody, seededArtifact + ".contentUrl").getFirst();
 
         String etagOfContent = mockMvc.perform(get(contentUrl)
                         .with(authentication(tokenWithArchitectureModelRead())))

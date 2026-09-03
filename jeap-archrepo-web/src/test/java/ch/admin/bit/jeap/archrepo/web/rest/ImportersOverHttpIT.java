@@ -20,8 +20,9 @@ import ch.admin.bit.jeap.security.test.resource.JeapAuthenticationTestTokenBuild
 import ch.admin.bit.jeap.security.test.resource.configuration.DisableJeapPermitAllSecurityConfiguration;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -60,6 +61,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(DisableJeapPermitAllSecurityConfiguration.class)
+// PER_CLASS so that the landscape is committed once rather than once per test method - see seed method
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ImportersOverHttpIT {
 
     /** Matches {@code jeap.security.oauth2.resourceserver.system-name} in {@code application-test.yml}. */
@@ -89,11 +92,15 @@ class ImportersOverHttpIT {
     private String consumer;
 
     /**
-     * Nothing is rolled back between methods here, so each seeds a landscape under its own names. Everything is
-     * written through the repositories, which commit - the request must find it in the database rather than in a
-     * persistence context this test is sharing with it.
+     * Seeded <b>once for the class</b>, not per method. Nothing here is rolled back - the requests must find the
+     * landscape in the database rather than in a persistence context this test is sharing with them - and every
+     * test below only reads, so seeding per method would leave one committed landscape per test method behind
+     * for the rest of the suite. That is what broke {@code DocsApiIT} on a build whose run order put this class
+     * first: it seeded seven.
+     * <p>
+     * The names still carry a random suffix, because what is committed here outlives the class.
      */
-    @BeforeEach
+    @BeforeAll
     void seedALandscapeWithRelationsAndRestApis() {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         system = "importers-system-" + suffix;
