@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.6.1] - 2026-09-03
+
+### Changed
+- The `importers` element collections of relations and REST APIs are fetched lazily instead of eagerly, and
+  `spring.jpa.properties.hibernate.default_batch_fetch_size` now defaults to `100`. Eager, an element collection
+  on rows arriving through a collection is loaded one owning row at a time, and every read of the architecture
+  model traverses all relations of all systems: `GET /docs-api/systems/{system}` spent seconds on thousands of
+  single-row queries for a field its payload does not contain. No API payload changes.
+- `RestApi.toString()` no longer includes `importers`, so logging a REST API does not read it from the database.
+
 ## [12.6.0] - 2026-09-03
 
 ### Dependencies

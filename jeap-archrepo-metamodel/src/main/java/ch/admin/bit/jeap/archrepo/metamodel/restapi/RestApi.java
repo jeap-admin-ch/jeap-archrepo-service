@@ -38,8 +38,19 @@ public class RestApi extends MutableDomainEntity implements MultipleImportable {
     @NotNull
     private String path;
 
+    /**
+     * Which sources have seen this REST API. See the same field on
+     * {@link ch.admin.bit.jeap.archrepo.metamodel.relation.AbstractRelation} for why it is lazy; the same
+     * per-owning-row {@code SELECT} applies here.
+     * <p>
+     * {@code @ToString.Exclude} because this class has a class-level {@code @ToString} and is logged as a whole
+     * object by several importers. Included, every one of those log lines would load this collection from the
+     * database - a query issued by a log statement, and a {@code LazyInitializationException} waiting for the
+     * first one written outside a transaction.
+     */
     @EqualsAndHashCode.Exclude
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "rest_api_importers")
     @Enumerated(EnumType.STRING)
     private SortedSet<Importer> importers = new TreeSet<>();
