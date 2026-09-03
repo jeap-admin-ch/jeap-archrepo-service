@@ -7,13 +7,14 @@ import jakarta.persistence.Entity;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Getter
 @Entity
 @DiscriminatorValue("EVENT")
 public class EventRelation extends AbstractRelation {
     @NonNull
+    @ToString.Include
     private String eventName;
 
     @Override

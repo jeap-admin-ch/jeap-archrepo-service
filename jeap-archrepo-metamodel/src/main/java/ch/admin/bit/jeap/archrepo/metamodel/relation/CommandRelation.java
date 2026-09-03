@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Getter
 @Entity
@@ -15,6 +15,7 @@ import lombok.*;
 public class CommandRelation extends AbstractRelation {
 
     @NonNull
+    @ToString.Include
     private String commandName;
 
     @Override

@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @SuperBuilder
 @Entity
 @DiscriminatorValue("MOBILE_APP")

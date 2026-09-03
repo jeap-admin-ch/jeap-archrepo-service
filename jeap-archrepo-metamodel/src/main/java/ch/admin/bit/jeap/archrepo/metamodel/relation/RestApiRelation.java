@@ -9,7 +9,8 @@ import lombok.*;
 import java.time.ZonedDateTime;
 
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+// restApi stays out: printing it would nest a whole RestApi in every relation log line
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Getter
 @Entity
@@ -18,6 +19,7 @@ public class RestApiRelation extends AbstractRelation {
 
     @Setter
     @EqualsAndHashCode.Exclude
+    @ToString.Include
     private String pactUrl;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -25,6 +27,7 @@ public class RestApiRelation extends AbstractRelation {
 
     @Setter
     @EqualsAndHashCode.Exclude
+    @ToString.Include
     private ZonedDateTime lastSeen;
 
     @Override

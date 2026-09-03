@@ -12,30 +12,31 @@ import lombok.*;
 import java.util.*;
 
 @EqualsAndHashCode(callSuper = false)
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Getter
 public class RestApi extends MutableDomainEntity implements MultipleImportable {
 
     @Id
     @NotNull
+    @ToString.Include
     private UUID id;
 
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "system_id")
     private System definingSystem;
 
     @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @ToString.Exclude
     private SystemComponent provider;
 
     @NotNull
+    @ToString.Include
     private String method;
 
     @NotNull
+    @ToString.Include
     private String path;
 
     /**
@@ -43,13 +44,12 @@ public class RestApi extends MutableDomainEntity implements MultipleImportable {
      * {@link ch.admin.bit.jeap.archrepo.metamodel.relation.AbstractRelation} for why it is lazy; the same
      * per-owning-row {@code SELECT} applies here.
      * <p>
-     * {@code @ToString.Exclude} because this class has a class-level {@code @ToString} and is logged as a whole
-     * object by several importers. Included, every one of those log lines would load this collection from the
-     * database - a query issued by a log statement, and a {@code LazyInitializationException} waiting for the
-     * first one written outside a transaction.
+     * Not in {@code toString}: this class is logged as a whole object by several importers, and every one of
+     * those log lines would otherwise load this collection from the database. The class-level
+     * {@code onlyExplicitlyIncluded} is what keeps it out, so there is nothing to remember when a field is
+     * added here.
      */
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "rest_api_importers")
     @Enumerated(EnumType.STRING)

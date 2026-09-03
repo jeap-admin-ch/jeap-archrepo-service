@@ -13,7 +13,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   on rows arriving through a collection is loaded one owning row at a time, and every read of the architecture
   model traverses all relations of all systems: `GET /docs-api/systems/{system}` spent seconds on thousands of
   single-row queries for a field its payload does not contain. No API payload changes.
-- `RestApi.toString()` no longer includes `importers`, so logging a REST API does not read it from the database.
+- Every entity of the model is now on `@ToString(onlyExplicitlyIncluded = true)`, listing only the plain columns
+  worth logging, so that **no `toString` can issue a database query**. It was not only `RestApi.importers`:
+  `System` rendered all seven of its lazy collections, so one log line loaded the whole aggregate; the three
+  graph entities rendered their `@Lob` blob; and `SystemComponentDatabaseSchema` read the name of a lazily
+  loaded system. `AbstractRelation` and `SystemComponent` gained a `toString` of their own, so a logged relation
+  or component now names itself instead of printing an identity hash.
 
 ## [12.6.0] - 2026-09-03
 

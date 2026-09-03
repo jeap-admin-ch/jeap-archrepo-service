@@ -67,13 +67,19 @@ public class SystemComponentDatabaseSchema extends MutableDomainEntity {
         return this;
     }
 
+    /**
+     * Hand-written rather than generated, and it must stay free of the associations and the blob: {@code system}
+     * is a lazy {@code @ManyToOne} whose {@code getName()} initialises the proxy, and {@code schema} is a lazy
+     * blob. This is rendered from the exception messages of {@code System.addDatabaseSchema}, so it has to work
+     * on a detached instance too. The component name is safe - that association is eager.
+     */
+    @Override
     public String toString() {
         return "SystemComponentDatabaseSchema{" +
-                "id=" + id +
-                ", system=" + (system != null ? system.getName() : "null") +
-                ", systemComponent=" + systemComponent.getName() +
-                ", schemaVersion=" + schemaVersion +
-                '}';
+               "id=" + id +
+               ", systemComponent=" + systemComponent.getName() +
+               ", schemaVersion=" + schemaVersion +
+               '}';
     }
 
 }

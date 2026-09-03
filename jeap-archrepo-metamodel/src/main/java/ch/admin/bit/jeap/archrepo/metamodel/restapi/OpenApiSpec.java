@@ -11,17 +11,17 @@ import lombok.*;
 import java.util.UUID;
 
 @NoArgsConstructor
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Getter
 public class OpenApiSpec extends MutableDomainEntity {
 
     @Id
     @NotNull
+    @ToString.Include
     private UUID id;
 
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "system_id")
     @Setter
@@ -29,14 +29,14 @@ public class OpenApiSpec extends MutableDomainEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
-    @ToString.Exclude
     private SystemComponent provider;
 
+    @ToString.Include
     private String version;
 
+    @ToString.Include
     private String serverUrl;
 
-    @ToString.Exclude
     private byte[] content;
 
     /**

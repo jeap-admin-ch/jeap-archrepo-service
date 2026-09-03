@@ -9,6 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 class SystemComponentDatabaseSchemaTest {
 
@@ -57,11 +59,16 @@ class SystemComponentDatabaseSchemaTest {
                 .hasMessage("version cannot be null");
     }
 
+    /**
+     * The system is deliberately absent from the rendering: it is a lazy {@code @ManyToOne}, and reading its
+     * name to build a string initialises the proxy - a database query issued by a log statement, and a
+     * {@code LazyInitializationException} once the schema is detached. See
+     * {@code EntityToStringDoesNotQueryTest}, which holds that for every entity of the model.
+     */
     @Test
     void testToString() {
         final System system = mock(System.class);
         final SystemComponent systemComponent = mock(SystemComponent.class);
-        when(system.getName()).thenReturn("test-system");
         when(systemComponent.getParent()).thenReturn(system);
         when(systemComponent.getName()).thenReturn("test-system-component");
         final SystemComponentDatabaseSchema dbSchema = SystemComponentDatabaseSchema.builder()
@@ -72,11 +79,11 @@ class SystemComponentDatabaseSchemaTest {
 
         final String expectedString = "SystemComponentDatabaseSchema{" +
                 "id=" + dbSchema.getId() +
-                ", system=test-system" +
                 ", systemComponent=test-system-component" +
                 ", schemaVersion=1.2.3" +
                 '}';
         assertThat(dbSchema).hasToString(expectedString);
+        verify(system, never()).getName();
     }
 
     private SystemComponent mockSystemComponent() {

@@ -28,7 +28,13 @@ import static java.util.Comparator.comparing;
 // Sonar does not always play well with lombok
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ToString
+/*
+ * Include-only, and it has to stay that way: this entity owns seven lazy collections, so an opt-out toString
+ * loads the whole aggregate - every component, message, relation, REST API, spec and schema - from one log
+ * line. See EntityToStringDoesNotQueryTest, which fails the build if any entity's toString reaches the
+ * database.
+ */
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Getter
 @Slf4j
@@ -36,9 +42,11 @@ public class System extends MutableDomainEntity {
 
     @Id
     @NotNull
+    @ToString.Include
     private UUID id;
 
     @NotNull
+    @ToString.Include
     private String name;
 
     private String description;

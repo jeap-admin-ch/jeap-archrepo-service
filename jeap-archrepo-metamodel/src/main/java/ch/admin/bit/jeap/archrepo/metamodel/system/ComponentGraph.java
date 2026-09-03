@@ -10,7 +10,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = false)
-@ToString
+// Include-only so that the graph blob can never reach a log line - see EntityToStringDoesNotQueryTest
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Getter
 @Table(name = "component_graph")
@@ -18,14 +19,17 @@ public class ComponentGraph extends MutableDomainEntity {
 
     @Id
     @NotNull
+    @ToString.Include
     private UUID id;
 
     @NotNull
     @Column(name = "system_name")
+    @ToString.Include
     private String systemName;
 
     @NotNull
     @Column(name = "component_name")
+    @ToString.Include
     private String componentName;
 
     @Lob
@@ -33,6 +37,7 @@ public class ComponentGraph extends MutableDomainEntity {
     @Column(name = "graph_data", columnDefinition = "BYTEA")
     private byte[] graphData;
 
+    @ToString.Include
     private String fingerprint;
 
     protected ComponentGraph() {

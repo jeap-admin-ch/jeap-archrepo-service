@@ -15,6 +15,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+/*
+ * Include-only: ownedBy and parent are lazy, so an opt-out toString would query for a team and a system on
+ * every log line that prints a component. The concrete class name Lombok prints already says which type it is.
+ */
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Getter
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -26,9 +31,11 @@ public abstract class SystemComponent implements Importable {
 
     @Id
     @NotNull
+    @ToString.Include
     private UUID id;
 
     @NonNull
+    @ToString.Include
     String name;
 
     String description;
