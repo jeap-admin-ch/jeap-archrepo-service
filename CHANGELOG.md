@@ -14,6 +14,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Everything that touches the database is tested against a real PostgreSQL 17 container instead of against H2.
 - The build - and an instance verifying pacts against `PactProviderTestBase` - now needs a running Docker daemon.
 
+### Dependencies
+- **ch.admin.bit.jeap:jeap-spring-boot-parent**: 40.8.0 → 40.9.0 (minor)
+
 ## [12.6.1] - 2026-09-03
 
 ### Changed
