@@ -26,7 +26,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -47,6 +51,36 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @IgnoreNoPactsToVerify
 @AllowOverridePactUrl
 public class PactProviderTestBase {
+    /**
+     * The image of the PostgreSQL the verification runs against, overridable for a build that pulls its images
+     * from a mirror rather than from Docker Hub.
+     */
+    public static final String POSTGRES_IMAGE_PROPERTY = "archrepo.test.postgres-image";
+
+    /**
+     * A real PostgreSQL, in the version the service runs on in production.
+     * <p>
+     * Every repository the verified endpoints use is mocked, but the application context is the real one and
+     * does not start without the JPA stack, so a database has to be there. <b>Running this verification needs a
+     * Docker daemon.</b>
+     * <p>
+     * Started once for the whole test JVM and never stopped: the Spring context outlives any per-class
+     * lifecycle.
+     */
+    private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer(DockerImageName.parse(
+            java.lang.System.getProperty(POSTGRES_IMAGE_PROPERTY, "postgres:17-alpine")));
+
+    static {
+        POSTGRES.start();
+    }
+
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+    }
+
     private static final String TEST_SYSTEM = "test-system";
     private static final String TEST_COMPONENT = "test-component";
     private static final String TEST_VERSION = "1.2.3";

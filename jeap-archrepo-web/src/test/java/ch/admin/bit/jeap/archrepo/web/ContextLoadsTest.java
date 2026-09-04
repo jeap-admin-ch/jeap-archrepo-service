@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "archrepo-config.environment=dev"
 })
 @ActiveProfiles("test")
-class ContextLoadsTest {
+class ContextLoadsTest extends PostgresIntegrationTestBase {
 
     @Autowired
     private UpdateService updateService;

@@ -9,12 +9,20 @@ spring:
     name: applicationplatform-archrepo-service
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: org.h2.Driver
-    url: "jdbc:h2:mem:testdb;INIT=CREATE SCHEMA IF NOT EXISTS data;DATABASE_TO_UPPER=FALSE;MODE=PostgreSQL"
-    username: sa
-    password:
+    # url, username and password come from the PostgreSQL container - see PactProviderTestBase
     hikari:
       schema: data
+  flyway:
+    locations: classpath:db/migration/common
+    # Flyway creates automatically the default schema if it doesn't exist
+    default-schema: data
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: data
 
 archrepo:
   openapi-base-url: "https://base-url"

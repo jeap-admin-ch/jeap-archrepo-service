@@ -3,13 +3,14 @@ package ch.admin.bit.jeap.archrepo.web.rest.docsapi;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplicationRole;
 import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationToken;
 import ch.admin.bit.jeap.security.test.resource.JeapAuthenticationTestTokenBuilder;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 /**
  * The tokens the docs API tests authenticate with. The system name matches
  * {@code jeap.security.oauth2.resourceserver.system-name} in {@code application-test.yml}, because a semantic
  * role only matches when its system part does.
  */
-abstract class DocsApiControllerTestBase {
+abstract class DocsApiControllerTestBase extends PostgresIntegrationTestBase {
 
     protected static final String SYSTEM_NAME = "application-platform";
 

@@ -42,6 +42,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
         classes = ArchRepoApplication.class,
@@ -51,7 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(JeapOAuth2IntegrationTestResourceConfiguration.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class DatabaseSchemaControllerTest {
+class DatabaseSchemaControllerTest extends PostgresIntegrationTestBase {
 
     private static final String SYSTEM_NAME = "test-system";
     private static final String COMPONENT_NAME = "test-component";

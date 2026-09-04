@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.7.0] - 2026-09-04
+
+### Fixed
+- `GET /docs-api/message-types` no longer fails on PostgreSQL with `function lower(bytea) does not exist`.
+
+### Changed
+- Everything that touches the database is tested against a real PostgreSQL 17 container instead of against H2.
+- The build - and an instance verifying pacts against `PactProviderTestBase` - now needs a running Docker daemon.
+
 ## [12.6.1] - 2026-09-03
 
 ### Changed

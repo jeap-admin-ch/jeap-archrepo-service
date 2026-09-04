@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class MessageTypeVersionRepositoryTest {
+class MessageTypeVersionRepositoryTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private MessageTypeVersionRepository messageTypeVersionRepository;

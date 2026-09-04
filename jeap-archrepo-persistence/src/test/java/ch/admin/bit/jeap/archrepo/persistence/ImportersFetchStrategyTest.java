@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.properties.hibernate.default_batch_fetch_size=100",
         "spring.jpa.properties.hibernate.generate_statistics=true"
 })
-class ImportersFetchStrategyTest {
+class ImportersFetchStrategyTest extends PostgresDataJpaTestBase {
 
     /**
      * Enough owning rows that one query per row is unmistakably different from a batch, and well inside a

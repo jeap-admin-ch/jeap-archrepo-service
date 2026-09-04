@@ -7,7 +7,7 @@
     <parent>
         <groupId>ch.admin.bit.jeap</groupId>
         <artifactId>jeap-archrepo-service</artifactId>
-        <version>12.6.1-SNAPSHOT</version>
+        <version>12.7.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>jeap-archrepo-test</artifactId>
@@ -89,8 +89,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
         </dependency>
     </dependencies>
 </project>

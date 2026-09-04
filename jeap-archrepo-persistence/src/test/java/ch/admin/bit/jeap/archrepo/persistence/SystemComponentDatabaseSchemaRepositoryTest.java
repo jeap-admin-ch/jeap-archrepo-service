@@ -19,7 +19,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class SystemComponentDatabaseSchemaRepositoryTest {
+class SystemComponentDatabaseSchemaRepositoryTest extends PostgresDataJpaTestBase {
 
     private static final String SYSTEM_NAME = "test-system";
     private static final String COMPONENT_NAME = "test-component";

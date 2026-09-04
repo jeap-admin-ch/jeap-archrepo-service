@@ -10,7 +10,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class TeamRepositoryTest {
+class TeamRepositoryTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private TeamRepository teamRepository;

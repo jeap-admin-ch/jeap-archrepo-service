@@ -20,39 +20,65 @@ import java.util.stream.Stream;
  * {@link MessageVersion} is an {@code @Embeddable} in an {@code @ElementCollection} and has no identity of its
  * own, so every query here reaches it through its {@link MessageType}. Loading the model instead would pull
  * every resolved schema of the landscape into memory to answer with one of them.
+ * <p>
+ * The unfiltered and the filtered index are <b>two queries each</b>, not one query with a nullable parameter:
+ * a {@code where :systemName is null or ...} leaves Hibernate no type to infer for the parameter, so a null is
+ * bound as an untyped object and PostgreSQL fails the request with {@code lower(bytea)}. Do not merge them
+ * back into one query.
  */
 @Repository
 public interface MessageTypeVersionRepository extends JpaRepository<MessageType, UUID> {
 
     /**
-     * The versions of every event, without their schemas.
-     *
-     * @param systemName restricts the result to one system, by its stored name and ignoring case. <b>Null means
-     *                   the whole landscape</b> - an alias is resolved by the caller, because only the caller
-     *                   can tell an unknown system from a system without messages
+     * The versions of every event of the landscape, without their schemas.
      */
     @Query("""
             select s.name as system, e.messageTypeName as message, 'EVENT' as kind, v.version as version
             from Event e
             join e.parent s
             join e.messageVersions v
-            where :systemName is null or lower(s.name) = lower(:systemName)
             """)
-    List<MessageTypeVersionIndexEntry> findEventIndexEntries(@Param("systemName") String systemName);
+    List<MessageTypeVersionIndexEntry> findEventIndexEntries();
 
     /**
-     * The versions of every command, without their schemas.
+     * The versions of one system's events, without their schemas.
      *
-     * @param systemName as in {@link #findEventIndexEntries(String)}
+     * @param systemName the system, by its stored name and ignoring case. An alias is resolved by the caller,
+     *                   because only the caller can tell an unknown system from a system without messages
+     */
+    @Query("""
+            select s.name as system, e.messageTypeName as message, 'EVENT' as kind, v.version as version
+            from Event e
+            join e.parent s
+            join e.messageVersions v
+            where lower(s.name) = lower(:systemName)
+            """)
+    List<MessageTypeVersionIndexEntry> findEventIndexEntriesBySystemName(@Param("systemName") String systemName);
+
+    /**
+     * The versions of every command of the landscape, without their schemas.
      */
     @Query("""
             select s.name as system, c.messageTypeName as message, 'COMMAND' as kind, v.version as version
             from Command c
             join c.parent s
             join c.messageVersions v
-            where :systemName is null or lower(s.name) = lower(:systemName)
             """)
-    List<MessageTypeVersionIndexEntry> findCommandIndexEntries(@Param("systemName") String systemName);
+    List<MessageTypeVersionIndexEntry> findCommandIndexEntries();
+
+    /**
+     * The versions of one system's commands, without their schemas.
+     *
+     * @param systemName as in {@link #findEventIndexEntriesBySystemName(String)}
+     */
+    @Query("""
+            select s.name as system, c.messageTypeName as message, 'COMMAND' as kind, v.version as version
+            from Command c
+            join c.parent s
+            join c.messageVersions v
+            where lower(s.name) = lower(:systemName)
+            """)
+    List<MessageTypeVersionIndexEntry> findCommandIndexEntriesBySystemName(@Param("systemName") String systemName);
 
     /**
      * Every version of every message type, or of one system's message types, sorted by system, message type and
@@ -61,14 +87,22 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      * Events and commands are separate entities and are read separately; the order is applied here so that the
      * index does not depend on which of the two queries ran first. Versions are ordered as numbers rather than
      * as text, or {@code 10.0.0} would stand between {@code 1.0.0} and {@code 2.0.0}.
+     *
+     * @param systemName restricts the result to one system, by its stored name and ignoring case. <b>Null means
+     *                   the whole landscape</b>
      */
     default List<MessageTypeVersionIndexEntry> findIndexEntries(String systemName) {
         Comparator<MessageTypeVersionIndexEntry> order =
                 Comparator.comparing(MessageTypeVersionIndexEntry::getSystem)
                         .thenComparing(MessageTypeVersionIndexEntry::getMessage)
                         .thenComparing(MessageTypeVersionIndexEntry::getVersion, MessageVersionOrder.INSTANCE);
-        return Stream.concat(findEventIndexEntries(systemName).stream(),
-                        findCommandIndexEntries(systemName).stream())
+        List<MessageTypeVersionIndexEntry> events = systemName == null
+                ? findEventIndexEntries()
+                : findEventIndexEntriesBySystemName(systemName);
+        List<MessageTypeVersionIndexEntry> commands = systemName == null
+                ? findCommandIndexEntries()
+                : findCommandIndexEntriesBySystemName(systemName);
+        return Stream.concat(events.stream(), commands.stream())
                 .sorted(order)
                 .toList();
     }

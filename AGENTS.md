@@ -17,6 +17,9 @@ model in PostgreSQL, then auto-generate Confluence documentation from that model
 
 Always use the Maven wrapper `./mvnw` (Java 25, Spring Boot 4).
 
+The tests run against a **real PostgreSQL in a Testcontainers container**, so a **running Docker daemon is
+required** - for every build, not only for the `*IT` integration tests.
+
 ```bash
 ./mvnw clean install                          # full reactor build + all tests
 ./mvnw -q -pl jeap-archrepo-docgen -am test   # build one module (+ its deps) and test it
@@ -107,6 +110,31 @@ upstream jEAP services this app calls (deploymentlog, message-contract, reaction
 with shared base classes and stubs in the `jeap-archrepo-test` module. Confluence is never hit in tests — they run with
 `mock-confluence-client: true`, so the real `ConfluenceRestV1Client` path is unverified by the suite and needs a staging
 smoke test before release.
+
+**Everything that touches the database runs on a real PostgreSQL 17** — the version of the Aurora the service is
+deployed on — started as a Testcontainers container. There is no H2 any more: an in-memory stand-in accepted SQL
+PostgreSQL rejects, and shipped a `lower(bytea)` failure to production that the whole suite was green for.
+
+- `jeap-archrepo-persistence`: `ArchRepoPostgresTestContainer` holds the container, `PostgresDataJpaTestBase`
+  points a `@DataJpaTest` at it. Each test class keeps its own `@DataJpaTest` declaration (several need
+  Hibernate properties of their own) and extends the base for the data source. Tests roll back, so they share
+  one database; `ArchRepoPostgresTestContainer.createDatabase()` hands a migration test a database of its own.
+- `jeap-archrepo-web`: `PostgresIntegrationTestBase` starts its own container for the module, and
+  `application-test.yml` no longer names a data source.
+- `jeap-archrepo-test`: `PactProviderTestBase` starts one too — every repository the verified endpoints use is
+  mocked, but the application context does not start without the JPA stack. **This is published**, so a
+  downstream instance verifying pacts needs a Docker daemon as well; the image is overridable with the system
+  property `archrepo.test.postgres-image`.
+
+The container is started once per test JVM in a static initializer and never stopped — Spring contexts are
+cached and outlive any per-class lifecycle. The image registry is configured per module in
+`src/test/resources/testcontainers.properties` (`hub.image.name.prefix`).
+
+Two things PostgreSQL does differently from the H2 that was here before, both of which the suite ran into:
+
+- `CURRENT_TIMESTAMP` is the **transaction** timestamp, so a `modified_at` stamped by an update cannot be
+  compared with a timestamp the JVM took inside the same transaction.
+- The driver cannot infer a SQL type for `ZonedDateTime`; bind an `OffsetDateTime` instead.
 
 ## Versioning & Conventions
 

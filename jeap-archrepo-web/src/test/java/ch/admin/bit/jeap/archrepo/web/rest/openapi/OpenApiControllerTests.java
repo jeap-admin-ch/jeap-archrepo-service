@@ -47,6 +47,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
         classes = ArchRepoApplication.class,
@@ -58,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 // The TODO markers point at JEAP-6593, which is a separate story; they stay until it is done
 @SuppressWarnings("java:S1135")
-class OpenApiControllerTests {
+class OpenApiControllerTests extends PostgresIntegrationTestBase {
 
     private static final String SYSTEM = "system";
     private static final String SERVICE = "system-context-service";

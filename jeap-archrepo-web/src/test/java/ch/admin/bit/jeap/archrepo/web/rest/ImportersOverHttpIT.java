@@ -42,6 +42,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 /**
  * Every endpoint that reads the lazily loaded {@code importers} of a relation or a REST API, over HTTP, with
@@ -63,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(DisableJeapPermitAllSecurityConfiguration.class)
 // PER_CLASS so that the landscape is committed once rather than once per test method - see seed method
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ImportersOverHttpIT {
+class ImportersOverHttpIT extends PostgresIntegrationTestBase {
 
     /** Matches {@code jeap.security.oauth2.resourceserver.system-name} in {@code application-test.yml}. */
     private static final String SYSTEM_NAME = "application-platform";

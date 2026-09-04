@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class SystemComponentRepositoryTest {
+class SystemComponentRepositoryTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private SystemComponentRepository systemComponentRepository;

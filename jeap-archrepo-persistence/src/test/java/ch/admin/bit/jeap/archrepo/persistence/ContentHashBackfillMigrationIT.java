@@ -36,12 +36,15 @@ class ContentHashBackfillMigrationIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        url = "jdbc:h2:mem:backfill-" + UUID.randomUUID()
-              + ";INIT=CREATE SCHEMA IF NOT EXISTS data;DATABASE_TO_UPPER=FALSE;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
-        connection = DriverManager.getConnection(url, "sa", "");
+        // A database of its own per test: the point is the transition from one schema version to the next, so no
+        // migration may have run on it yet
+        url = ArchRepoPostgresTestContainer.createDatabase();
+        connection = DriverManager.getConnection(url,
+                ArchRepoPostgresTestContainer.container().getUsername(),
+                ArchRepoPostgresTestContainer.container().getPassword());
         // The migrations create their objects in the 'data' schema; the migration itself resolves them through
         // Flyway's default schema, this connection has to be pointed at it explicitly
-        execute("set schema data");
+        execute("set search_path to data");
     }
 
     @AfterEach
@@ -110,7 +113,8 @@ class ContentHashBackfillMigrationIT {
 
     private void migrateTo(String target) {
         var configuration = Flyway.configure()
-                .dataSource(url, "sa", "")
+                .dataSource(url, ArchRepoPostgresTestContainer.container().getUsername(),
+                        ArchRepoPostgresTestContainer.container().getPassword())
                 .locations("classpath:db/migration/common")
                 .defaultSchema("data")
                 .schemas("data");

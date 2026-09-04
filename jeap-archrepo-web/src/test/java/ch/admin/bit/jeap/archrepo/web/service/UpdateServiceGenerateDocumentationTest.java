@@ -17,11 +17,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 @SpringBootTest(properties = {"archrepo-config.environment=dev"})
 @Import(ArchRepoTestConfiguration.class)
 @ActiveProfiles("test")
-class UpdateServiceGenerateDocumentationTest {
+class UpdateServiceGenerateDocumentationTest extends PostgresIntegrationTestBase {
     @Autowired
     UpdateService generatorService;
     @MockitoBean

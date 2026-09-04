@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class ComponentGraphRepositoryTest {
+class ComponentGraphRepositoryTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private ComponentGraphRepository componentGraphRepository;
@@ -109,7 +109,10 @@ class ComponentGraphRepositoryTest {
         ZonedDateTime createdAt = (ZonedDateTime) ReflectionTestUtils.getField(updatedComponentGraph, "createdAt");
         ZonedDateTime modifiedAt = (ZonedDateTime) ReflectionTestUtils.getField(updatedComponentGraph, "modifiedAt");
         assertThat(createdAt).isNotNull();
-        assertThat(modifiedAt).isNotNull().isAfter(createdAt);
+        // Not compared with createdAt: the update stamps modified_at with CURRENT_TIMESTAMP, which PostgreSQL
+        // answers with the start of the transaction - and the whole test runs in one. That it is set at all is
+        // what says the update ran, because an unmodified row has no modified_at
+        assertThat(modifiedAt).isNotNull();
     }
 
     @Test

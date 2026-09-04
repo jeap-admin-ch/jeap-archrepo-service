@@ -12,13 +12,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 import javax.sql.DataSource;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class GatewayComponentMigrationTest {
+class GatewayComponentMigrationTest extends PostgresDataJpaTestBase {
 
     private static final String MIGRATION = "db/migration/common/V2_4_0__migrate-gateway-components.sql";
 
@@ -43,9 +43,9 @@ class GatewayComponentMigrationTest {
         UUID backendId = UUID.randomUUID();
 
         jdbcTemplate.update("INSERT INTO team (id, name, created_at) VALUES (?, ?, ?)",
-                teamId, "gateway-team", ZonedDateTime.now());
+                teamId, "gateway-team", OffsetDateTime.now());
         jdbcTemplate.update("INSERT INTO system (id, name, default_owner_id, created_at) VALUES (?, ?, ?, ?)",
-                systemId, "gateway-system", teamId, ZonedDateTime.now());
+                systemId, "gateway-system", teamId, OffsetDateTime.now());
         insertComponent(gatewayId, "test-gateway", "BACKEND_SERVICE", systemId, teamId);
         insertComponent(frontendId, "frontend-gateway", "FRONTEND", systemId, teamId);
         insertComponent(backendId, "test-service", "BACKEND_SERVICE", systemId, teamId);
@@ -68,7 +68,7 @@ class GatewayComponentMigrationTest {
         jdbcTemplate.update("""
                 INSERT INTO system_component (id, name, system_id, team_id, type, created_at)
                 VALUES (?, ?, ?, ?, ?, ?)
-                """, id, name, systemId, teamId, type, ZonedDateTime.now());
+                """, id, name, systemId, teamId, type, OffsetDateTime.now());
     }
 
     private String componentType(UUID id) {

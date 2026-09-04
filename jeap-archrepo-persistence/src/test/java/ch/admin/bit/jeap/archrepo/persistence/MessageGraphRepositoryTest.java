@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class MessageGraphRepositoryTest {
+class MessageGraphRepositoryTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private MessageGraphRepository messageGraphRepository;
@@ -154,7 +154,10 @@ class MessageGraphRepositoryTest {
         ZonedDateTime createdAt = (ZonedDateTime) ReflectionTestUtils.getField(updatedMessageGraph, "createdAt");
         ZonedDateTime modifiedAt = (ZonedDateTime) ReflectionTestUtils.getField(updatedMessageGraph, "modifiedAt");
         assertThat(createdAt).isNotNull();
-        assertThat(modifiedAt).isNotNull().isAfter(createdAt);
+        // Not compared with createdAt: the update stamps modified_at with CURRENT_TIMESTAMP, which PostgreSQL
+        // answers with the start of the transaction - and the whole test runs in one. That it is set at all is
+        // what says the update ran, because an unmodified row has no modified_at
+        assertThat(modifiedAt).isNotNull();
     }
 
     @Test

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 /**
  * The evidence for the story's "no existing functionality is removed" criterion.
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(DisableJeapPermitAllSecurityConfiguration.class)
-class ExistingApiUnchangedIT {
+class ExistingApiUnchangedIT extends PostgresIntegrationTestBase {
 
     @Autowired
     private MockMvc mockMvc;

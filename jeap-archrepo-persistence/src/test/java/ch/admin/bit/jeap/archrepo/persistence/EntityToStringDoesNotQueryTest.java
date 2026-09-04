@@ -62,7 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.flyway.locations=classpath:db/migration/common",
         "spring.jpa.properties.hibernate.generate_statistics=true"
 })
-class EntityToStringDoesNotQueryTest {
+class EntityToStringDoesNotQueryTest extends PostgresDataJpaTestBase {
 
     private static final String SYSTEM = "wvs";
     private static final byte[] BLOB = "{\"openapi\":\"3.0.0\"}".getBytes(StandardCharsets.UTF_8);

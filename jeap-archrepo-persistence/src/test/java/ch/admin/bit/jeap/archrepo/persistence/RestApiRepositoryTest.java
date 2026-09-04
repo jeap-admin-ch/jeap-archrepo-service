@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
-class RestApiRepositoryTest {
+class RestApiRepositoryTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private RestApiRepository repository;

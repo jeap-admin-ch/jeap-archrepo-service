@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.flyway.locations=classpath:db/migration/common")
 @Import(SchedulerRunRepositoryImpl.class)
-class SchedulerRunRepositoryImplTest {
+class SchedulerRunRepositoryImplTest extends PostgresDataJpaTestBase {
 
     @Autowired
     private SchedulerRunRepositoryImpl repository;

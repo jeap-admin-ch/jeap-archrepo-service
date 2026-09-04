@@ -20,11 +20,12 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import ch.admin.bit.jeap.archrepo.web.PostgresIntegrationTestBase;
 
 @SpringBootTest(properties = {"archrepo-config.environment=dev"})
 @Import(ArchRepoTestConfiguration.class)
 @ActiveProfiles("test")
-class UpdateServiceUpdateModelTest {
+class UpdateServiceUpdateModelTest extends PostgresIntegrationTestBase {
     private static final String SYSTEM_NAME = "test";
     @Autowired
     UpdateService service;
