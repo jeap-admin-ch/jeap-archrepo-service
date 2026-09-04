@@ -33,7 +33,6 @@
         <dependency>
             <groupId>com.fasterxml.uuid</groupId>
             <artifactId>java-uuid-generator</artifactId>
-            <version>5.2.0</version>
         </dependency>
 
         <dependency>

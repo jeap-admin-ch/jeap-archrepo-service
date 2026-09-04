@@ -38,10 +38,7 @@
 
     <properties>
         <maven.javadoc.skip>false</maven.javadoc.skip>
-        <org.eclipse.jgit.version>7.7.1.202607240634-r</org.eclipse.jgit.version>
         <asciidoc-confluence-publisher-client.version>0.35.0</asciidoc-confluence-publisher-client.version>
-        <wiremock-spring-boot.version>4.2.2</wiremock-spring-boot.version>
-        <commons-io.version>2.22.0</commons-io.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <guava.version>33.7.1-jre</guava.version>
     </properties>
@@ -142,11 +139,8 @@
                 <artifactId>jeap-archrepo-dbschema-model</artifactId>
                 <version>12.7.0-SNAPSHOT</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.jgit</groupId>
-                <artifactId>org.eclipse.jgit</artifactId>
-                <version>${org.eclipse.jgit.version}</version>
-            </dependency>
+            <!-- The parent manages org.eclipse.jgit itself, but its org.eclipse.jgit.ssh.apache trails behind:
+                 held to the same version as the core artifact, which is what ${org.eclipse.jgit.version} is -->
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
                 <artifactId>org.eclipse.jgit.ssh.apache</artifactId>
@@ -156,17 +150,6 @@
                 <groupId>org.sahli.asciidoc.confluence.publisher</groupId>
                 <artifactId>asciidoc-confluence-publisher-client</artifactId>
                 <version>${asciidoc-confluence-publisher-client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wiremock.integrations</groupId>
-                <artifactId>wiremock-spring-boot-standalone</artifactId>
-                <version>${wiremock-spring-boot.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-beanutils</groupId>
@@ -203,11 +186,6 @@
                             </manifestEntries>
                         </archive>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>5.7.0.6970</version>
                 </plugin>
             </plugins>
         </pluginManagement>
