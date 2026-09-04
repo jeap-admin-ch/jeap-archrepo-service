@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.7.1] - 2026-09-04
+
+### Fixed
+- `AWSPrometheusProxy` no longer returns `null` when AMP answers without a body: the empty body is reported as
+  the failed call it is, instead of surfacing as an unsuccessful-response error one frame later.
+
+### Changed
+- The AWS and RHOS system component importers update a component through the `Optional` the lookup returned
+  instead of looking it up a second time and unwrapping it unguarded.
+
 ## [12.7.0] - 2026-09-04
 
 ### Fixed

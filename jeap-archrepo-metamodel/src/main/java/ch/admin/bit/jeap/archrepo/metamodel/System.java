@@ -122,7 +122,14 @@ public class System extends MutableDomainEntity {
     }
 
     public List<Relation> getActiveRelations() {
-        return relations.stream().filter(r -> RelationStatus.ACTIVE.equals(r.getStatus())).collect(Collectors.toUnmodifiableList());
+        // Not Stream.toList(): the stream is of AbstractRelation, and toList() is not target-typed, so it
+        // yields a List<AbstractRelation> that does not fit the List<Relation> returned here. The collector
+        // is, and infers Relation as its element type. Sonar's java:S6204 does not apply here.
+        @SuppressWarnings("java:S6204")
+        List<Relation> activeRelations = relations.stream()
+                .filter(r -> RelationStatus.ACTIVE.equals(r.getStatus()))
+                .collect(Collectors.toUnmodifiableList());
+        return activeRelations;
     }
 
     public List<Event> getEvents() {

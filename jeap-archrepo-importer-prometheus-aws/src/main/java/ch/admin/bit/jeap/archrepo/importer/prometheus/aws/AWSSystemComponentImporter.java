@@ -94,15 +94,16 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
     }
 
     private void createOrUpdateSystemComponent(System system, String componentName) {
-        if (system.findSystemComponent(componentName).isEmpty()) {
-            log.info("Create new SystemComponent {} in System {}", componentName, system.getName());
-            SystemComponentFactory.createSystemComponent(system, componentName, Importer.GRAFANA);
-        } else {
-            log.info("Update SystemComponent {} in System {}", componentName, system.getName());
-            SystemComponent systemComponent = system.findSystemComponent(componentName).get();
-            // When a component is imported from metrics, the grafana importer takes precedence over any other importers
-            systemComponent.setImporter(Importer.GRAFANA);
-            systemComponent.setLastSeenFromDate(ZonedDateTime.now());
-        }
+        system.findSystemComponent(componentName).ifPresentOrElse(
+                systemComponent -> {
+                    log.info("Update SystemComponent {} in System {}", componentName, system.getName());
+                    // When a component is imported from metrics, the grafana importer takes precedence over any other importers
+                    systemComponent.setImporter(Importer.GRAFANA);
+                    systemComponent.setLastSeenFromDate(ZonedDateTime.now());
+                },
+                () -> {
+                    log.info("Create new SystemComponent {} in System {}", componentName, system.getName());
+                    SystemComponentFactory.createSystemComponent(system, componentName, Importer.GRAFANA);
+                });
     }
 }

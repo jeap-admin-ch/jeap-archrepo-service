@@ -132,13 +132,12 @@ public class AWSPrometheusProxy {
         SdkHttpResponse sdkHttpResponse = httpExecuteResponse.httpResponse();
         log.trace("Response Code: {}", sdkHttpResponse.statusText());
 
-
-        if (httpExecuteResponse.responseBody().isPresent()) {
-            return getFromResponse(httpExecuteResponse.responseBody().get());
-        }
-
-        return null;
-
+        // Never return null here: the caller dereferences what this returns, and a body-less response is a
+        // failed call, not an empty result. Thrown, it is wrapped like every other call failure.
+        AbortableInputStream responseBody = httpExecuteResponse.responseBody()
+                .orElseThrow(() -> new IOException("AMP responded with status %d and no body"
+                        .formatted(sdkHttpResponse.statusCode())));
+        return getFromResponse(responseBody);
     }
 
     private PrometheusQueryResponse getFromResponse(AbortableInputStream abortableInputStream) throws IOException {
