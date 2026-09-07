@@ -936,6 +936,43 @@ imported without importing them again.
 | `404`  | `message-type-version-not-found` | The system has no such message type, or it has no such version         |
 | `406`  | -                                | `Accept` allows neither `application/json` nor `*/*`                   |
 
+## Contract testing
+
+The docs API is under a **consumer-driven contract**. Its consumer is the jEAP Doc Service, which reads every one
+of the nine resources, and its pacts are verified against this service the way every other pact of the arch repo
+is: the broker's webhook triggers the instance's `pact-verify` workflow, which runs the instance's
+`PactProviderTest`.
+
+`jeap-archrepo-test` ships what such a verification needs, so that an instance keeps its two-line test class:
+
+| What | Where |
+| ---- | ----- |
+| Five provider states covering all nine resources | `PactProviderTestBase`, mapped route by route in `DOCS_API_ROUTE_STATES` |
+| The landscape they put the service into | `DocsApiPactStubs` - one landscape for every resource, so that the resources cannot disagree about what exists |
+| That no resource is left without a state | `DocsApiPactStateCoverageTest`, which reads the routes off the controllers |
+
+| State | Serves |
+| ----- | ------ |
+| `A documented landscape is available` | `/docs-api/systems`, `/docs-api/systems/{system}`, `/docs-api/systems/{system}/messages` |
+| `No system named 'no-such-system' is documented` | the `404` of `/docs-api/systems/{system}` - a system that is gone is a normal state for a generator, not a failure |
+| `An OpenAPI specification is published` | `/docs-api/openapi-specs` and the `openapi` content resource |
+| `A database schema is published` | `/docs-api/database-schemas` and the `database-schema` content resource |
+| `A message type version is published` | `/docs-api/message-types` and one version of one message type |
+
+**A token cannot be part of a contract.** This API is bearer-authenticated, and a real token written into a pact
+file when the consumer's test ran would be replayed by the verification days later, long expired. So a consumer
+records a **placeholder** bearer token, and the verification replaces it with one signed on the spot - carrying
+the real `<system-name>_@architecture-model_#read` role, so authorization is exercised rather than mocked. Two
+consequences:
+
+- **no interaction may assert anything about the `Authorization` header**: what the verification sends there is
+  not what the consumer wrote;
+- an interaction that sends **no** bearer token at all is left alone, so `401` stays verifiable.
+
+The token is signed against the JWKS the application itself serves under the `pact-provider-test` profile, which
+is why that profile pins `server.port` - the JWKS URI has to name the port before the context starts. An
+instance whose build occupies that port overrides `server.port` on its own test class.
+
 ## Configuration
 
 The docs API is always active - it is part of what the arch repo is, not a feature an instance opts into. There is

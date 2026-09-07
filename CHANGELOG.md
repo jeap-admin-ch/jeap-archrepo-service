@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.8.0] - 2026-09-07
+
+### Added
+- Provider states for the docs API in `jeap-archrepo-test`, so that the jEAP Doc Service's pacts can be
+  verified against this service: five states covering all nine resources, the landscape they set up in
+  `DocsApiPactStubs`, and `DocsApiPactStateCoverageTest`, which reads the routes off the controllers and fails
+  when one of them has no state.
+- `PactProviderTestBase` signs a bearer token per interaction and puts it in place of whatever bearer token a
+  pact recorded - a token cannot be part of a contract, because one recorded when the consumer's test ran is
+  expired by the time the verification replays it. The token carries the real
+  `<system-name>_@architecture-model_#read` role, so the docs API's authorization is exercised rather than
+  mocked. A request that carries no bearer token, or HTTP basic credentials, is left untouched.
+
+### Changed
+- The `pact-provider-test` profile runs the application on a **defined port** (`18899`) instead of a random
+  one, because the JWKS URI the tokens are validated against has to name the port before the context starts. An
+  instance whose build occupies it can override `server.port` on its own test class.
+
 ## [12.7.2] - 2026-09-06
 
 ### Dependencies

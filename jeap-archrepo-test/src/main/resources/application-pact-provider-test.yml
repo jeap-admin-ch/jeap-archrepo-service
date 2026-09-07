@@ -1,4 +1,7 @@
 server:
+  # A fixed port, because the JWKS URI below has to name it and is bound before the web server starts. Unlikely
+  # to collide, and an instance whose build occupies it can override server.port on its own test class.
+  port: 18899
   servlet:
     context-path: /${spring.application.name}
 
@@ -51,6 +54,13 @@ jeap:
         # Required: the docs API authorizes every resource with a semantic role, which the jEAP security starter
         # only activates when the system name is configured.
         system-name: "application-platform"
+        # The docs API is bearer-authenticated, so a verification of it has to present a token this application
+        # accepts. The issuer is the test issuer of jeap-spring-boot-security-starter-test (JwsBuilder
+        # .DEFAULT_ISSUER) and the keys are served by the JWKS endpoint mock this application itself carries
+        # under this profile - see PactProviderTestBase, which signs one token per interaction against them.
+        authorization-server:
+          issuer: "http://localhost/auth"
+          jwk-set-uri: "http://localhost:18899/applicationplatform-archrepo-service/.well-known/jwks.json"
 archrepo-config:
   environment: dev
 
