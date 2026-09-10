@@ -84,5 +84,44 @@ class SystemRepositoryTest extends PostgresDataJpaTestBase {
                 .contains(savedSystem);
     }
 
+    @Test
+    void findByNameOrAliasIgnoreCase_prefersTheNameOverAnotherSystemsAlias() {
+        System named = saveSystem("orders");
+        saveSystem("billing", "orders");
 
+        assertThat(systemRepository.findByNameOrAliasIgnoreCase("ORDERS")).contains(named);
+    }
+
+    @Test
+    void findByNameOrAliasIgnoreCase_resolvesAnAlias() {
+        System aliased = saveSystem("billing", "invoicing");
+
+        assertThat(systemRepository.findByNameOrAliasIgnoreCase("INVOICING")).contains(aliased);
+    }
+
+    @Test
+    void findByNameOrAliasIgnoreCase_answersTheSameSystemWhereTwoCarryTheAlias() {
+        // Aliases are not unique across systems: the lookup used to throw here, and every caller with it
+        saveSystem("billing", "shipping-services");
+        saveSystem("archiving", "shipping-services");
+
+        assertThat(systemRepository.findByNameOrAliasIgnoreCase("shipping-services"))
+                .contains(systemRepository.findByNameOrAliasIgnoreCase("SHIPPING-SERVICES").orElseThrow());
+    }
+
+    @Test
+    void findByNameOrAliasIgnoreCase_unknownName() {
+        saveSystem("orders");
+
+        assertThat(systemRepository.findByNameOrAliasIgnoreCase("no-such-system")).isEmpty();
+    }
+
+    private System saveSystem(String name, String... aliases) {
+        Team team = teamRepository.saveAndFlush(Team.builder().name("team-" + name).build());
+        return systemRepository.saveAndFlush(System.builder()
+                .name(name)
+                .defaultOwner(team)
+                .aliases(List.of(aliases))
+                .build());
+    }
 }

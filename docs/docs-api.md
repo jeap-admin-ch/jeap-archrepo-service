@@ -33,9 +33,11 @@ All nine are `GET`, read-only, and require the same role.
 | `GET /docs-api/message-types`                                           | Every message type with the versions it has                   |
 | `GET /docs-api/message-types/{system}/{message}/versions/{version}`     | One version of one message type, with its Avro schemas        |
 
-`{system}` is matched by **name or alias**, ignoring case; `{component}` and `{message}` are matched by name,
-ignoring case, and must belong to the system in the path. The same resolution applies to the `system` query
-parameter of the three indexes.
+`{system}` is matched by **name**, ignoring case, and by an alias only where no system carries that name -
+names and aliases share one namespace, and a system may hold another system's name as an alias, in which
+case the named one answers. `{component}` and `{message}` are matched by name, ignoring case, and must
+belong to the system in the path. The same resolution applies to the `system` query parameter of the three
+indexes.
 
 A generation run costs: the system list once, the export and the messages per system, the three indexes once, a
 content resource only for an artifact whose entity tag actually moved, and one request per message type version:

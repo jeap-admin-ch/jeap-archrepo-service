@@ -1,5 +1,8 @@
 package ch.admin.bit.jeap.archrepo.web.rest.docsapi;
 
+import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
+import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.persistence.ArchitectureModelRepository;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.security.resource.configuration.MvcSecurityConfiguration;
@@ -15,6 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -91,6 +97,33 @@ class SystemsControllerTest extends DocsApiControllerTestBase {
     }
 
     @Test
+    void getSystem_prefersTheNamedSystemOverAnotherSystemsAlias() throws Exception {
+        // The systems come out of the database unordered, so the winner must not depend on which comes first
+        for (boolean namedFirst : List.of(true, false)) {
+            when(architectureModelRepository.load()).thenReturn(collidingAlias(namedFirst));
+
+            mockMvc.perform(get(DocsApiPaths.SYSTEMS + "/orders")
+                            .with(authentication(tokenWithArchitectureModelRead())))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value("orders"));
+        }
+    }
+
+    @Test
+    void getMessages_prefersTheNamedSystemOverAnotherSystemsAlias() throws Exception {
+        // The resource that served the aliased system's messages while the named one's stayed unread
+        for (boolean namedFirst : List.of(true, false)) {
+            when(architectureModelRepository.load()).thenReturn(collidingAlias(namedFirst));
+
+            mockMvc.perform(get(DocsApiPaths.SYSTEMS + "/orders/messages")
+                            .with(authentication(tokenWithArchitectureModelRead())))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.messages", org.hamcrest.Matchers.hasSize(1)))
+                    .andExpect(jsonPath("$.messages[0].name").value("OrdersOrderPlacedEvent"));
+        }
+    }
+
+    @Test
     void getSystem_isCaseInsensitive() throws Exception {
         mockMvc.perform(get(DocsApiPaths.SYSTEMS + "/" + DocsApiModelStub.SYSTEM.toUpperCase())
                         .with(authentication(tokenWithArchitectureModelRead())))
@@ -125,5 +158,28 @@ class SystemsControllerTest extends DocsApiControllerTestBase {
         mockMvc.perform(get(DocsApiPaths.SYSTEMS + "/no-such-system/messages")
                         .with(authentication(tokenWithArchitectureModelRead())))
                 .andExpect(status().isNotFound());
+    }
+
+    private static Event event(String name) {
+        return Event.builder()
+                .id(UUID.randomUUID())
+                .messageTypeName(name)
+                .scope("system")
+                .topic("orders-events")
+                .descriptorUrl("https://descriptors.example.com/" + name + ".json")
+                .messageVersions(List.of())
+                .build();
+    }
+
+    /** A landscape in which one system is named like another system's alias, each with a message of its own. */
+    private static ArchitectureModel collidingAlias(boolean namedFirst) {
+        System named = System.builder().name("orders").build();
+        named.addEvent(event("OrdersOrderPlacedEvent"));
+        System aliased = System.builder().name("billing").aliases(List.of("orders")).build();
+        aliased.addEvent(event("BillingInvoiceSentEvent"));
+        return ArchitectureModel.builder()
+                .systems(namedFirst ? List.of(named, aliased) : List.of(aliased, named))
+                .openApiBaseUrl(DocsApiModelStub.OPEN_API_BASE_URL)
+                .build();
     }
 }

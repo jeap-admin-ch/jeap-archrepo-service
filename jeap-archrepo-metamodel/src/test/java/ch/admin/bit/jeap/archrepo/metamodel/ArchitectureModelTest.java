@@ -49,6 +49,17 @@ class ArchitectureModelTest {
     }
 
     @Test
+    void findSystem_prefersANameOverAnotherSystemsAlias() {
+        System named = System.builder().name("orders").build();
+        System aliased = System.builder().name("billing").aliases(List.of("orders")).build();
+
+        // The systems come out of the database unordered, so the winner must not depend on which comes first
+        assertSame(named, modelOf(named, aliased).findSystem("orders").orElseThrow());
+        assertSame(named, modelOf(aliased, named).findSystem("ORDERS").orElseThrow());
+        assertSame(aliased, modelOf(named, aliased).findSystem("billing").orElseThrow());
+    }
+
+    @Test
     void findSystemComponent() {
         Optional<SystemComponent> exactMatch = model.findSystemComponent(frontend.getName());
         Optional<SystemComponent> ignoredCase = model.findSystemComponent(frontend.getName().toUpperCase());
@@ -335,6 +346,12 @@ class ArchitectureModelTest {
         assertThat(list)
                 .hasSize(4)
                 .containsExactlyInAnyOrder("backend", "scs", "other-backend-service-1", "other-backend-service-2");
+    }
+
+    private static ArchitectureModel modelOf(System... systems) {
+        return ArchitectureModel.builder()
+                .systems(List.of(systems))
+                .build();
     }
 
     @BeforeEach

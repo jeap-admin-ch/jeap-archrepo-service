@@ -18,8 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/management")
@@ -41,6 +44,7 @@ public class ManagementController {
             log.error("System with name or alias '{}' already exists. Did not create a new system.", systemName);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "System with name or alias already exists.");
         }
+        rejectTakenAliases(systemName, createSystemDto.getAliases());
 
         System system = System.builder()
                 .name(systemName)
@@ -52,6 +56,45 @@ public class ManagementController {
         systemRepository.save(system);
         log.info("Created a new system with name '{}'.", systemName);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Names and aliases share one namespace, so an alias has to be as free as the name - against what is
+     * stored and against the rest of the request. An alias that is another system's name hides that system
+     * wherever a name is resolved, and one that another system already carries leaves both of them
+     * resolvable only by chance.
+     */
+    private void rejectTakenAliases(String systemName, List<String> aliases) {
+        if (aliases == null) {
+            return;
+        }
+        Set<String> seen = new HashSet<>();
+        for (String alias : aliases) {
+            if (alias == null || alias.isBlank()) {
+                reject("An alias must not be empty.");
+            }
+            if (alias.equalsIgnoreCase(systemName)) {
+                rejectAlias(alias, "is the name of the system itself");
+            }
+            if (!seen.add(alias.toLowerCase(Locale.ROOT))) {
+                rejectAlias(alias, "is given twice");
+            }
+            Optional<System> existing = systemRepository.findByNameOrAliasIgnoreCase(alias);
+            if (existing.isPresent()) {
+                rejectAlias(alias, alias.equalsIgnoreCase(existing.get().getName())
+                        ? "is the name of system '" + existing.get().getName() + "'"
+                        : "is already an alias of system '" + existing.get().getName() + "'");
+            }
+        }
+    }
+
+    private void rejectAlias(String alias, String reason) {
+        reject("Alias '%s' %s.".formatted(alias, reason));
+    }
+
+    private void reject(String reason) {
+        log.error("{} Did not create a new system.", reason);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
     }
 
     private Team getOrCreateTeam(String teamName) {

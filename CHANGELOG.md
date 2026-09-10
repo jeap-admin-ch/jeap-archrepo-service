@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.9.1] - 2026-09-10
+
+### Fixed
+- A system is resolved by **name before alias**: `ArchitectureModel.findSystem` and the docs API's system
+  resource matched a name and an alias in one pass and took the first hit, so where a system carried another
+  system's name as an alias, the order the database happened to return decided which of the two answered. On
+  one landscape that hid a system's messages from the generated documentation and published another system
+  under its name. An alias now resolves a system only where no system carries the name, and
+  `SystemsController` resolves through the model instead of keeping a matcher of its own.
+- Creating a system validates its **aliases** the way it has always validated its name: an alias that is an
+  existing system's name, one another system already carries, the name of the system being created, or one
+  given twice in the same request is refused with a `400` naming the collision. Only the name was checked,
+  which is how an alias colliding with a system's name could be created in the first place.
+- `SystemRepository.findByNameOrAliasIgnoreCase` no longer fails where two systems carry the same alias: the
+  alias lookup returns a list and the first match by name wins. As a single-result query it threw, so the
+  docs API's message-type, artifact-index and component-artifact resources answered `500` on exactly the
+  ambiguous data the validation above now refuses.
+
 ## [12.9.0] - 2026-09-09
 
 ### Dependencies

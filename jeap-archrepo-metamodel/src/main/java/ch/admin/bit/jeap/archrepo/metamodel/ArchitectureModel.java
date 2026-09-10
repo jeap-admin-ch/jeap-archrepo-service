@@ -38,15 +38,30 @@ public class ArchitectureModel {
         return unmodifiableList(systems);
     }
 
-    private static boolean systemNameOrAliasMatches(String systemName, System system) {
-        return systemName.equalsIgnoreCase(system.getName()) ||
-                (system.getAliases() != null && system.getAliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(systemName)));
+    private static boolean nameMatches(String systemName, System system) {
+        return systemName.equalsIgnoreCase(system.getName());
     }
 
+    private static boolean aliasMatches(String systemName, System system) {
+        return system.getAliases() != null
+                && system.getAliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(systemName));
+    }
+
+    /**
+     * The system of that name, or - only where no system carries the name - the one holding it as an alias.
+     * <p>
+     * Names and aliases share one namespace, so a system may carry another system's name as an alias. Matching
+     * both in one pass would leave the order of {@link #systems} to decide which of the two is returned, and
+     * that order is whatever the database happened to hand back: an importer would file a message or a
+     * component under the wrong system, and every reader of the model would follow it there.
+     */
     public Optional<System> findSystem(String systemName) {
         return systems.stream()
-                .filter(system -> systemNameOrAliasMatches(systemName, system))
-                .findFirst();
+                .filter(system -> nameMatches(systemName, system))
+                .findFirst()
+                .or(() -> systems.stream()
+                        .filter(system -> aliasMatches(systemName, system))
+                        .findFirst());
     }
 
     public <T extends Relation> List<T> getAllRelationsByType(Class<T> relationClass) {

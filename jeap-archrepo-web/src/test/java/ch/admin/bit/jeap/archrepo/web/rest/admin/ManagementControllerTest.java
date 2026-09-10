@@ -124,6 +124,99 @@ class ManagementControllerTest {
     }
 
     @Test
+    void createSystem_AliasIsTheNameOfAnExistingSystem_WithAuth() throws Exception {
+        CreateSystemDto createSystemDto = createSystemDto("Test System", "Test Description",
+                "http://confluence.test", List.of("Shared"), "Test Team");
+
+        when(systemRepository.findByNameOrAliasIgnoreCase("Test System")).thenReturn(Optional.empty());
+        when(systemRepository.findByNameOrAliasIgnoreCase("Shared"))
+                .thenReturn(Optional.of(System.builder().name("Shared").build()));
+
+        mockMvc.perform(post("/api/management/system")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createSystemDto))
+                        .with(httpBasic(API_USER, API_SECRET)))
+                .andExpect(status().isBadRequest());
+
+        verify(systemRepository, never()).save(any());
+    }
+
+    @Test
+    void createSystem_AliasIsAlreadyHeldByAnotherSystem_WithAuth() throws Exception {
+        CreateSystemDto createSystemDto = createSystemDto("Test System", "Test Description",
+                "http://confluence.test", List.of("free-alias", "shared-services"), "Test Team");
+
+        when(systemRepository.findByNameOrAliasIgnoreCase("Test System")).thenReturn(Optional.empty());
+        when(systemRepository.findByNameOrAliasIgnoreCase("free-alias")).thenReturn(Optional.empty());
+        when(systemRepository.findByNameOrAliasIgnoreCase("shared-services")).thenReturn(
+                Optional.of(System.builder().name("Notification").aliases(List.of("Shared-Services")).build()));
+
+        mockMvc.perform(post("/api/management/system")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createSystemDto))
+                        .with(httpBasic(API_USER, API_SECRET)))
+                .andExpect(status().isBadRequest());
+
+        verify(systemRepository, never()).save(any());
+    }
+
+    @Test
+    void createSystem_FreeAliases_WithAuth() throws Exception {
+        String teamName = "Test Team";
+        CreateSystemDto createSystemDto = createSystemDto("Test System", "Test Description",
+                "http://confluence.test", List.of("alias1", "alias2"), teamName);
+
+        when(systemRepository.findByNameOrAliasIgnoreCase("Test System")).thenReturn(Optional.empty());
+        when(systemRepository.findByNameOrAliasIgnoreCase("alias1")).thenReturn(Optional.empty());
+        when(systemRepository.findByNameOrAliasIgnoreCase("alias2")).thenReturn(Optional.empty());
+        when(teamRepository.findByName(teamName)).thenReturn(Optional.of(createTeam(teamName)));
+        when(systemRepository.save(any(System.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        mockMvc.perform(post("/api/management/system")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createSystemDto))
+                        .with(httpBasic(API_USER, API_SECRET)))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<System> systemCaptor = ArgumentCaptor.forClass(System.class);
+        verify(systemRepository).save(systemCaptor.capture());
+        assertEquals(List.of("alias1", "alias2"), systemCaptor.getValue().getAliases());
+    }
+
+    @Test
+    void createSystem_AliasIsTheSystemsOwnName_WithAuth() throws Exception {
+        CreateSystemDto createSystemDto = createSystemDto("Test System", "Test Description",
+                "http://confluence.test", List.of("test system"), "Test Team");
+
+        when(systemRepository.findByNameOrAliasIgnoreCase("Test System")).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/management/system")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createSystemDto))
+                        .with(httpBasic(API_USER, API_SECRET)))
+                .andExpect(status().isBadRequest());
+
+        verify(systemRepository, never()).save(any());
+    }
+
+    @Test
+    void createSystem_AliasIsGivenTwice_WithAuth() throws Exception {
+        CreateSystemDto createSystemDto = createSystemDto("Test System", "Test Description",
+                "http://confluence.test", List.of("Twice", "twice"), "Test Team");
+
+        when(systemRepository.findByNameOrAliasIgnoreCase("Test System")).thenReturn(Optional.empty());
+        when(systemRepository.findByNameOrAliasIgnoreCase("Twice")).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/management/system")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createSystemDto))
+                        .with(httpBasic(API_USER, API_SECRET)))
+                .andExpect(status().isBadRequest());
+
+        verify(systemRepository, never()).save(any());
+    }
+
+    @Test
     void createSystem_CreatesNewTeam_WithAuth() throws Exception {
         String teamName = "New Team";
         CreateSystemDto createSystemDto = createMinimalSystemDto("Test System", teamName);

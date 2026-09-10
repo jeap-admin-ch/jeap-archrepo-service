@@ -54,11 +54,12 @@ class SystemsController {
     @RequiresArchitectureModelRead
     @Operation(summary = "One system with its components and relations",
             description = "Everything the system page and its component pages need, in one response. The system "
-                          + "is matched by name or by alias, ignoring case.")
+                          + "is matched by name, ignoring case; an alias resolves it only where no system "
+                          + "carries that name.")
     @ApiResponse(responseCode = "200", description = "The system",
                     content = @Content(schema = @Schema(implementation = SystemDetailDto.class)))
     @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
-    @ApiResponse(responseCode = "404", description = "No system of that name or alias")
+    @ApiResponse(responseCode = "404", description = "No system of that name, and none holding it as an alias")
     public ResponseEntity<byte[]> getSystem(@PathVariable("system") String systemName, WebRequest request) {
         ArchitectureModel model = architectureModelRepository.load();
         System system = findSystem(model, systemName);
@@ -73,22 +74,19 @@ class SystemsController {
     @ApiResponse(responseCode = "200", description = "The messages",
                     content = @Content(schema = @Schema(implementation = MessageListDto.class)))
     @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
-    @ApiResponse(responseCode = "404", description = "No system of that name or alias")
+    @ApiResponse(responseCode = "404", description = "No system of that name, and none holding it as an alias")
     public ResponseEntity<byte[]> getMessages(@PathVariable("system") String systemName, WebRequest request) {
         ArchitectureModel model = architectureModelRepository.load();
         System system = findSystem(model, systemName);
         return etagSupport.respond(request, dtoFactory.createMessageList(model, system));
     }
 
+    /**
+     * The model's own resolution, so that a name always wins over another system's alias - a matcher of this
+     * class's own would be a second rule to keep in step with the one every importer resolves through.
+     */
     private System findSystem(ArchitectureModel model, String systemName) {
-        return model.getSystems().stream()
-                .filter(system -> matchesNameOrAlias(system, systemName))
-                .findFirst()
+        return model.findSystem(systemName)
                 .orElseThrow(() -> DocsApiException.systemNotFound(systemName));
-    }
-
-    private boolean matchesNameOrAlias(System system, String systemName) {
-        return system.getName().equalsIgnoreCase(systemName)
-               || system.getAliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(systemName));
     }
 }
