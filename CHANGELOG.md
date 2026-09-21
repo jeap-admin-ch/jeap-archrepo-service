@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [13.4.1] - 2026-09-21
+
+### Fixed
+- RHOS Prometheus/Grafana importer no longer aborts an entire query when one of several Grafana
+  datasources is scoped (via prom-label-proxy) to a namespace different from the one being queried;
+  such datasources are now skipped instead of causing a "conflicting label matcher" 400 error to
+  fail the whole import.
+
 ## [13.4.0] - 2026-09-17
 
 ### Dependencies

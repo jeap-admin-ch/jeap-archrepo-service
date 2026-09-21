@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
@@ -70,8 +71,21 @@ public class RhosGrafanaAccess {
             List<RhosDatasource> datasources = queryDatasources(restClient);
             for (RhosDatasource datasource : datasources) {
                 if (datasource.getName().contains("application") && datasource.getName().endsWith("-" + stageName)) {
-                    RhosGrafanaQueryResponseData rhosPrometheusQueryResponseData = queryRange(restClient, datasource, queryExpression, rangeDays);
-                    results.add(rhosPrometheusQueryResponseData);
+                    try {
+                        RhosGrafanaQueryResponseData rhosPrometheusQueryResponseData = queryRange(restClient, datasource, queryExpression, rangeDays);
+                        results.add(rhosPrometheusQueryResponseData);
+                    } catch (PrometheusException e) {
+                        if (isConflictingNamespaceMatcher(e)) {
+                            // The datasource is bound (via prom-label-proxy) to a namespace that differs from the
+                            // one referenced in the query. This datasource simply does not apply to this query,
+                            // so we skip it instead of aborting the whole call and failing all other datasources.
+                            log.debug("Datasource '{}' is not scoped for query '{}', skipping it: {}",
+                                    datasource.getName(), queryExpression, e.getMessage());
+                        } else {
+                            log.warn("Error in Grafana call for datasource '{}'", datasource.getName(), e);
+                            throw e;
+                        }
+                    }
                 }
             }
         }
@@ -91,10 +105,21 @@ public class RhosGrafanaAccess {
                     .retrieve()
                     .body(RhosGrafanaQueryResponseData.class);
         } catch (Exception e) {
-            log.warn("Error in Grafana call", e);
             throw PrometheusException.wrapConnectionException(e);
         }
         return response;
+    }
+
+    /**
+     * Datasources are scoped to a specific namespace by prom-label-proxy, which injects a namespace label matcher
+     * into every query and rejects requests whose query already contains a conflicting namespace matcher with a
+     * 400 Bad Request. Since we query every "application" datasource of a stage without knowing upfront which
+     * namespace(s) it is scoped to, such a conflict is expected for the (many) datasources that are not scoped to
+     * the namespace referenced in the query, and must not be treated as a hard failure.
+     */
+    private static boolean isConflictingNamespaceMatcher(PrometheusException e) {
+        return e.getCause() instanceof HttpClientErrorException.BadRequest badRequest
+                && badRequest.getResponseBodyAsString().contains("conflicting label matcher");
     }
 
     private List<RhosDatasource> queryDatasources(RestClient restClient) {
