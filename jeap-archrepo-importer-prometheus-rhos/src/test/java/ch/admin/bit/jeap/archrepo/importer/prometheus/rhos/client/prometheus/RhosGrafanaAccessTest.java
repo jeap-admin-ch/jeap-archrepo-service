@@ -52,7 +52,7 @@ class RhosGrafanaAccessTest {
     }
 
     @Test
-    void queryRange_oneDatasourceScopedToOtherNamespace_skipsItAndReturnsResultsFromMatchingDatasource() throws IOException {
+    void queryRange_oneDatasourceScopedToOtherNamespace_skipsItAndReturnsResultsFromMatchingDatasource() {
         datasourceOkUid = java.util.UUID.randomUUID().toString();
         datasourceConflictingUid = java.util.UUID.randomUUID().toString();
         server.createContext("/api/datasources", datasourcesHandler(datasourceOkUid, datasourceConflictingUid));
@@ -71,7 +71,7 @@ class RhosGrafanaAccessTest {
     }
 
     @Test
-    void queryRange_allDatasourcesScopedToOtherNamespace_returnsEmptyList() throws IOException {
+    void queryRange_allDatasourcesScopedToOtherNamespace_returnsEmptyList() {
         datasourceConflictingUid = java.util.UUID.randomUUID().toString();
         server.createContext("/api/datasources", datasourcesHandler(datasourceConflictingUid));
         server.createContext("/api/ds/query", queryHandler(uid -> new Response(400, CONFLICTING_NAMESPACE_MATCHER_BODY)));
@@ -84,7 +84,7 @@ class RhosGrafanaAccessTest {
     }
 
     @Test
-    void queryRange_unrelatedBadRequest_isNotSwallowedAndThrows() throws IOException {
+    void queryRange_unrelatedBadRequest_isNotSwallowedAndThrows() {
         datasourceOkUid = java.util.UUID.randomUUID().toString();
         server.createContext("/api/datasources", datasourcesHandler(datasourceOkUid));
         server.createContext("/api/ds/query", queryHandler(uid -> new Response(400, OTHER_ERROR_BODY)));

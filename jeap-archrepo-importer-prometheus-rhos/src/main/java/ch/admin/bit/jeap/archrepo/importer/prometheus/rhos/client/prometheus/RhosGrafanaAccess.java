@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class can be used to query prometheus metrics trough grafana. We will therefore use the ds/query API of
@@ -68,29 +69,36 @@ public class RhosGrafanaAccess {
         List<RhosGrafanaQueryResponseData> results = new ArrayList<>();
 
         for (RestClient restClient : this.restClients) {
-            List<RhosDatasource> datasources = queryDatasources(restClient);
-            for (RhosDatasource datasource : datasources) {
-                if (datasource.getName().contains("application") && datasource.getName().endsWith("-" + stageName)) {
-                    try {
-                        RhosGrafanaQueryResponseData rhosPrometheusQueryResponseData = queryRange(restClient, datasource, queryExpression, rangeDays);
-                        results.add(rhosPrometheusQueryResponseData);
-                    } catch (PrometheusException e) {
-                        if (isConflictingNamespaceMatcher(e)) {
-                            // The datasource is bound (via prom-label-proxy) to a namespace that differs from the
-                            // one referenced in the query. This datasource simply does not apply to this query,
-                            // so we skip it instead of aborting the whole call and failing all other datasources.
-                            log.debug("Datasource '{}' is not scoped for query '{}', skipping it: {}",
-                                    datasource.getName(), queryExpression, e.getMessage());
-                        } else {
-                            log.warn("Error in Grafana call for datasource '{}'", datasource.getName(), e);
-                            throw e;
-                        }
-                    }
+            for (RhosDatasource datasource : queryDatasources(restClient)) {
+                if (isApplicationDatasourceForStage(datasource, stageName)) {
+                    queryRangeIfApplicable(restClient, datasource, queryExpression, rangeDays)
+                            .ifPresent(results::add);
                 }
             }
         }
 
         return results;
+    }
+
+    private static boolean isApplicationDatasourceForStage(RhosDatasource datasource, String stageName) {
+        return datasource.getName().contains("application") && datasource.getName().endsWith("-" + stageName);
+    }
+
+    private Optional<RhosGrafanaQueryResponseData> queryRangeIfApplicable(RestClient restClient, RhosDatasource datasource, String queryExpression, int rangeDays) {
+        try {
+            return Optional.of(queryRange(restClient, datasource, queryExpression, rangeDays));
+        } catch (PrometheusException e) {
+            if (isConflictingNamespaceMatcher(e)) {
+                // The datasource is bound (via prom-label-proxy) to a namespace that differs from the
+                // one referenced in the query. This datasource simply does not apply to this query,
+                // so we skip it instead of aborting the whole call and failing all other datasources.
+                log.debug("Datasource '{}' is not scoped for query '{}', skipping it: {}",
+                        datasource.getName(), queryExpression, e.getMessage());
+                return Optional.empty();
+            }
+            log.warn("Error in Grafana call for datasource '{}'", datasource.getName(), e);
+            throw e;
+        }
     }
 
     private RhosGrafanaQueryResponseData queryRange(RestClient restClient, RhosDatasource rhosDatasource, String queryExpression, int rangeDays) {
