@@ -134,13 +134,13 @@ Authentication: none. The endpoint is `permitAll()`.
 {
   "systems": [
     {
-      "name": "wvs",
+      "name": "system",
       "description": "Warenverkehrssystem",
       "ownedBy": "Team Blue",
-      "aliases": ["WVS-ALIAS"],
+      "aliases": ["SYSTEM-ALIAS"],
       "systemComponents": [
         {
-          "name": "wvs-foo-bar-service",
+          "name": "system-foo-bar-service",
           "description": "Handles foo and bar",
           "ownedBy": "Team Blue",
           "importer": "DEPLOYMENT_LOG",
@@ -197,20 +197,20 @@ Authentication: none. The endpoint is `permitAll()`.
 [
   {
     "relationType": "REST_API_RELATION",
-    "consumerSystem": "zoll",
-    "consumer": "zoll-gateway",
-    "providerSystem": "wvs",
-    "provider": "wvs-foo-bar-service",
+    "consumerSystem": "example",
+    "consumer": "example-gateway",
+    "providerSystem": "system",
+    "provider": "system-foo-bar-service",
     "method": "GET",
     "path": "/api/foo/{id}"
   },
   {
     "relationType": "EVENT_RELATION",
-    "consumerSystem": "zoll",
-    "consumer": "zoll-gateway",
-    "providerSystem": "wvs",
-    "provider": "wvs-foo-bar-service",
-    "messageType": "WvsDeclarationAcceptedEvent"
+    "consumerSystem": "example",
+    "consumer": "example-gateway",
+    "providerSystem": "system",
+    "provider": "system-foo-bar-service",
+    "messageType": "SystemDeclarationAcceptedEvent"
   }
 ]
 ```
@@ -254,10 +254,10 @@ Authentication: none. The endpoint is `permitAll()`.
 ```json
 [
   {
-    "consumerSystem": "zoll",
-    "consumer": "zoll-gateway",
-    "providerSystem": "wvs",
-    "provider": "wvs-foo-bar-service",
+    "consumerSystem": "example",
+    "consumer": "example-gateway",
+    "providerSystem": "system",
+    "provider": "system-foo-bar-service",
     "method": "GET",
     "path": "/api/foo/{id}"
   }
@@ -297,7 +297,7 @@ Authentication: none. The endpoint is `permitAll()`.
 `200 OK`, `application/json` - a flat array of component names.
 
 ```json
-["wvs-foo-bar-service", "zoll-gateway"]
+["system-foo-bar-service", "system-gateway"]
 ```
 
 Only components of type `BACKEND_SERVICE` or `SELF_CONTAINED_SYSTEM` are considered; a component is listed when
@@ -339,7 +339,7 @@ The body is `multipart/form-data` with one required part:
 ```bash
 curl -u api:$ARCHREPO_API_SECRET \
      -F file=@openapi.json \
-     "https://archrepo.example.com/my-archrepo-service/api/openapi/wvs-foo-bar-service?version=1.4.2"
+     "https://archrepo.example.com/my-archrepo-service/api/openapi/system-foo-bar-service?version=1.4.2"
 ```
 
 What the handler does, in order:
@@ -399,7 +399,7 @@ the request rather than fixed to `application/json`.
 ```json
 {
   "openapi": "3.0.3",
-  "info": { "title": "wvs-foo-bar-service", "version": "1.4.2" },
+  "info": { "title": "system-foo-bar-service", "version": "1.4.2" },
   "servers": [ { "url": "https://foo-bar.example.com" } ],
   "paths": {
     "/api/foo/{id}": {
@@ -494,8 +494,8 @@ Authentication: none. `GET /api/openapi/**` is `permitAll()`.
 
 ```json
 [
-  { "system": "wvs", "component": "wvs-foo-bar-service", "version": "1.4.2" },
-  { "system": "zoll", "component": "zoll-gateway", "version": null }
+  { "system": "system", "component": "system-foo-bar-service", "version": "1.4.2" },
+  { "system": "example", "component": "example-gateway", "version": null }
 ]
 ```
 
@@ -532,9 +532,9 @@ The body is a `CreateOrUpdateDbSchemaDto` and is validated with `@Valid`:
 
 ```json
 {
-  "systemComponentName": "wvs-foo-bar-service",
+  "systemComponentName": "system-foo-bar-service",
   "schema": {
-    "name": "wvs_foo_bar",
+    "name": "system_foo_bar",
     "version": "42",
     "tables": [
       {
@@ -609,8 +609,8 @@ Authentication: none. `GET /api/dbschemas/**` is `permitAll()`.
 
 ```json
 [
-  { "system": "wvs", "component": "wvs-foo-bar-service", "version": "42" },
-  { "system": "zoll", "component": "zoll-gateway", "version": "7" }
+  { "system": "system", "component": "system-foo-bar-service", "version": "42" },
+  { "system": "example", "component": "example-gateway", "version": "7" }
 ]
 ```
 
@@ -634,7 +634,7 @@ role.
 
 ### Request
 
-`GET /external-api/dbschemas?systemComponentName=wvs-foo-bar-service`
+`GET /external-api/dbschemas?systemComponentName=system-foo-bar-service`
 
 No path parameters.
 
@@ -654,9 +654,9 @@ No request body.
 
 ```json
 {
-  "systemComponentName": "wvs-foo-bar-service",
+  "systemComponentName": "system-foo-bar-service",
   "schema": {
-    "name": "wvs_foo_bar",
+    "name": "system_foo_bar",
     "version": "42",
     "tables": [
       {
@@ -776,11 +776,11 @@ No path parameters and no query parameters.
 
 ```json
 {
-  "name": "wvs",
+  "name": "system",
   "description": "Warenverkehrssystem",
-  "confluenceLink": "https://confluence.example.com/display/WVS",
-  "aliases": ["WVS-ALIAS"],
-  "teamName": "Team Blue"
+  "confluenceLink": "https://confluence.example.com/display/system",
+  "aliases": ["SYSTEM-ALIAS"],
+  "teamName": "Team Example"
 }
 ```
 
@@ -867,8 +867,8 @@ No path parameters and no query parameters.
 
 ```json
 {
-  "providerName": "wvs-foo-bar-service",
-  "consumerName": "zoll-gateway",
+  "providerName": "system-foo-bar-service",
+  "consumerName": "example-gateway",
   "method": "GET",
   "path": "/api/foo/{id}"
 }

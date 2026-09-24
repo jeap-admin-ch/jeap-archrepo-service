@@ -113,7 +113,7 @@ cannot describe two different bodies.
 ## Links in the payloads
 
 `contentUrl` is a **path, not a full URL** - and it carries the service's context path, so
-`/my-archrepo-service/docs-api/systems/wvs/components/wvs-foo-bar-service/openapi`. Resolving it against the base
+`/my-archrepo-service/docs-api/systems/system/components/system-foo-bar-service/openapi`. Resolving it against the base
 URL the consumer already called therefore yields the resource again. Outside a request - in a unit test, or on a
 service that runs at the root - there is no context path to prepend and the path starts at `/docs-api`.
 
@@ -206,18 +206,18 @@ Role: `architecture-model` / `read`.
 {
   "systems": [
     {
-      "name": "wvs",
+      "name": "system",
       "description": "Warenverkehrssystem",
-      "aliases": ["WVS-ALIAS"],
+      "aliases": ["system-ALIAS"],
       "team": {
         "name": "Team Blue",
         "contactAddress": "team-blue@example.com",
-        "jiraLink": "https://jira.example.com/projects/WVS",
-        "confluenceLink": "https://confluence.example.com/display/WVS"
+        "jiraLink": "https://jira.example.com/projects/system",
+        "confluenceLink": "https://confluence.example.com/display/system"
       }
     },
     {
-      "name": "zoll",
+      "name": "example",
       "aliases": []
     }
   ]
@@ -277,18 +277,18 @@ Role: `architecture-model` / `read`.
 
 ```json
 {
-  "name": "wvs",
+  "name": "system",
   "description": "Warenverkehrssystem",
-  "aliases": ["WVS-ALIAS"],
+  "aliases": ["system-ALIAS"],
   "team": {
     "name": "Team Blue",
     "contactAddress": "team-blue@example.com",
-    "jiraLink": "https://jira.example.com/projects/WVS",
-    "confluenceLink": "https://confluence.example.com/display/WVS"
+    "jiraLink": "https://jira.example.com/projects/system",
+    "confluenceLink": "https://confluence.example.com/display/system"
   },
   "components": [
     {
-      "name": "wvs-foo-bar-service",
+      "name": "system-foo-bar-service",
       "description": "Handles foo and bar",
       "type": "BACKEND_SERVICE",
       "team": { "name": "Team Blue", "contactAddress": "team-blue@example.com" },
@@ -298,33 +298,33 @@ Role: `architecture-model` / `read`.
       "openApi": {
         "version": "1.4.2",
         "serverUrl": "https://foo-bar.example.com",
-        "contentUrl": "/my-archrepo-service/docs-api/systems/wvs/components/wvs-foo-bar-service/openapi",
-        "swaggerUrl": "https://archrepo.example.com/archrepo-service/swagger-ui/index.html?url=/archrepo-service/api/openapi/wvs/wvs-foo-bar-service"
+        "contentUrl": "/my-archrepo-service/docs-api/systems/system/components/system-foo-bar-service/openapi",
+        "swaggerUrl": "https://archrepo.example.com/archrepo-service/swagger-ui/index.html?url=/archrepo-service/api/openapi/system/system-foo-bar-service"
       },
       "databaseSchema": {
         "schemaVersion": "42",
-        "contentUrl": "/my-archrepo-service/docs-api/systems/wvs/components/wvs-foo-bar-service/database-schema"
+        "contentUrl": "/my-archrepo-service/docs-api/systems/system/components/system-foo-bar-service/database-schema"
       }
     }
   ],
   "relations": [
     {
       "type": "REST_API_RELATION",
-      "consumerSystem": "zoll",
-      "consumer": "zoll-gateway",
-      "providerSystem": "wvs",
-      "provider": "wvs-foo-bar-service",
+      "consumerSystem": "example",
+      "consumer": "example-gateway",
+      "providerSystem": "system",
+      "provider": "system-foo-bar-service",
       "method": "GET",
       "path": "/api/foo/{id}",
       "pactUrl": "https://pactbroker.example.com/pacts/foo"
     },
     {
       "type": "EVENT_RELATION",
-      "consumerSystem": "zoll",
-      "consumer": "zoll-gateway",
-      "providerSystem": "wvs",
-      "provider": "wvs-foo-bar-service",
-      "messageType": "WvsDeclarationAcceptedEvent"
+      "consumerSystem": "example",
+      "consumer": "example-gateway",
+      "providerSystem": "system",
+      "provider": "system-foo-bar-service",
+      "messageType": "SystemDeclarationAcceptedEvent"
     }
   ]
 }
@@ -413,44 +413,44 @@ Role: `architecture-model` / `read`.
 {
   "messages": [
     {
-      "name": "WvsCheckNctsReferabilityV2Command",
+      "name": "systemCheckNctsReferabilityV2Command",
       "kind": "COMMAND",
-      "scope": "wvs",
-      "topic": "wvs-ncts-command",
+      "scope": "system",
+      "topic": "system-ncts-command",
       "descriptorUrl": "https://descriptors.example.com/ncts.json",
       "versions": ["1.0.0"],
       "contracts": [
         {
           "role": "SENDER",
-          "component": "wvs-foo-bar-service",
-          "system": "wvs",
-          "topic": "wvs-ncts-command",
+          "component": "system-foo-bar-service",
+          "system": "system",
+          "topic": "system-ncts-command",
           "versions": ["1.0.0"]
         }
       ]
     },
     {
-      "name": "WvsDeclarationAcceptedEvent",
+      "name": "systemDeclarationAcceptedEvent",
       "kind": "EVENT",
-      "scope": "wvs",
-      "topic": "wvs-declaration-event",
+      "scope": "system",
+      "topic": "system-declaration-event",
       "descriptorUrl": "https://descriptors.example.com/declaration.json",
-      "documentationUrl": "https://confluence.example.com/display/WVS/DeclarationAccepted",
+      "documentationUrl": "https://confluence.example.com/display/system/DeclarationAccepted",
       "description": "A declaration was accepted",
       "versions": ["1.0.0", "2.0.0"],
       "contracts": [
         {
           "role": "CONSUMER",
-          "component": "zoll-gateway",
-          "system": "zoll",
-          "topic": "wvs-declaration-event",
+          "component": "example-gateway",
+          "system": "example",
+          "topic": "system-declaration-event",
           "versions": ["1.0.0", "2.0.0"]
         },
         {
           "role": "PUBLISHER",
-          "component": "wvs-foo-bar-service",
-          "system": "wvs",
-          "topic": "wvs-declaration-event",
+          "component": "system-foo-bar-service",
+          "system": "system",
+          "topic": "system-declaration-event",
           "versions": ["2.0.0"]
         }
       ]
@@ -522,7 +522,7 @@ Role: `architecture-model` / `read`.
 ```json
 {
   "openapi": "3.0.3",
-  "info": { "title": "wvs-foo-bar-service", "version": "1.4.2" },
+  "info": { "title": "system-foo-bar-service", "version": "1.4.2" },
   "servers": [ { "url": "https://foo-bar.example.com" } ],
   "paths": {
     "/api/foo/{id}": {
@@ -588,7 +588,7 @@ Role: `architecture-model` / `read`.
 
 ```json
 {
-  "name": "wvs_foo_bar",
+  "name": "system_foo_bar",
   "version": "42",
   "tables": [
     {
@@ -677,12 +677,12 @@ Role: `architecture-model` / `read`.
 {
   "artifacts": [
     {
-      "system": "wvs",
-      "component": "wvs-foo-bar-service",
+      "system": "system",
+      "component": "system-foo-bar-service",
       "version": "1.4.2",
       "etag": "\"sha256:41ab7c\"",
       "lastModifiedAt": "2026-08-12T05:31:00Z",
-      "contentUrl": "/my-archrepo-service/docs-api/systems/wvs/components/wvs-foo-bar-service/openapi"
+      "contentUrl": "/my-archrepo-service/docs-api/systems/system/components/system-foo-bar-service/openapi"
     }
   ]
 }
@@ -745,12 +745,12 @@ Role: `architecture-model` / `read`.
 {
   "artifacts": [
     {
-      "system": "wvs",
-      "component": "wvs-foo-bar-service",
+      "system": "system",
+      "component": "system-foo-bar-service",
       "version": "42",
       "etag": "\"sha256:77de10\"",
       "lastModifiedAt": "2026-08-12T05:31:00Z",
-      "contentUrl": "/my-archrepo-service/docs-api/systems/wvs/components/wvs-foo-bar-service/database-schema"
+      "contentUrl": "/my-archrepo-service/docs-api/systems/system/components/system-foo-bar-service/database-schema"
     }
   ]
 }
@@ -814,17 +814,17 @@ Role: `architecture-model` / `read`.
 {
   "messageTypes": [
     {
-      "system": "wvs",
-      "message": "WvsDeclarationAcceptedEvent",
+      "system": "system",
+      "message": "systemDeclarationAcceptedEvent",
       "kind": "EVENT",
       "versions": [
         {
           "version": "1.0.0",
-          "contentUrl": "/my-archrepo-service/docs-api/message-types/wvs/WvsDeclarationAcceptedEvent/versions/1.0.0"
+          "contentUrl": "/my-archrepo-service/docs-api/message-types/system/systemDeclarationAcceptedEvent/versions/1.0.0"
         },
         {
           "version": "2.0.0",
-          "contentUrl": "/my-archrepo-service/docs-api/message-types/wvs/WvsDeclarationAcceptedEvent/versions/2.0.0"
+          "contentUrl": "/my-archrepo-service/docs-api/message-types/system/systemDeclarationAcceptedEvent/versions/2.0.0"
         }
       ]
     }
@@ -865,7 +865,7 @@ version declares. This is what a message page in the generated documentation sho
 
 ### Request
 
-`GET /docs-api/message-types/wvs/WvsDeclarationAcceptedEvent/versions/2.0.0`
+`GET /docs-api/message-types/system/systemDeclarationAcceptedEvent/versions/2.0.0`
 
 | Path parameter | Matched                                                                    |
 | -------------- | ---------------------------------------------------------------------------- |
@@ -892,20 +892,20 @@ Role: `architecture-model` / `read`.
 
 ```json
 {
-  "system": "wvs",
-  "message": "WvsDeclarationAcceptedEvent",
+  "system": "system",
+  "message": "systemDeclarationAcceptedEvent",
   "version": "2.0.0",
   "compatibilityMode": "BACKWARD",
   "compatibleVersion": "1.0.0",
   "key": {
-    "schemaName": "WvsDeclarationAcceptedEventKey.avdl",
-    "schemaUrl": "https://github.com/example/message-type-registry/blob/master/descriptor/wvs/event/WvsDeclarationAcceptedEvent/WvsDeclarationAcceptedEventKey.avdl",
-    "resolvedSchema": "//-- Start WvsDeclarationAcceptedEventKey.avdl\n..."
+    "schemaName": "systemDeclarationAcceptedEventKey.avdl",
+    "schemaUrl": "https://github.com/example/message-type-registry/blob/master/descriptor/system/event/systemDeclarationAcceptedEvent/systemDeclarationAcceptedEventKey.avdl",
+    "resolvedSchema": "//-- Start systemDeclarationAcceptedEventKey.avdl\n..."
   },
   "value": {
-    "schemaName": "WvsDeclarationAcceptedEventValue.avdl",
-    "schemaUrl": "https://github.com/example/message-type-registry/blob/master/descriptor/wvs/event/WvsDeclarationAcceptedEvent/WvsDeclarationAcceptedEventValue.avdl",
-    "resolvedSchema": "//-- Start WvsDeclarationAcceptedEventValue.avdl\n..."
+    "schemaName": "systemDeclarationAcceptedEventValue.avdl",
+    "schemaUrl": "https://github.com/example/message-type-registry/blob/master/descriptor/system/event/systemDeclarationAcceptedEvent/systemDeclarationAcceptedEventValue.avdl",
+    "resolvedSchema": "//-- Start systemDeclarationAcceptedEventValue.avdl\n..."
   }
 }
 ```
