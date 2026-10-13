@@ -34,9 +34,10 @@ public class DeploymentlogServicePactTestBase {
     @Pact(provider = DEPLOYMENTLOG, consumer = ARCHREPO)
     private RequestResponsePact getDeployedComponents(PactDslWithProvider builder) {
         String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
-        return builder.given("Currently deployed components for the stage 'ref' are available")
-                .uponReceiving("A GET request to " + API_PATH)
+        return builder.given("Currently deployed and undeployed components for the stage 'ref' are available")
+                .uponReceiving("A GET request to " + API_PATH + " including undeployed components")
                 .path(API_PATH)
+                .query("includeUndeployed=true")
                 .method("GET")
                 .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
                 .willRespondWith()
@@ -45,6 +46,7 @@ public class DeploymentlogServicePactTestBase {
                 .body(PactDslJsonArray.arrayEachLike()
                         .stringValue("componentName", "some-system-component")
                         .stringValue("version", "1.0.0")
+                        .booleanType("undeployed", false)
                         .closeObject())
                 .toPact();
     }
@@ -67,5 +69,49 @@ public class DeploymentlogServicePactTestBase {
         assertThat(result).isNotEmpty();
         assertThat(result.getFirst().componentName())
                 .isEqualTo("some-system-component");
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Pact(provider = DEPLOYMENTLOG, consumer = ARCHREPO)
+    private RequestResponsePact getUndeployedComponent(PactDslWithProvider builder) {
+        String basicAuth = Base64.getEncoder().encodeToString("user:secret".getBytes());
+        return builder.given("An undeployed component with its undeployedAt timestamp is available for the stage 'ref'")
+                .uponReceiving("A GET request to " + API_PATH + " including undeployed components")
+                .path(API_PATH)
+                .query("includeUndeployed=true")
+                .method("GET")
+                .matchHeader("Authorization", "Basic " + basicAuth, "Basic " + basicAuth)
+                .willRespondWith()
+                .status(200)
+                .matchHeader("Content-Type", "application/json", "application/json; encoding=utf-8")
+                .body(PactDslJsonArray.arrayEachLike()
+                        .stringValue("componentName", "some-undeployed-system-component")
+                        .stringValue("version", "1.0.0")
+                        .booleanType("undeployed", true)
+                        .datetime("undeployedAt", "yyyy-MM-dd'T'HH:mm:ss'Z'")
+                        .closeObject())
+                .toPact();
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "getUndeployedComponent")
+    void testGetUndeployedComponentContract() {
+        // given
+        DeploymentlogProperties props = new DeploymentlogProperties();
+        props.setUrl("http://localhost:8888");
+        props.setUsername("user");
+        props.setPassword("secret");
+        DeploymentlogService deploymentlogService = new DeploymentlogImporterConfiguration()
+                .deploymentlogService(props, "test");
+
+        // when
+        List<ComponentVersionSummaryDto> result = deploymentlogService.getDeployedComponents("ref");
+
+        // then
+        assertThat(result).isNotEmpty();
+        ComponentVersionSummaryDto component = result.getFirst();
+        assertThat(component.componentName()).isEqualTo("some-undeployed-system-component");
+        assertThat(component.undeployed()).isTrue();
+        assertThat(component.undeployedAt()).isNotNull();
     }
 }

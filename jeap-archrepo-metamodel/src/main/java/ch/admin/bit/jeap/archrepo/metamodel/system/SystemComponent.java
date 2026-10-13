@@ -61,6 +61,15 @@ public abstract class SystemComponent implements Importable {
     @EqualsAndHashCode.Exclude
     ZonedDateTime lastSeen;
 
+    // Set by the deployment log importer. Internal housekeeping only: the component is kept (instead of deleted)
+    // so a redeploy or the importers' diffing can find it again. Not exposed by any API; readers never see an
+    // undeployed component (see System#getSystemComponents).
+    @EqualsAndHashCode.Exclude
+    boolean undeployed;
+
+    @EqualsAndHashCode.Exclude
+    ZonedDateTime undeployedAt;
+
     protected SystemComponent(String name) {
         this.id = UUID.randomUUID();
         this.createdAt = ZonedDateTime.now();
@@ -73,6 +82,16 @@ public abstract class SystemComponent implements Importable {
 
     public void setLastSeenFromNow() {
         this.setLastSeenFromDate(ZonedDateTime.now());
+    }
+
+    public void markUndeployed(ZonedDateTime undeployedAt) {
+        this.undeployed = true;
+        this.undeployedAt = undeployedAt;
+    }
+
+    public void markDeployed() {
+        this.undeployed = false;
+        this.undeployedAt = null;
     }
 
     public boolean isObsolete() {

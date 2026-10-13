@@ -75,6 +75,7 @@ public class SystemContext {
     private static List<RelationView> getConsumedRelationsByType(ArchitectureModel model, System system, RelationType relationType) {
         return model.getAllActiveRelationsByType(relationType).stream()
                 .filter(relation -> relationToOrFromComponentInSystem(model, system, relation))
+                .filter(relation -> !model.involvesUndeployedComponent(relation))
                 .sorted(RELATION_COMPARATOR)
                 .map(relation -> RelationView.of(relation, systemName(model, relation.getProviderName())))
                 .filter(relation -> !system.getName().equals(relation.getCounterpart()))
@@ -84,6 +85,7 @@ public class SystemContext {
     private static List<RelationView> getProvidedRelationsByType(ArchitectureModel model, System system, RelationType relationType) {
         return model.getAllActiveRelationsByType(relationType).stream()
                 .filter(relation -> relationToOrFromComponentInSystem(model, system, relation))
+                .filter(relation -> !model.involvesUndeployedComponent(relation))
                 .sorted(RELATION_COMPARATOR)
                 .map(relation -> RelationView.of(relation, systemName(model, relation.getConsumerName())))
                 .filter(relation -> !system.getName().equals(relation.getCounterpart()))

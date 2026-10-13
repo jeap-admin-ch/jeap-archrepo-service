@@ -49,6 +49,14 @@ After the last page is written, the generator walks the whole tree below the roo
 did not just generate. A system that left the model therefore takes its pages with it - and any page a person
 created under the root page is removed too. **The root page's subtree belongs to the generator.**
 
+An **undeployed** component's page is cleaned up the same way, even though the component itself stays in the
+model: the generator reads a system's `getSystemComponents()`, which leaves out undeployed components (importers use
+`getSystemComponentsIncludingUndeployed()`), so it
+neither creates nor updates that component's page, and the orphan cleanup takes it on the next run. The system
+and component context diagrams draw no box and no relation for an undeployed component either - see
+`ArchitectureModel.isUndeployedComponent`. What is kept in the model for a component that left is internal housekeeping only (redeploy and importer
+diffing); no API or page exposes it.
+
 ## When it runs
 
 The `generateDocumentation()` job runs on `archrepo.documentation-generator.update-schedule`, guarded by ShedLock

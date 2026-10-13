@@ -138,7 +138,7 @@ Removal is not one mechanism but several, which is worth knowing when something 
 
 | What                                    | Removed by                                                                            | When                                                                               |
 | --------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| A component the deployment log created  | `DeploymentlogSystemComponentImporter`, at the end of its run                         | It is no longer among the deployed components                                      |
+| A component the deployment log created  | `DeploymentlogSystemComponentImporter`, at the end of its run                         | The deployment log no longer reports it at all - one still reported as undeployed from this environment is marked `undeployed` instead and kept |
 | A component the metrics created         | `AWSSystemComponentImporter` / `RhosSystemComponentImporter`, at the end of their run | Its `lastSeen` is more than 14 days old                                            |
 | A REST relation                         | `ArchitectureModel.cleanup()`, at the end of a full run                               | It was imported and its `lastSeen` is more than 3 months old, or it was never seen |
 | A `RestApi`                             | `ArchitectureModel.cleanup()`, at the end of a full run                               | No relation references it any more                                                 |

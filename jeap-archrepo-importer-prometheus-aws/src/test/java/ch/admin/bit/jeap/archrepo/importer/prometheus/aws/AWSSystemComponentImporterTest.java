@@ -38,15 +38,30 @@ class AWSSystemComponentImporterTest {
     void importIntoModel() {
         doReturn(Set.of(SYSTEM)).when(awsPrometheusClient).listApplications("ref");
         doReturn(Set.of(EXISTING_APP, NEW_APP)).when(awsPrometheusClient).listServices(SYSTEM, SPACE);
-        assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
+        assertThat(system.getSystemComponentsIncludingUndeployed().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
                 .contains(EXISTING_APP, DEPRECATED_APP, NOT_YET_DEPRECATED_APP);
 
         awsSystemComponentImporter.importIntoModel(model, "ref");
 
-        assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
+        assertThat(system.getSystemComponentsIncludingUndeployed().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
                 .contains(EXISTING_APP, NOT_YET_DEPRECATED_APP, NEW_APP);
+    }
+
+    @Test
+    void importIntoModel_keepsAComponentUndeployedWhileMetricsStillReportIt() {
+        doReturn(Set.of(SYSTEM)).when(awsPrometheusClient).listApplications("ref");
+        doReturn(Set.of(EXISTING_APP)).when(awsPrometheusClient).listServices(SYSTEM, SPACE);
+        ZonedDateTime undeployedAt = ZonedDateTime.now().minusDays(1);
+        system.findSystemComponent(EXISTING_APP).orElseThrow().markUndeployed(undeployedAt);
+
+        awsSystemComponentImporter.importIntoModel(model, "ref");
+
+        SystemComponent component = system.findSystemComponent(EXISTING_APP).orElseThrow();
+        assertThat(component.isUndeployed()).isTrue();
+        assertThat(component.getUndeployedAt()).isEqualTo(undeployedAt);
+        assertThat(component.getImporter()).isEqualTo(Importer.GRAFANA);
     }
 
     @BeforeEach

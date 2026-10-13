@@ -5,6 +5,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,20 @@ class SystemTest {
         assertTrue(found.isPresent());
         assertSame(frontend, found.get());
         assertTrue(notFound.isEmpty());
+    }
+
+    @Test
+    void getSystemComponents_excludesUndeployedOnes() {
+        assertEquals(List.of(frontend), system.getSystemComponents());
+
+        frontend.markUndeployed(ZonedDateTime.now());
+
+        assertTrue(system.getSystemComponents().isEmpty());
+        assertEquals(List.of(frontend), system.getSystemComponentsIncludingUndeployed());
+
+        frontend.markDeployed();
+
+        assertEquals(List.of(frontend), system.getSystemComponents());
     }
 
     @BeforeEach

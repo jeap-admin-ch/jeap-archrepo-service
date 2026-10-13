@@ -73,6 +73,17 @@ class ArchitectureModelTest {
     }
 
     @Test
+    void isUndeployedComponent() {
+        assertFalse(model.isUndeployedComponent(frontend.getName()));
+        assertFalse(model.isUndeployedComponent("foo"));
+
+        frontend.markUndeployed(ZonedDateTime.now());
+
+        assertTrue(model.isUndeployedComponent(frontend.getName()));
+        assertTrue(model.isUndeployedComponent(frontend.getName().toUpperCase()));
+    }
+
+    @Test
     void removeAllByImporter() {
         SystemComponent additionalComponent = BackendService.builder()
                 .name("additional")
@@ -346,6 +357,58 @@ class ArchitectureModelTest {
         assertThat(list)
                 .hasSize(4)
                 .containsExactlyInAnyOrder("backend", "scs", "other-backend-service-1", "other-backend-service-2");
+    }
+
+    @Test
+    void getSystemComponentsWithoutOpenApiSpec_excludesUndeployedComponents() {
+        backend.markUndeployed(ZonedDateTime.now());
+
+        assertThat(model.getSystemComponentsWithoutOpenApiSpec())
+                .containsExactlyInAnyOrder("scs", "other-backend-service-1", "other-backend-service-2");
+    }
+
+    @Test
+    void getRestApiRelationsWithoutPact_excludesRelationsInvolvingUndeployedComponents() {
+        RestApiRelation toUndeployedProvider = RestApiRelation.builder()
+                .consumerName(frontend.getName())
+                .restApi(createRestApi(backend, "GET", "/api/undeployed-provider"))
+                .lastSeen(ZonedDateTime.now())
+                .build();
+        RestApiRelation fromUndeployedConsumer = RestApiRelation.builder()
+                .consumerName(otherBackendService1.getName())
+                .restApi(createRestApi(backend2, "GET", "/api/undeployed-consumer"))
+                .lastSeen(ZonedDateTime.now())
+                .build();
+        RestApiRelation deployedOnBothEnds = RestApiRelation.builder()
+                .consumerName(frontend.getName())
+                .restApi(createRestApi(backend2, "GET", "/api/deployed"))
+                .lastSeen(ZonedDateTime.now())
+                .build();
+        system1.addRelation(toUndeployedProvider);
+        system1.addRelation(fromUndeployedConsumer);
+        system1.addRelation(deployedOnBothEnds);
+        backend.markUndeployed(ZonedDateTime.now());
+        otherBackendService1.markUndeployed(ZonedDateTime.now());
+
+        assertThat(model.getRestApiRelationsWithoutPact()).containsExactly(deployedOnBothEnds);
+    }
+
+    @Test
+    void involvesUndeployedComponent_isTrueForEitherEnd() {
+        RestApiRelation relation = RestApiRelation.builder()
+                .consumerName(frontend.getName())
+                .restApi(createRestApi(backend, "GET", "/api/foo"))
+                .lastSeen(ZonedDateTime.now())
+                .build();
+
+        assertFalse(model.involvesUndeployedComponent(relation));
+
+        backend.markUndeployed(ZonedDateTime.now());
+        assertTrue(model.involvesUndeployedComponent(relation));
+
+        backend.markDeployed();
+        frontend.markUndeployed(ZonedDateTime.now());
+        assertTrue(model.involvesUndeployedComponent(relation));
     }
 
     private static ArchitectureModel modelOf(System... systems) {

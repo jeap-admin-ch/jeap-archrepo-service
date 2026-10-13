@@ -81,4 +81,33 @@ class ModelStub {
                 .systems(List.of(system))
                 .build();
     }
+
+    static ArchitectureModel createModelWithUndeployedOnlySystem() {
+        BackendService backendService = BackendService.builder()
+                .name(COMPONENT)
+                .importer(Importer.GRAFANA)
+                .ownedBy(Team.builder().name("Lagrev").build())
+                .description("desc")
+                .build();
+        System system = System.builder()
+                .name(SYSTEM)
+                .aliases(List.of(ALIAS))
+                .systemComponents(List.of(backendService))
+                .defaultOwner(Team.builder().name("team").build())
+                .build();
+
+        BackendService undeployedComponent = BackendService.builder()
+                .name("undeployed-system-service")
+                .importer(Importer.DEPLOYMENT_LOG)
+                .build();
+        undeployedComponent.markUndeployed(ZonedDateTime.now());
+        System undeployedSystem = System.builder()
+                .name("undeployed-system")
+                .systemComponents(List.of(undeployedComponent))
+                .build();
+
+        return ArchitectureModel.builder()
+                .systems(List.of(system, undeployedSystem))
+                .build();
+    }
 }

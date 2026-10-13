@@ -6,6 +6,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
+import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentType;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,46 @@ class ModelDtoFactoryTest {
         assertEquals("desc", systemComponentDto.getDescription());
         assertEquals("Lagrev", systemComponentDto.getOwnedBy());
         assertEquals(SystemComponentType.BACKEND_SERVICE, systemComponentDto.getType());
+    }
+
+    @Test
+    void createModelDto_excludesSystemWithOnlyUndeployedComponents() {
+        ModelDtoFactory modelDtoFactory = new ModelDtoFactory();
+        ArchitectureModel model = ModelStub.createModelWithUndeployedOnlySystem();
+
+        ModelDto modelDto = modelDtoFactory.createModelDto(model);
+
+        assertThat(modelDto.getSystems())
+                .extracting(SystemDto::getName)
+                .containsExactly(ModelStub.SYSTEM);
+    }
+
+    @Test
+    void createModelDto_keepsSystemWithoutAnyComponents() {
+        ModelDtoFactory modelDtoFactory = new ModelDtoFactory();
+        System systemWithoutComponents = System.builder().name("empty-system").build();
+        ArchitectureModel model = ArchitectureModel.builder()
+                .systems(List.of(systemWithoutComponents))
+                .build();
+
+        assertThat(modelDtoFactory.createModelDto(model).getSystems())
+                .extracting(SystemDto::getName)
+                .containsExactly("empty-system");
+    }
+
+    @Test
+    void createModelDto_listsOnlyTheDeployedComponentsOfASystem() {
+        ModelDtoFactory modelDtoFactory = new ModelDtoFactory();
+        ArchitectureModel model = ModelStub.createModelWithUndeployedOnlySystem();
+        BackendService extraUndeployed = BackendService.builder().name("system-undeployed-service").build();
+        extraUndeployed.markUndeployed(java.time.ZonedDateTime.now());
+        model.findSystem(ModelStub.SYSTEM).orElseThrow().addSystemComponent(extraUndeployed);
+
+        SystemDto systemDto = modelDtoFactory.createModelDto(model).getSystems().stream()
+                .filter(s -> s.getName().equals(ModelStub.SYSTEM)).findFirst().orElseThrow();
+
+        assertThat(systemDto.getSystemComponents()).extracting(SystemComponentDto::getName)
+                .containsExactly(ModelStub.COMPONENT);
     }
 
     @Test

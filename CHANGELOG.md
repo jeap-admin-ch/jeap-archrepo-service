@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [15.13.0] - 2026-10-15
+
+### Changed
+- The deployment log importer now marks a component the deployment log still reports, but as undeployed from
+  this environment, as `undeployed` instead of deleting it. It is removed only once the deployment log no
+  longer reports it at all, and redeploying it clears the flag again.
+- `GET /api/model`, `GET /api/model/{system}/relations`, `GET /api/model/rest-api-relation-without-pact` and
+  `GET /api/model/system-components-without-open-api-spec` no longer mention an undeployed component or a
+  relation to or from one; the docs API's `components`/`relations` leave the same two out. A consumer sees
+  exactly the currently deployed architecture and needs no flag of its own to filter it - which is what lets
+  the governance service's existing archrepo importer keep working unchanged: a component missing from a fetch
+  that was present in the last one is already treated as deleted.
+- The Confluence documentation generator no longer creates or updates a page for an undeployed component, and
+  no longer draws it, or a relation to or from it, in a system's or a component's context diagram. Its page is
+  taken by the next run's orphan cleanup, the same as before a component was ever tombstoned instead of
+  deleted.
+
+### Added
+- A migration adds `undeployed` and `undeployed_at` columns to `system_component`.
+
 ## [15.12.0] - 2026-10-14
 
 ### Dependencies

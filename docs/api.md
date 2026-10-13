@@ -169,6 +169,13 @@ Authentication: none. The endpoint is `permitAll()`.
 `SystemDto` is annotated `@JsonInclude(NON_NULL)`, so an absent system field is missing from the payload;
 `SystemComponentDto` is not, so an absent component field is an explicit `null`.
 
+**A component the deployment log reports as undeployed from this environment is left out of
+`systemComponents` entirely**, and a system left with no components this way is left out of `systems` too - a
+consumer reading this endpoint sees exactly the components that are currently deployed, with no flag to check
+and nothing to filter itself. This is also what lets the governance service's importer work unchanged: a
+component absent from one fetch that was present in the last one is, as far as it is concerned, deleted - which
+is the outcome wanted for a component that left.
+
 | Status | When                                                    |
 | ------ | ------------------------------------------------------- |
 | `200`  | Always - an empty landscape is an empty `systems` array |
@@ -227,7 +234,8 @@ Authentication: none. The endpoint is `permitAll()`.
 | `messageType`    | string | The event or the command name - event and command relations only                      |
 
 `RelationDto` is annotated `@JsonInclude(NON_NULL)`, so the fields that do not apply to a relation type are
-**omitted**, not rendered as `null`.
+**omitted**, not rendered as `null`. A relation with either end an undeployed component is left out too, the
+same as in `GET /api/model`.
 
 | Status | When                                                                 |
 | ------ | -------------------------------------------------------------------- |
@@ -274,7 +282,8 @@ Authentication: none. The endpoint is `permitAll()`.
 | `path`           | string | The path template of the called endpoint                                           |
 
 `RestApiRelationDto` carries no `@JsonInclude`, so an unresolved system is an explicit `null` here - unlike in
-`RelationDto`.
+`RelationDto`. A relation with either end an undeployed component is left out, so it is never offered as
+something to add a Pact test for.
 
 | Status | When                                         |
 | ------ | -------------------------------------------- |
@@ -301,7 +310,8 @@ Authentication: none. The endpoint is `permitAll()`.
 ```
 
 Only components of type `BACKEND_SERVICE` or `SELF_CONTAINED_SYSTEM` are considered; a component is listed when
-its system holds no `OpenApiSpec` naming it as the provider.
+its system holds no `OpenApiSpec` naming it as the provider. An undeployed component is never listed, whether or
+not it has a spec.
 
 | Status | When                                     |
 | ------ | ---------------------------------------- |

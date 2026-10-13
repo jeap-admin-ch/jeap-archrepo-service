@@ -110,4 +110,35 @@ class DocumentationGeneratorTest {
         verify(messageGraphService).getGraphs(eq(commandMock), any());
         verify(confluenceAdapter, times(7)).updatePage(anyString(), anyString(), anyString(), anyString());
     }
+
+    @Test
+    void generate_withUndeployedComponent_rendersNoPageForIt() {
+        SystemComponent deployedMock = mock(SystemComponent.class);
+        when(deployedMock.getName()).thenReturn("ComponentA");
+
+        System systemMock = mock(System.class);
+        when(systemMock.getName()).thenReturn(SYSTEM_NAME);
+        // getSystemComponents() is what the generator reads: an undeployed component is kept out of
+        // it by System itself, so this test does not need an undeployed mock to prove the exclusion.
+        when(systemMock.getSystemComponents()).thenReturn(List.of(deployedMock));
+        when(systemMock.getEvents()).thenReturn(List.of());
+        when(systemMock.getCommands()).thenReturn(List.of());
+
+        ArchitectureModel model = ArchitectureModel.builder()
+                .systems(List.of(systemMock))
+                .build();
+
+        when(confluenceAdapter.findOrCreatePageUnderAncestor(anyString(), anyString()))
+                .thenAnswer(invocation -> UUID.randomUUID().toString());
+        when(templateRenderer.renderSystemPage(any(), eq(systemMock), any())).thenReturn("Rendered System Page");
+        when(templateRenderer.renderIndexPage()).thenReturn("Rendered Index Page");
+        when(templateRenderer.renderComponentPage(any(), eq(deployedMock), any())).thenReturn("Rendered Component Page");
+
+        documentationGenerator.generate(model);
+
+        // One page for the deployed component only, never for an undeployed one - and never a read of
+        // getSystemComponentsIncludingUndeployed(), which would still include it.
+        verify(templateRenderer).renderComponentPage(any(), eq(deployedMock), any());
+        verify(systemMock, never()).getSystemComponentsIncludingUndeployed();
+    }
 }

@@ -126,6 +126,7 @@ class DocsApiDtoFactory {
         return model.getSystems().stream()
                 .flatMap(s -> s.getActiveRelations().stream())
                 .filter(relation -> belongsToSystem(relation, system.getName(), componentToSystem))
+                .filter(relation -> !model.involvesUndeployedComponent(relation))
                 .map(relation -> createRelation(componentToSystem, relation))
                 .sorted(comparing(RelationDto::type)
                         .thenComparing(RelationDto::consumer, nullsFirst(naturalOrder()))

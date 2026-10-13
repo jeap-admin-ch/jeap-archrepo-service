@@ -163,6 +163,25 @@ class DocsApiDtoFactoryTest {
         assertThat(consumer.versions()).containsExactly("1.0.0", "2.0.0");
     }
 
+    @Test
+    void createSystemDetail_leavesOutAnUndeployedComponent() {
+        model.findSystemComponent(DocsApiModelStub.COMPONENT_WITHOUT_ARTIFACTS).orElseThrow()
+                .markUndeployed(java.time.ZonedDateTime.now());
+
+        assertThat(systemDetail().components()).extracting(ComponentDto::name)
+                .contains(DocsApiModelStub.COMPONENT)
+                .doesNotContain(DocsApiModelStub.COMPONENT_WITHOUT_ARTIFACTS);
+    }
+
+    @Test
+    void createSystemDetail_leavesOutRelationsWithAnUndeployedEnd() {
+        model.findSystemComponent(DocsApiModelStub.OTHER_COMPONENT).orElseThrow()
+                .markUndeployed(java.time.ZonedDateTime.now());
+
+        // Every relation of the stub has the other system's gateway as its consumer
+        assertThat(systemDetail().relations()).isEmpty();
+    }
+
     private SystemDetailDto systemDetail() {
         return factory.createSystemDetail(model, wvs());
     }

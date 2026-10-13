@@ -61,9 +61,14 @@ void importIntoModel(ArchitectureModel model, String environment);
 `@ConditionalOnProperty`, or the custom `@ConditionalOnNonEmptyHosts` for the Prometheus variants) — if its config is
 absent, the importer simply isn't active. There is no hard-coded importer list.
 
-`getOrder()` encodes source precedence: metrics importers (prometheus-aws/rhos) run before `deploymentlog` so
-live-metrics data wins over deployment-log data when both describe the same component. Entities carry an `Importer` enum
-marking their source, which lets a scheduled importer remove elements that have disappeared from its source.
+`getOrder()` encodes source precedence: metrics importers (prometheus-aws/rhos) run *after* `deploymentlog`
+(`Integer.MIN_VALUE + 50` vs. `Integer.MIN_VALUE`) and overwrite the component's importer attribution and
+`lastSeen` when they see it live, so live-metrics data wins over deployment-log data for a component's existence
+and generic attributes. The `undeployed`/`undeployedAt` flag is the exception: only `deploymentlog` ever sets or
+clears it, so a tombstone from the deployment log is authoritative even for a component metrics still sees as
+live - metrics presence refreshes `lastSeen` and `importer` on such a component but never un-marks it undeployed.
+Entities carry an `Importer` enum marking their source, which lets a scheduled importer remove elements that have
+disappeared from its source.
 
 Not all ingestion is scheduled: OpenAPI specs and database schemas are pushed in synchronously via REST controllers in
 `jeap-archrepo-web/.../web/rest/` (those importers are plain `@Component`s, not `ArchRepoImporter`s).

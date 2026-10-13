@@ -41,9 +41,24 @@ class RhosSystemComponentImporterTest {
 
         systemComponentImporter.importIntoModel(model, "ref");
 
-        assertThat(system.getSystemComponents().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
+        assertThat(system.getSystemComponentsIncludingUndeployed().stream().filter(sc -> sc.getImporter().equals(Importer.GRAFANA)).map(SystemComponent::getName).toList())
                 .hasSize(3)
                 .contains(EXISTING_APP, NOT_YET_DEPRECATED_APP, NEW_APP);
+    }
+
+    @Test
+    void importIntoModel_keepsAComponentUndeployedWhileMetricsStillReportIt() {
+        doReturn(Set.of("bit-jme-r")).when(grafanaClient).namespaces("ref");
+        doReturn(Set.of(EXISTING_APP)).when(grafanaClient).services("ref", "bit-jme-r");
+        ZonedDateTime undeployedAt = ZonedDateTime.now().minusDays(1);
+        system.findSystemComponent(EXISTING_APP).orElseThrow().markUndeployed(undeployedAt);
+
+        systemComponentImporter.importIntoModel(model, "ref");
+
+        SystemComponent component = system.findSystemComponent(EXISTING_APP).orElseThrow();
+        assertThat(component.isUndeployed()).isTrue();
+        assertThat(component.getUndeployedAt()).isEqualTo(undeployedAt);
+        assertThat(component.getImporter()).isEqualTo(Importer.GRAFANA);
     }
 
     @BeforeEach

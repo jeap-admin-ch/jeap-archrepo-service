@@ -226,7 +226,22 @@ public class System extends MutableDomainEntity {
         restApis.add(restApi);
     }
 
+    /**
+     * The components of this system that are still deployed - what a page, a diagram, a relation list or either
+     * REST API (docs or model) should show as the current architecture. This is the default view: readers get it
+     * without having to remember to filter.
+     */
     public List<SystemComponent> getSystemComponents() {
+        return systemComponents.stream().filter(component -> !component.isUndeployed()).toList();
+    }
+
+    /**
+     * All components of this system, including undeployed ones. An undeployed component is kept in the model only
+     * for internal housekeeping, which is what lets an importer mark it undeployed again, or redeployed, rather
+     * than recreate it. Only importers and the model's own bookkeeping should use this; nothing that reports the
+     * architecture to a reader or another service may.
+     */
+    public List<SystemComponent> getSystemComponentsIncludingUndeployed() {
         return unmodifiableList(systemComponents);
     }
 

@@ -101,12 +101,17 @@ public class ArchitectureModel {
                 .toList();
     }
 
+    /**
+     * Not {@link #getAllActiveRelationsByType}: a relation to or from an undeployed component is excluded too,
+     * so a missing Pact test for one left is not reported as something to fix.
+     */
     public List<RestApiRelation> getRestApiRelationsWithoutPact() {
         return systems.stream()
                 .flatMap(system -> system.getActiveRelations().stream())
                 .filter(RestApiRelation.class::isInstance)
                 .map(RestApiRelation.class::cast)
                 .filter(relation -> relation.getPactUrl() == null)
+                .filter(relation -> !involvesUndeployedComponent(relation))
                 .toList();
     }
 
@@ -114,6 +119,25 @@ public class ArchitectureModel {
         return systems.stream()
                 .flatMap(system -> system.findSystemComponent(componentName).stream())
                 .findFirst();
+    }
+
+    /**
+     * Whether the name is a component this model has and it is undeployed - what a diagram or a relation list
+     * checks before drawing it, so that a relation to or from a component that left no longer reads as part of
+     * the current architecture. A name the model does not have - another system's business name in an event
+     * relation, for instance - answers false: this is not the check that catches that.
+     */
+    public boolean isUndeployedComponent(String componentName) {
+        return componentName != null && findSystemComponent(componentName).map(SystemComponent::isUndeployed).orElse(false);
+    }
+
+    /**
+     * Whether either end of the relation is an undeployed component - a relation to or from one left no longer
+     * reads as part of the current architecture, the rule every API and doc surface applies before showing a
+     * relation.
+     */
+    public boolean involvesUndeployedComponent(Relation relation) {
+        return isUndeployedComponent(relation.getConsumerName()) || isUndeployedComponent(relation.getProviderName());
     }
 
     public void removeAllByImporter(Importer importer) {
@@ -139,7 +163,7 @@ public class ArchitectureModel {
 
     public List<SystemComponent> getAllSystemComponentsByImporter(Importer importer) {
         return getAllSystems()
-                .flatMap(s -> s.getSystemComponents().stream())
+                .flatMap(s -> s.getSystemComponentsIncludingUndeployed().stream())
                 .filter(s -> s.getImporter() == importer)
                 .toList();
     }
@@ -165,6 +189,7 @@ public class ArchitectureModel {
 
     public List<String> getSystemComponentsWithoutOpenApiSpec() {
         return this.getAllSystemComponents()
+                .filter(sc -> !sc.isUndeployed())
                 .filter(sc -> SystemComponentType.BACKEND_SERVICE.equals(sc.getType()) || SystemComponentType.SELF_CONTAINED_SYSTEM.equals(sc.getType()))
                 .filter(sc -> sc.getParent().getOpenApiSpecs().stream().filter(o -> o.getProvider().equals(sc)).findFirst().isEmpty())
                 .map(SystemComponent::getName)
@@ -202,7 +227,7 @@ public class ArchitectureModel {
     }
 
     private Stream<SystemComponent> getAllSystemComponents() {
-        return getAllSystems().flatMap(system -> system.getSystemComponents().stream());
+        return getAllSystems().flatMap(system -> system.getSystemComponentsIncludingUndeployed().stream());
     }
 
     public Map<String, String> getAllSystemComponentNamesWithSystemName() {

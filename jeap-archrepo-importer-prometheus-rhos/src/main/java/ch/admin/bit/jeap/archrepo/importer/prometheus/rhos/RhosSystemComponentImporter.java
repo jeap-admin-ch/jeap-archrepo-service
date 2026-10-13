@@ -97,7 +97,10 @@ class RhosSystemComponentImporter implements ArchRepoImporter {
         system.findSystemComponent(componentName).ifPresentOrElse(
                 systemComponent -> {
                     log.info("Update SystemComponent {} in System {}", componentName, system.getName());
-                    // When a component is imported from metrics, the grafana importer takes precedence over any other importers
+                    // When a component is imported from metrics, the grafana importer takes precedence over any other importers.
+                    // The undeployed flag is deliberately left untouched: deploymentlog is authoritative for it, so metrics
+                    // still being emitted (e.g. a pod not yet terminated) must not un-mark a component the deployment log
+                    // already reports as undeployed.
                     systemComponent.setImporter(Importer.GRAFANA);
                     systemComponent.setLastSeenFromDate(ZonedDateTime.now());
                 },

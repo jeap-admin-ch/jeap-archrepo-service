@@ -78,8 +78,10 @@ Two removal styles coexist:
 
 - **Full replace.** The message type importer and the Pact broker importer call `removeAllByImporter()` for their
   own source at the *start* of the run and re-import everything.
-- **Diff.** The deployment log importer removes its own components that were not in this run's response; the
-  metrics importers remove their own components whose `lastSeen` is more than 14 days old (`isObsolete()`).
+- **Diff.** The deployment log importer removes its own components that have vanished from the deployment log
+  entirely; one it still reports, but as undeployed from this environment, is kept and marked `undeployed`
+  instead of being removed, so it is only tombstoned, not deleted. The metrics importers remove their own
+  components whose `lastSeen` is more than 14 days old (`isObsolete()`).
 
 `ArchitectureModel.cleanup()`, which `UpdateService` calls after the last importer, is a third thing again and
 concerns **only REST elements**: it removes imported `RestApiRelation`s not seen for three months and `RestApi`

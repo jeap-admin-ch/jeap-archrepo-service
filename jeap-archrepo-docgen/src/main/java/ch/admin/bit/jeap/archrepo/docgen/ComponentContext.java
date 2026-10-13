@@ -140,6 +140,7 @@ public class ComponentContext {
     private static List<RelationView> getConsumedRelationsByType(ArchitectureModel model, SystemComponent systemComponent, RelationType relationType) {
         return model.getAllActiveRelationsByType(relationType).stream()
                 .filter(relation -> systemComponent.getName().equals(relation.getConsumerName()))
+                .filter(relation -> !model.involvesUndeployedComponent(relation))
                 .sorted(RELATION_COMPARATOR)
                 .map(RelationView::ofConsumedRelation)
                 .toList();
@@ -148,6 +149,7 @@ public class ComponentContext {
     private static List<RelationView> getProvidedRelationsByType(ArchitectureModel model, SystemComponent systemComponent, RelationType relationType) {
         return model.getAllActiveRelationsByType(relationType).stream()
                 .filter(relation -> systemComponent.getName().equals(relation.getProviderName()))
+                .filter(relation -> !model.involvesUndeployedComponent(relation))
                 .sorted(RELATION_COMPARATOR)
                 .map(RelationView::ofProvidedRelation)
                 .toList();
@@ -156,6 +158,7 @@ public class ComponentContext {
     private static List<ProvidedRestAPIRelationView> getProvidedRestApiRelations(ArchitectureModel model, SystemComponent systemComponent) {
         return model.getAllActiveRelationsByType(RelationType.REST_API_RELATION).stream()
                 .filter(relation -> systemComponent.getName().equals(relation.getProviderName()))
+                .filter(relation -> !model.involvesUndeployedComponent(relation))
                 .map(RestApiRelation.class::cast)
                 .map(ProvidedRestAPIRelationView::of)
                 .toList();

@@ -7,6 +7,9 @@ import java.util.List;
 
 public interface DeploymentlogService {
 
-    @GetExchange("/api/environment/{environment}/components")
+    /**
+     * Also asks for components that were undeployed, so that the importer can tombstone rather than delete them.
+     */
+    @GetExchange("/api/environment/{environment}/components?includeUndeployed=true")
     List<ComponentVersionSummaryDto> getDeployedComponents(@PathVariable("environment") String environment);
 }

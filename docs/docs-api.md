@@ -366,7 +366,13 @@ Role: `architecture-model` / `read`.
 | `relations[].messageType`      | string             | The event or command name - event and command relations only                                                                                           | any other relation type                            |
 
 Only **active** relations appear - a deleted relation must not be documented. `importer` and `lastSeen` are the
-provenance a generated page shows.
+provenance a generated page shows. **A component the deployment log reports as undeployed from this environment
+is left out of `components` entirely**, the same way the generated site drops its page - this is per-environment,
+so a component undeployed from one environment and still deployed in another appears here on one site and not
+the other. A relation with either end undeployed is left out of `relations` for the same reason. A consumer
+deciding whether to remove a component's documentation altogether still has to read every environment it serves
+and act only once the component is absent from every one of them - absence here carries no reason, so it reads
+the same whether a component was undeployed or never existed.
 
 | Status | `type`             | When                                                                   |
 | ------ | ------------------ | ---------------------------------------------------------------------- |

@@ -90,6 +90,9 @@ public class DocumentationGenerator {
         updatePage(context.getEventIndexPages().get(systemKey), indexContent);
         updatePage(context.getCommandIndexPages().get(systemKey), indexContent);
 
+        // getSystemComponents() leaves out undeployed components: one must not go on being generated a page
+        // here - this, together with ensureSystemPages() above not creating one for it, is what lets the
+        // orphan cleanup take its page.
         system.getSystemComponents().forEach(component -> renderComponent(context, component));
         system.getEvents().forEach(event -> renderEvent(context, event));
         system.getCommands().forEach(command -> renderCommand(context, command));

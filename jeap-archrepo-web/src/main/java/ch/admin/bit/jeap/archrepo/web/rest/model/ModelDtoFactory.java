@@ -19,8 +19,16 @@ class ModelDtoFactory {
 
     ModelDto createModelDto(ArchitectureModel model) {
         return ModelDto.builder()
-                .systems(map(model.getSystems(), this::createSystemDto))
+                .systems(model.getSystems().stream()
+                        .filter(ModelDtoFactory::isReportedSystem)
+                        .map(this::createSystemDto)
+                        .toList())
                 .build();
+    }
+
+    // A system whose components are all undeployed is gone; one that never had components is kept as before.
+    private static boolean isReportedSystem(System system) {
+        return system.getSystemComponentsIncludingUndeployed().isEmpty() || !system.getSystemComponents().isEmpty();
     }
 
     private SystemDto createSystemDto(System system) {
@@ -54,6 +62,7 @@ class ModelDtoFactory {
         return model.getSystems().stream()
                 .flatMap(s -> s.getActiveRelations().stream())
                 .filter(r -> consumerOrProducerIsForSystem(r, system.getName(), servicesAndSystems))
+                .filter(r -> !model.involvesUndeployedComponent(r))
                 .map(r -> createRelationDto(servicesAndSystems, r))
                 .toList();
     }
