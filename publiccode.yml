@@ -1,8 +1,8 @@
 publiccodeYmlVersion: 0.5.0
 name: jeap-archrepo-service
 applicationSuite: jEAP
-softwareVersion: 15.14.0
-releaseDate: 2026-10-18
+softwareVersion: 16.0.0
+releaseDate: 2026-10-16
 url: "https://github.com/jeap-admin-ch/jeap-archrepo-service.git"
 landingURL: "https://github.com/jeap-admin-ch/jeap"
 platforms:
@@ -18,19 +18,18 @@ description:
   en:
     localisedName: jeap-archrepo-service
     shortDescription: >
-      Service template which provides a centralized system for automatically managing and documenting the
-      application architecture inventory.
+      Library that provides a centralized architecture inventory through REST APIs for use by the jEAP Doc Service.
     longDescription: >
       The jEAP Architecture Repository Service (Arch Repo) is a central architecture repository holding the 
       architecture model for documenting components and their relations in a microservice-based system architecture.
-      It maintains an up-to-date inventory of microservices, their relationships, events, and interfaces, and 
-      automatically generates architecture documentation from this data. The Arch Repo focuses on system architecture 
-      and integrates information from multiple sources, publishing the resulting architecture model to Confluence.
-      A service instance can be created by depending on this template, then adding specific configuration.
+      It maintains an up-to-date inventory of microservices, their relationships, events, and interfaces, and exposes
+      the resulting architecture model through REST APIs, including an OAuth2-protected Docs API consumed by the jEAP
+      Doc Service. The Doc Service generates the architecture documentation. A service instance can be created by
+      depending on this library, then adding specific configuration.
     features:
       - Maintains an up-to-date inventory of microservices, relationships, and interfaces
-      - Integrates multiple data sources to automatically generate architecture documentation
-      - Publishes architecture models to Confluence
+      - Integrates multiple data sources into an architecture inventory
+      - Exposes the architecture model to the jEAP Doc Service
 legal:
   license: Apache-2.0
 maintenance:

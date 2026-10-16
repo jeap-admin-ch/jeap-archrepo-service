@@ -14,9 +14,6 @@ public class Pacticipants {
     public static final String MCS_PROPERTY_NAME = "archrepo-messagecontract-provider";
     public static final String MCS = "${" + MCS_PROPERTY_NAME + "}";
 
-    public static final String REACTION_OBSERVER_SERVICE_PROPERTY_NAME = "archrepo-reactionobserverservice-provider";
-    public static final String REACTION_OBSERVER_SERVICE = "${" + REACTION_OBSERVER_SERVICE_PROPERTY_NAME + "}";
-
     public static void setArchrepoPacticipant(String archrepoPacticipantName) {
         System.setProperty(ARCHREPO_PROPERTY_NAME, archrepoPacticipantName);
     }
@@ -27,10 +24,6 @@ public class Pacticipants {
 
     public static void setMessageContractServicePacticipant(String mcsPacticipantName) {
         System.setProperty(MCS_PROPERTY_NAME, mcsPacticipantName);
-    }
-
-    public static void setReactionObserverServicePacticipant(String reactionObserverServicePacticipantName) {
-        System.setProperty(REACTION_OBSERVER_SERVICE_PROPERTY_NAME, reactionObserverServicePacticipantName);
     }
 
 }

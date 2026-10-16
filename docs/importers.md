@@ -34,7 +34,7 @@ one that runs last decides what it looks like:
 | `Integer.MIN_VALUE`       | `DeploymentlogSystemComponentImporter`                      | Runs first: a component that was deployed                                                                                                                            |
 | `Integer.MIN_VALUE + 50`  | `AWSSystemComponentImporter`, `RhosSystemComponentImporter` | Runs after the deployment log and takes precedence, because metrics are a live signal from a running component while a deployment only says something was rolled out |
 | `Integer.MIN_VALUE + 100` | `AWSJeapRelationImporter`, `RhosJeapRelationImporter`       | Relations, once the components they connect exist                                                                                                                    |
-| default                   | message type, Pact broker, reaction observer graphs         | Independent of component creation                                                                                                                                    |
+| default                   | message type, Pact broker                                   | Independent of component creation                                                                                                                                    |
 
 ### Conditional registration
 
@@ -49,7 +49,6 @@ configuring it and nothing else:
 | `prometheus-rhos`   | `prometheus-rhos.hosts` is a non-empty list    | The same from Prometheus instances on RHOS                                                                              |
 | `messagetype`       | `messages.message-contract-service-uri` is set | Events, commands, their versions and their contracts, from the message type registries and the message contract service |
 | `pactbroker`        | `pactbroker.url` is set                        | REST API relations, and the Pact contract that proves them                                                              |
-| `reaction-observer` | `reactionobserverservice.url` is set           | The system, component and message reaction graphs                                                                       |
 | `openapi`           | always                                         | Not an `ArchRepoImporter`: it parses specs pushed in over the REST API - see below                                      |
 
 See [Configuration](configuration.md) for the full properties of each.
