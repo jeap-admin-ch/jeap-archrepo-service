@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 @Tag(name = "jobs", description = "Architecture repository jobs")
-@Slf4j
 public class JobsController {
 
     private final UpdateService updateService;
@@ -21,15 +19,11 @@ public class JobsController {
     @PostMapping
     @Operation(
             summary = "Create a new job",
-            description = "Create a new job to trigger Documentation Generation (GENERATE_DOC) or  Model Update manually (UPDATE_MODEL)")
+            description = "Create a new job to trigger a model update manually (UPDATE_MODEL)")
     @ApiResponse(responseCode = "200", description = "Job successfully created and started asynchronously")
     @Async
     public void triggerUpdate(@RequestBody JobDto jobDto) {
-        if (jobDto.getType() == JobType.GENERATE_DOC) {
-            updateService.generateDocumentation();
-        } else {
-            updateService.updateModel();
-        }
+        updateService.updateModel();
     }
 
     @PostMapping("/import/{importerName}")

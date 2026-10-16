@@ -4,20 +4,17 @@ import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
-import ch.admin.bit.jeap.archrepo.metamodel.message.MessageGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.RestApiRelation;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.OpenApiSpec;
 import ch.admin.bit.jeap.archrepo.metamodel.restapi.RestApi;
 import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
-import ch.admin.bit.jeap.archrepo.metamodel.system.ComponentGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.system.Frontend;
 import ch.admin.bit.jeap.archrepo.metamodel.system.Gateway;
 import ch.admin.bit.jeap.archrepo.metamodel.system.MobileApp;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SelfContainedSystem;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
-import ch.admin.bit.jeap.archrepo.metamodel.system.SystemGraph;
 import ch.admin.bit.jeap.archrepo.metamodel.system.UnknownSystemComponent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -71,12 +68,6 @@ class EntityToStringDoesNotQueryTest extends PostgresDataJpaTestBase {
     private SystemRepository systemRepository;
     @Autowired
     private TeamRepository teamRepository;
-    @Autowired
-    private SystemGraphRepository systemGraphRepository;
-    @Autowired
-    private ComponentGraphRepository componentGraphRepository;
-    @Autowired
-    private MessageGraphRepository messageGraphRepository;
     @Autowired
     private OpenApiSpecRepository openApiSpecRepository;
     @Autowired
@@ -147,15 +138,6 @@ class EntityToStringDoesNotQueryTest extends PostgresDataJpaTestBase {
                         .systemComponent(backend).schema(BLOB).schemaVersion("42")
                         .build());
 
-        SystemGraph systemGraph = systemGraphRepository.save(
-                SystemGraph.builder().systemName(SYSTEM).graphData(BLOB).fingerprint("sha256:sys").build());
-        ComponentGraph componentGraph = componentGraphRepository.save(ComponentGraph.builder()
-                .systemName(SYSTEM).componentName("wvs-backend").graphData(BLOB).fingerprint("sha256:comp")
-                .build());
-        MessageGraph messageGraph = messageGraphRepository.save(MessageGraph.builder()
-                .messageTypeName("WvsDeclarationAcceptedEvent").variant("default").graphData(BLOB)
-                .fingerprint("sha256:msg").build());
-
         fixture.put(System.class, system.getId());
         fixture.put(BackendService.class, backend.getId());
         fixture.put(Frontend.class, frontend.getId());
@@ -169,9 +151,6 @@ class EntityToStringDoesNotQueryTest extends PostgresDataJpaTestBase {
         fixture.put(CommandRelation.class, commandRelation.getId());
         fixture.put(OpenApiSpec.class, spec.getId());
         fixture.put(SystemComponentDatabaseSchema.class, schema.getId());
-        fixture.put(SystemGraph.class, systemGraph.getId());
-        fixture.put(ComponentGraph.class, componentGraph.getId());
-        fixture.put(MessageGraph.class, messageGraph.getId());
 
         entityManager.flush();
         entityManager.clear();
@@ -210,8 +189,8 @@ class EntityToStringDoesNotQueryTest extends PostgresDataJpaTestBase {
 
     /**
      * That the list above stays complete. An entity that grows a {@code toString} without being added to the
-     * fixture would otherwise be unguarded, which is how {@code System} and the three graph entities came to
-     * render their collections and blobs in the first place.
+     * fixture would otherwise be unguarded, which is how {@code System} came to render its collections in the
+     * first place.
      * <p>
      * Abstract entities are covered by a concrete subclass: {@code AbstractRelation} and
      * {@code SystemComponent} declare the {@code toString} their subtypes call through {@code callSuper}.
@@ -257,11 +236,6 @@ class EntityToStringDoesNotQueryTest extends PostgresDataJpaTestBase {
         assertThat(entityManager.find(BackendService.class, fixture.get(BackendService.class)).toString())
                 .isEqualTo("BackendService(super=SystemComponent(id=%s, name=wvs-backend))"
                         .formatted(fixture.get(BackendService.class)));
-
-        assertThat(entityManager.find(SystemGraph.class, fixture.get(SystemGraph.class)).toString())
-                .as("the graph blob must not be rendered")
-                .isEqualTo("SystemGraph(id=%s, systemName=%s, fingerprint=sha256:sys)"
-                        .formatted(fixture.get(SystemGraph.class), SYSTEM));
 
         assertThat(entityManager.find(SystemComponentDatabaseSchema.class,
                 fixture.get(SystemComponentDatabaseSchema.class)).toString())

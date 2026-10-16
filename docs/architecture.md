@@ -1,7 +1,8 @@
 # Architecture
 
 The arch repo service continuously assembles one **architecture model** of a jEAP landscape out of several
-external sources, persists it in PostgreSQL, and publishes it - over REST, and as generated Confluence pages.
+external sources, persists it in PostgreSQL, and exposes it over REST. The jEAP Doc Service consumes the
+OAuth2-protected Docs API to generate architecture documentation.
 
 ```mermaid
 flowchart TB
@@ -10,17 +11,18 @@ flowchart TB
         PM["Prometheus / metrics"]
         MTR["Message type registry"]
         PB["Pact broker"]
-        RO["Reaction observer"]
     end
     sources --> IMP["ArchRepoImporter plugins"]
     IMP --> MODEL["ArchitectureModel"]
     PUSH["OpenAPI specs and<br/>database schemas<br/>pushed over REST"] --> MODEL
     MODEL --> JPA["JPA entities"]
     JPA --> PG[("PostgreSQL")]
-    PG --> REST["REST API"]
-    PG --> DOC["DocumentationGenerator"]
-    DOC --> CONF["Confluence"]
+    PG --> REST["REST APIs"]
+    REST --> DOC["jEAP Doc Service"]
 ```
+
+    The Doc Service reads architecture inventory through the OAuth2-protected Docs API and accesses the Reaction Observer
+    directly using OAuth2. The Arch Repo Service does not call the Reaction Observer.
 
 ## Modules
 
@@ -31,7 +33,6 @@ flowchart TB
 | `jeap-archrepo-importers`      | The `ArchRepoImporter` extension point - see [Importers](importers.md)                                                                                                        |
 | `jeap-archrepo-importer-*`     | One module per source, each activating itself only when its configuration is present                                                                                          |
 | `jeap-archrepo-dbschema-model` | The `DatabaseSchema` record - the format components push their schema in                                                                                                      |
-| `jeap-archrepo-docgen`         | The Confluence export - see [Documentation generator](documentation-generator.md)                                                                                             |
 | `jeap-archrepo-web`            | The `@SpringBootApplication`, the REST controllers, the security configuration and the scheduled jobs                                                                         |
 | `jeap-archrepo-test`           | Test support and the Pact contract test base classes, for instances                                                                                                           |
 | `jeap-archrepo-instance`       | A `pom`-packaged aggregator pulling `web` and `test` together for a deployment                                                                                                |
@@ -61,24 +62,23 @@ another source contributed, and it is what a generated page shows as "where this
 `isObsolete()`, and the metrics importers drop their own obsolete components at the end of their run.
 [Operations](operations.md) has the full removal rules.
 
-## The two scheduled jobs
+## The scheduled model update
 
-Both live in `UpdateService` in `jeap-archrepo-web` and are guarded by ShedLock (`@SchedulerLock`), so only one
-instance of a cluster runs them.
+It lives in `UpdateService` in `jeap-archrepo-web` and is guarded by ShedLock (`@SchedulerLock`), so only one
+instance of a cluster runs it.
 
-| Job                       | Schedule                                           | What it does                                                                                                             |
-| ------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `updateModel()`           | `archrepo.update-schedule`                         | Loads the model, runs every registered importer in `getOrder()` sequence, cleans up stale REST elements, saves the model |
-| `generateDocumentation()` | `archrepo.documentation-generator.update-schedule` | Loads the model and renders it to Confluence                                                                             |
+| Job             | Schedule                 | What it does                                                                                                             |
+| --------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `updateModel()` | `archrepo.update-schedule` | Loads the model, runs every registered importer in `getOrder()` sequence, cleans up stale REST elements, saves the model |
 
-Both are `@Transactional` and save once at the end, which makes a run atomic: an importer that throws rolls the
-whole run back and leaves the previous model in place.
+The update is `@Transactional` and saves once at the end, which makes a run atomic: an importer that throws rolls
+the whole run back and leaves the previous model in place.
 
-Both can also be triggered on demand over `POST /api/jobs` - see [API](api.md).
+It can also be triggered on demand over `POST /api/jobs` - see [API](api.md).
 
-Each run is tracked by a `SchedulerRunTracker`, which records the run and publishes a Micrometer gauge
-(`archrepo_model_update_last_run_from`, `archrepo_generate_documentation_last_run_from`) so that a stalled
-scheduler is visible in monitoring - see [Operations](operations.md).
+Runs are tracked by a `SchedulerRunTracker`, which records the last successful run and publishes the
+`archrepo_model_update_last_run_from` Micrometer gauge so that a stalled scheduler is visible in monitoring - see
+[Operations](operations.md).
 
 ## Not all ingestion is scheduled
 
@@ -92,6 +92,5 @@ not `ArchRepoImporter` plugins, because they run in the request rather than in t
 - [Data model](data-model.md) - the entities behind the model, in detail
 - [Importers](importers.md) - the extension point and the importers that ship with the library
 - [API](api.md) - what the model is published over
-- [Documentation generator](documentation-generator.md) - the Confluence export
 - [Operations](operations.md) - running the jobs and monitoring them
 - [Configuration](configuration.md) - the schedules and the source configuration

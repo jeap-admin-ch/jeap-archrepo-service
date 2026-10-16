@@ -5,8 +5,10 @@ aggregate the importers work on; it is assembled from and written back to these 
 `ArchitectureModelRepository` - see [Architecture](architecture.md).
 
 All tables are created by the Flyway migrations of `jeap-archrepo-persistence` in the database schema `data`.
-There are eighteen of them, plus Flyway's own `flyway_schema_history`. Every one is documented below, grouped by
-what it belongs to.
+Existing databases contain eighteen application tables plus Flyway's own `flyway_schema_history`: fifteen active
+model and operational tables, and three legacy reaction-graph tables retained until a separate follow-up release
+drops them after all service instances have upgraded. Only the active tables are described below, grouped by what
+they belong to.
 
 ## The system aggregate
 
@@ -127,8 +129,7 @@ The `*_schema_resolved` columns of `message_type_versions` hold a **rendering** 
 `SchemaImportResolver` when the message type is imported: imports inlined and marked with comments, base types
 dropped, namespaces and enclosing braces removed. The file itself is not stored - `*_schema_url` is where it can
 be read - so the rendering cannot be changed without importing the message types again. It is what the
-[docs API](docs-api.md) serves as `resolvedSchema`, which is the only consumer of these six columns besides the
-Confluence documentation generator.
+[docs API](docs-api.md) serves as `resolvedSchema`, the consumer of these six columns.
 
 ## REST APIs and relations
 
@@ -225,45 +226,6 @@ version, so there is no history.
 fetching it. It is written when the artifact is stored; artifacts that predate the column were filled once by the
 `V2_6_0` migration. `open_api_spec.content` is nullable, so a spec can exist without content and then has no hash;
 `system_component_database_schema.schema` is `NOT NULL`.
-
-## Reaction graphs
-
-Written directly by the reaction observer importer rather than through `ArchitectureModelRepository`. They
-reference systems, components and message types **by name**, with no foreign key.
-
-```mermaid
-erDiagram
-    system_graph {
-        uuid id PK
-        varchar system_name
-        bytea graph_data
-        varchar fingerprint
-        timestamptz created_at
-        timestamptz modified_at
-    }
-    component_graph {
-        uuid id PK
-        varchar system_name
-        varchar component_name
-        bytea graph_data
-        varchar fingerprint
-        timestamptz created_at
-        timestamptz modified_at
-    }
-    message_graph {
-        uuid id PK
-        varchar message_type_name
-        varchar variant
-        bytea graph_data
-        varchar fingerprint
-        timestamptz created_at
-        timestamptz modified_at
-    }
-```
-
-`graph_data` is the rendered graph; `fingerprint` is the hash of the data it was rendered from, which is how the
-importer decides whether a graph has to be re-rendered. `message_graph` is unique on
-`(message_type_name, variant)`.
 
 ## Operational tables
 

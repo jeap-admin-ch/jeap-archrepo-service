@@ -703,7 +703,7 @@ nothing to show".
 
 ## `POST /api/jobs`
 
-Run one of the two scheduled jobs now instead of waiting for its cron expression - see
+Run the scheduled model update now instead of waiting for its cron expression - see
 [Operations](operations.md).
 
 ### Request
@@ -723,7 +723,7 @@ No path parameters and no query parameters.
 
 | Field  | Required | Meaning                                                                                  |
 | ------ | -------- | ---------------------------------------------------------------------------------------- |
-| `type` | yes      | `UPDATE_MODEL` for a full import run, `GENERATE_DOC` for a full documentation generation |
+| `type` | yes      | `UPDATE_MODEL` for a full import run |
 
 ### Response
 
@@ -735,7 +735,7 @@ appears only in the log. The job still takes its ShedLock lock, so a cluster run
 | Status | When                                                               |
 | ------ | ------------------------------------------------------------------ |
 | `200`  | The job was handed to the executor                                 |
-| `400`  | The body is not valid JSON, or `type` is not one of the two values |
+| `400`  | The body is not valid JSON, or `type` is not `UPDATE_MODEL` |
 | `401`  | No basic credentials                                               |
 
 ## `POST /api/jobs/import/{importerName}`
