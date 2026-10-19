@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.web.service;
 
+import ch.admin.bit.jeap.archrepo.docgen.DocumentationGenerator;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.persistence.OpenApiSpecRepository;
@@ -30,6 +31,8 @@ class UpdateServiceUpdateModelTest extends PostgresIntegrationTestBase {
     UpdateService service;
     @MockitoBean
     ArchRepoImporter importer;
+    @MockitoBean
+    DocumentationGenerator documentationGenerator;
     @MockitoBean
     TeamRepository teamRepository;
     @MockitoBean

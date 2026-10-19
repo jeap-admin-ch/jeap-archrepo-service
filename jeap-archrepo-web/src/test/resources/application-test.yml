@@ -9,6 +9,8 @@ server:
 spring:
   application:
     name: test-app
+  thymeleaf:
+    check-template-location: false
   flyway:
     locations: classpath:db/migration/common
     # Flyway creates automatically the default schema if it doesn't exist
@@ -33,6 +35,18 @@ archrepo:
   update-schedule: "-"
   api:
     secret: "{noop}secret"
+  documentation-generator:
+    update-schedule: "-"
+    space-key: "FOO"
+    root-page-name: "BAR"
+    confluence:
+      url: "https://foo.bar"
+      space-key: "ARCDOCTEST"
+      root-page-id: "123456"
+      username: "ezv-archrepo-techuser"
+      password: "PASSWORD"
+      mock-confluence-client: true
+
 pactbroker:
   url: "https://foo.bar"
 

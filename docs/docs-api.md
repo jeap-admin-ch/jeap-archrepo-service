@@ -15,7 +15,7 @@ own - request, payload and every status it can answer with.
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Authentication** | `/api/**` is served by a filter chain using HTTP basic with several public `GET`s. Under that root the new resources would inherit those defaults; here **every** resource requires a bearer token and a semantic role        |
 | **Payloads**       | `/api/model` is consumed by other services and is under Pact contract. Every field the documentation needs would otherwise be a change to a contracted payload. The docs API has its own DTOs and can grow with the generator |
-| **Caching**        | The Doc Service re-reads the model on every run. The docs API answers conditional requests, so an unchanged landscape costs a handful of `304`s                                                                   |
+| **Caching**        | The documentation generator re-reads the model on every run. The docs API answers conditional requests, so an unchanged landscape costs a handful of `304`s                                                                   |
 
 ## The resources
 

@@ -1,0 +1,16 @@
+<div th:fragment="api-relation-list" xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <ul>
+        <li th:each="apiRelation: ${relation.relations}">
+            <ac:link>
+                <ri:page th:ri:content-title="${apiRelation.consumer}"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[[[${apiRelation.consumer}]]]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+            <th:block th:if="${apiRelation.pactUrl}">
+                /
+                <a th:href="${apiRelation.pactUrl}" target="_blank">Pact</a>
+            </th:block>
+        </li>
+    </ul>
+</div>

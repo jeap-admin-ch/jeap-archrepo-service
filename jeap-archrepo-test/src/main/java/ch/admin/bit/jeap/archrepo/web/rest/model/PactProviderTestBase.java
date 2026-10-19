@@ -134,6 +134,9 @@ public class PactProviderTestBase {
     SystemComponentRepository systemComponentRepository;
 
     @MockitoBean
+    ComponentGraphRepository componentGraphRepository;
+
+    @MockitoBean
     RestApiRepository restApiRepository;
 
     @MockitoBean

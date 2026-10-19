@@ -32,6 +32,18 @@ archrepo:
   update-schedule: "-"
   api:
     secret: "{noop}secret"
+  documentation-generator:
+    update-schedule: "-"
+    space-key: "FOO"
+    root-page-name: "BAR"
+    confluence:
+      url: "https://foo.bar"
+      space-key: "ARCDOCTEST"
+      root-page-id: "123456"
+      username: "ezv-archrepo-techuser"
+      password: "PASSWORD"
+      mock-confluence-client: true
+
 pactbroker:
   url: "https://foo.bar"
 
@@ -51,3 +63,4 @@ jeap:
           jwk-set-uri: "http://localhost:18899/applicationplatform-archrepo-service/.well-known/jwks.json"
 archrepo-config:
   environment: dev
+

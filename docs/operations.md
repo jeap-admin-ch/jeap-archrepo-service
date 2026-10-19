@@ -3,32 +3,35 @@
 What an instance does while it runs, how to tell whether it is still doing it, and the few things that have to be
 maintained by hand.
 
-## The model update job
+## The two jobs
 
-`UpdateService` in `jeap-archrepo-web` carries one scheduled job.
+`UpdateService` in `jeap-archrepo-web` carries both scheduled jobs.
 
-| Job             | Cron property              | Lock name           |
-| --------------- | -------------------------- | ------------------- |
-| `updateModel()` | `archrepo.update-schedule` | `update-model-task` |
+| Job                       | Cron property                                      | Lock name                     |
+| ------------------------- | -------------------------------------------------- | ----------------------------- |
+| `updateModel()`           | `archrepo.update-schedule`                         | `update-model-task`           |
+| `generateDocumentation()` | `archrepo.documentation-generator.update-schedule` | `generate-documentation-task` |
 
-The cron expression is **required** - the application does not start without it. Set it to `-` to disable the job.
+Both cron expressions are **required** - the application does not start without them. Set a schedule to `-` to
+disable a job.
 
 `updateModel()` loads the model, runs every registered importer sorted by `getOrder()`, calls
-`ArchitectureModel.cleanup()` and saves the model.
+`ArchitectureModel.cleanup()` and saves the model. `generateDocumentation()` loads the model and renders it to
+Confluence without changing it, so a failing export never damages the inventory.
 
 ### In a cluster
 
-`ArchRepoApplication` enables ShedLock with `defaultLockAtMostFor = "10m"`, and the job declares
+`ArchRepoApplication` enables ShedLock with `defaultLockAtMostFor = "10m"`, and both jobs declare
 `lockAtLeastFor = "5s"`, `lockAtMostFor = "2h"`. The locks are rows in the `shedlock` table, created by the Flyway
-migrations, so only one instance of a cluster runs the job even though every instance schedules it.
+migrations, so only one instance of a cluster runs a job even though every instance schedules it.
 
-The scheduled method starts with `LockAssert.assertLocked()`: it never runs unlocked, which also covers the manual
-job trigger below, since the lock is applied by a method interceptor rather than by the scheduler.
+Both methods start with `LockAssert.assertLocked()`: they never run unlocked, which also covers the manual
+triggers below, since the lock is applied by a method interceptor rather than by the scheduler.
 
 If an instance dies mid-run, the lock is held for at most `lockAtMostFor` - two hours - before another instance may
 pick the job up again.
 
-### The job is transactional
+### Both jobs are transactional
 
 `updateModel()` runs in one transaction and saves once, at the end. An importer that throws therefore **rolls the
 whole run back**: nothing an earlier importer found is persisted either, and the model stays exactly as the
@@ -36,41 +39,52 @@ previous successful run left it. That is the intended behaviour - a half-importe
 had disappeared from their source and get them removed - but it means one broken source blocks the whole update,
 so a failing importer is worth an alert rather than a shrug.
 
+Some importers guard against that themselves. The reaction observer importers, for instance, catch and log a
+failure per component or message type, so one graph the observer cannot deliver does not take the run down. That
+is a property of the individual importer, not of the framework.
+
 ## Monitoring
 
-The job is tracked by a `SchedulerRunTracker`, which persists the timestamp of the last **successful** run in the
+Each job is tracked by a `SchedulerRunTracker`, which persists the timestamp of the last **successful** run in the
 `scheduler_run` table and registers a Micrometer gauge:
 
-| Gauge                                 | Job           | Value                              |
-| ------------------------------------- | ------------- | ---------------------------------- |
-| `archrepo_model_update_last_run_from` | `update-model` | Days since the last successful run |
+| Gauge                                           | Job                      | Value                              |
+| ----------------------------------------------- | ------------------------ | ---------------------------------- |
+| `archrepo_model_update_last_run_from`           | `update-model`           | Days since the last successful run |
+| `archrepo_generate_documentation_last_run_from` | `generate-documentation` | Days since the last successful run |
 
 The value is in **days**, not seconds, so a daily schedule should keep the gauge at `0` or `1`. Because the
 timestamp is persisted, the gauge survives a restart and does not reset to a healthy value when an instance is
 redeployed. Alert on it rising above the job's period - that is the only signal that distinguishes "the scheduler
 stopped" from "nothing changed".
 
-The method is also `@Timed`, which yields the `archrepo_model_update` timer for run duration.
+Both methods are also `@Timed`, which yields the timers `archrepo_model_update` and
+`archrepo_generate_documentation` for run durations.
 
 ## Triggering a job by hand
 
 | Request                                            | Effect                                                                       |
 | -------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `POST /api/jobs` with `{ "type": "UPDATE_MODEL" }` | A full import run                                                            |
+| `POST /api/jobs` with `{ "type": "GENERATE_DOC" }` | A full Confluence export                                                     |
 | `POST /api/jobs/import/{importerName}`             | One importer only, named by its **simple class name**, matched ignoring case |
 
-Both are `@Async`: the response says the job started, not that it finished. Watch the log for the outcome.
+All three are `@Async`: the response says the job started, not that it finished. Watch the log for the outcome.
 
 Running a single importer loads and saves the model like a full run, but it does **not** call
 `ArchitectureModel.cleanup()` - use it to refresh one source, not as a substitute for the scheduled run.
 
-Both need the HTTP basic credentials, see [Security](security.md).
+All three need the HTTP basic credentials, see [Security](security.md).
 
-## Existing Confluence documentation
+## What the runtime image needs
 
-The new architecture documentation is already available from the jEAP Doc Service.
-After deployment, the existing Confluence documentation is deliberately left in place and will become stale.
-It is manually removed one week after deployment; this service no longer refreshes or cleans up those pages.
+The documentation generator renders the reaction graphs by piping DOT into an external **Graphviz** process
+(`dot -Tpng`, with a 60 second timeout per graph). The `dot` binary therefore has to be on the `PATH` of the
+container the instance runs in; without it every graph attachment fails.
+
+The PlantUML diagrams are different: they are written into the page as a Confluence `plantuml` macro and rendered
+by Confluence, so the target Confluence instance needs that macro available. See
+[Documentation generator](documentation-generator.md).
 
 ## Maintenance by hand
 
@@ -116,7 +130,7 @@ All four fields are required. The relation is marked `DELETED` rather than remov
 simply recreate it. `404` when nothing matches.
 
 **Descriptions.** `System`, `SystemComponent` and `MessageType` each have a `description` no importer sets. Fill
-them in directly in the database to add prose to the architecture documentation produced by the Doc Service.
+them in directly in the database to add prose to the generated pages.
 
 ## How elements disappear again
 
@@ -137,6 +151,9 @@ The message type importer and the Pact broker importer do not diff at all. Each 
 source no longer reports is gone by construction. Because the whole run is one transaction, that wipe is only
 visible if the re-import also succeeds.
 
+Confluence pages are cleaned up separately, by the export - see
+[Documentation generator](documentation-generator.md).
+
 ## One-off work on the first start of 11.0.0
 
 The `V2_6_0` migration fills the `content_hash` of every OpenAPI spec and database schema stored before the column
@@ -150,3 +167,4 @@ landscape the first start of this version therefore takes noticeably longer; sub
 - [Configuration](configuration.md) - the schedules and the source properties
 - [Importers](importers.md) - what each run does
 - [API](api.md) - the endpoints used here
+- [Documentation generator](documentation-generator.md) - the export job

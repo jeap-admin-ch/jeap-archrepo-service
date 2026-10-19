@@ -26,6 +26,20 @@ The docs API is always active; it has no property of its own.
 | ------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `jeap.security.oauth2.resourceserver.system-name` | yes      | -       | Activates semantic authorization, without which the docs API's role cannot be evaluated. **The service refuses to start without it** |
 
+## Documentation generator
+
+See [Documentation generator](documentation-generator.md).
+
+| Property                                                             | Required | Default | Description                                                     |
+| -------------------------------------------------------------------- | -------- | ------- | --------------------------------------------------------------- |
+| `archrepo.documentation-generator.update-schedule`                   | yes      | -       | Cron expression for the Confluence export. `-` disables it      |
+| `archrepo.documentation-generator.confluence.url`                    | yes      | -       | Base URL of the Confluence instance                             |
+| `archrepo.documentation-generator.confluence.space-key`              | yes      | -       | The space the documentation is written to                       |
+| `archrepo.documentation-generator.confluence.root-page-id`           | yes      | -       | **Id**, not name, of the page the generated tree hangs under    |
+| `archrepo.documentation-generator.confluence.username`               | yes      | -       | Technical user                                                  |
+| `archrepo.documentation-generator.confluence.password`               | yes      | -       | Its password                                                    |
+| `archrepo.documentation-generator.confluence.mock-confluence-client` | no       | `false` | When `true` nothing is written to Confluence. Used by all tests |
+
 ## Importers
 
 Each importer activates itself when its configuration is present - see [Importers](importers.md).
@@ -68,6 +82,13 @@ Each importer activates itself when its configuration is present - see [Importer
 | -------------------------------------------- | ------------------------------------------------------- |
 | `pactbroker.url`                             | Base URL of the Pact broker. **Activates the importer** |
 | `pactbroker.username`, `pactbroker.password` | Credentials                                             |
+
+### Reaction observer
+
+| Property                                                               | Description                                                           |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `reactionobserverservice.url`                                          | Base URL of the reaction observer service. **Activates the importer** |
+| `reactionobserverservice.username`, `reactionobserverservice.password` | Credentials                                                           |
 
 ## Security
 

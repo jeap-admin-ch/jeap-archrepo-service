@@ -1,0 +1,179 @@
+package ch.admin.bit.jeap.archrepo.docgen;
+
+import ch.admin.bit.jeap.archrepo.docgen.plantuml.PlantUmlRenderer;
+import ch.admin.bit.jeap.archrepo.docgen.plantuml.RenderedDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.docgen.graph.RenderedReactionGraph;
+import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
+import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
+import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
+import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
+import ch.admin.bit.jeap.archrepo.metamodel.relation.EventRelation;
+import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.thymeleaf.ITemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toSet;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+class TemplateRenderer {
+
+    private final ITemplateEngine templateEngine;
+    private final PlantUmlRenderer plantUmlRenderer;
+    private final BrowserReactionGraphRenderer browserReactionGraphRenderer;
+
+    String renderIndexPage() {
+        Context context = new Context(Locale.GERMAN);
+        return templateEngine.process("index", context).trim();
+    }
+
+    String renderSystemPage(ArchitectureModel model, System system, RenderedReactionGraph graph) {
+        List<SystemEvent> systemEvents = system.getEvents().stream()
+                .map(e -> createSystemEvent(model, e))
+                .sorted(comparing(SystemEvent::getName))
+                .toList();
+        List<SystemCommand> systemCommands = system.getCommands().stream()
+                .map(e -> createSystemCommand(model, e))
+                .sorted(comparing(SystemCommand::getName))
+                .toList();
+        SystemContext systemContext = SystemContext.of(model, system);
+
+        system.sortSystemComponents();
+
+        Context context = new Context(Locale.GERMAN);
+        context.setVariable("system", system);
+        context.setVariable("systemEvents", systemEvents);
+        context.setVariable("systemCommands", systemCommands);
+        String plantUmLSource = plantUmlRenderer.renderSystemContextView(systemContext);
+        context.setVariable("contextViewPlantUml", plantUmLSource);
+        context.setVariable("plantUmlMacroId", stableMacroUuid(system.getName()));
+        context.setVariable("systemGraph", graph == null ? null : renderReactionGraph(
+                graph, GraphTitleFormatter.systemGraph(system.getName())));
+        return templateEngine.process("system", context).trim();
+    }
+
+    private SystemEvent createSystemEvent(ArchitectureModel model, Event e) {
+        Set<String> providerNames = getRelationsForEvent(model, e)
+                .map(EventRelation::getProviderName)
+                .filter(Objects::nonNull)
+                .collect(toSet());
+        Set<String> consumerNames = getRelationsForEvent(model, e)
+                .map(EventRelation::getConsumerName)
+                .filter(Objects::nonNull)
+                .collect(toSet());
+        return new SystemEvent(e.getMessageTypeName(), providerNames, consumerNames);
+    }
+
+    private SystemCommand createSystemCommand(ArchitectureModel model, Command e) {
+        Set<String> senderNames = getRelationsForCommand(model, e)
+                .map(CommandRelation::getProviderName)
+                .filter(Objects::nonNull)
+                .collect(toSet());
+        Set<String> receiverNames = getRelationsForCommand(model, e)
+                .map(CommandRelation::getConsumerName)
+                .filter(Objects::nonNull)
+                .collect(toSet());
+        return new SystemCommand(e.getMessageTypeName(), senderNames, receiverNames);
+    }
+
+    private Stream<EventRelation> getRelationsForEvent(ArchitectureModel model, Event event) {
+        return model.getAllRelationsByType(EventRelation.class).stream()
+                .filter(r -> r.getEventName().equals(event.getMessageTypeName()));
+    }
+
+    private Stream<CommandRelation> getRelationsForCommand(ArchitectureModel model, Command command) {
+        return model.getAllRelationsByType(CommandRelation.class).stream()
+                .filter(r -> r.getCommandName().equals(command.getMessageTypeName()));
+    }
+
+    String renderComponentPage(ArchitectureModel model, SystemComponent systemComponent, RenderedReactionGraph graph) {
+        ComponentContext componentContext = ComponentContext.of(model, systemComponent);
+
+        Context context = new Context(Locale.GERMAN);
+        context.setVariable("systemComponent", systemComponent);
+        String contextViewPlantUml = plantUmlRenderer.renderComponentContextView(componentContext);
+        context.setVariable("contextViewPlantUml", contextViewPlantUml);
+        context.setVariable("contextViewPlantUmlMacroId", stableMacroUuid(systemComponent.getName() + "_context"));
+
+        context.setVariable("consumedRestApiRelations", componentContext.getConsumedRestApiRelations());
+        context.setVariable("producedEventRelations", componentContext.getProducedEventsGroupedByEvent());
+        context.setVariable("sentCommandRelations", componentContext.getSentCommandsGroupedByCommand());
+
+        context.setVariable("providedRestApiRelations", componentContext.getProvidedRestApiRelationsGroupedByPath());
+        context.setVariable("consumedEventRelations", componentContext.getConsumedEventsGroupedByEvent());
+        context.setVariable("receivedCommandRelations", componentContext.getReceivedCommandsGroupedByCommand());
+
+        context.setVariable("openApiSpecUrl", componentContext.getOpenApiSpecUrl());
+        context.setVariable("componentGraph", graph == null ? null : renderReactionGraph(
+                graph, GraphTitleFormatter.serviceGraph(systemComponent.getName())));
+
+        Optional<SystemComponentDatabaseSchema> databaseSchema = getDatabaseSchema(componentContext);
+
+        if (databaseSchema.isPresent()) {
+            RenderedDatabaseSchema renderedDatabaseSchema = plantUmlRenderer.renderDatabaseSchema(databaseSchema.get());
+
+            if (renderedDatabaseSchema.length() > 50000) {
+                log.warn("The PlantUML source for the database schema of system component '{}' is too long ({} characters). It will not be included in the documentation to avoid exceeding Confluence's page size limit.",
+                        systemComponent.getName(), renderedDatabaseSchema.length());
+                context.setVariable("databaseSchemaPlantUmlTooBig", renderedDatabaseSchema.length());
+            } else {
+                context.setVariable("databaseSchemaPlantUml", renderedDatabaseSchema.content());
+                context.setVariable("databaseSchemaPlantUmlMacroId", stableMacroUuid(systemComponent.getName() + "_database"));
+            }
+        } else {
+            context.setVariable("databaseSchemaPlantUmlNoSchema", "no_schema");
+        }
+
+        return templateEngine.process("system-component", context).trim();
+    }
+
+    private Optional<SystemComponentDatabaseSchema> getDatabaseSchema(ComponentContext componentContext) {
+        return componentContext.getSystemComponent().getParent().getDatabaseSchema(componentContext.getSystemComponent().getName());
+    }
+
+
+    private String stableMacroUuid(String plantUmLSource) {
+        return UUID.nameUUIDFromBytes(plantUmLSource.getBytes(StandardCharsets.UTF_8)).toString();
+    }
+
+    String renderEventPage(Event event, List<RenderedReactionGraph> graphs) {
+        Context context = new Context(Locale.GERMAN);
+        context.setVariable("messageType", event);
+        context.setVariable("messageGraphs", renderReactionGraphs(graphs, event.getMessageTypeName()));
+        return templateEngine.process("event", context).trim();
+    }
+
+    String renderCommandPage(Command command, List<RenderedReactionGraph> graphs) {
+        Context context = new Context(Locale.GERMAN);
+        context.setVariable("messageType", command);
+        context.setVariable("messageGraphs", renderReactionGraphs(graphs, command.getMessageTypeName()));
+        return templateEngine.process("command", context).trim();
+    }
+
+    private ConfluenceReactionGraph renderReactionGraph(RenderedReactionGraph graph, String displayTitle) {
+        ConfluenceReactionGraph renderedGraph = browserReactionGraphRenderer.render(graph);
+        return new ConfluenceReactionGraph(displayTitle, renderedGraph.cdata());
+    }
+
+    private List<ConfluenceReactionGraph> renderReactionGraphs(List<RenderedReactionGraph> graphs, String messageTypeName) {
+        List<ConfluenceReactionGraph> renderedGraphs = new ArrayList<>(graphs.size());
+        for (int i = 0; i < graphs.size(); i++) {
+            RenderedReactionGraph graph = graphs.get(i);
+            ConfluenceReactionGraph renderedGraph = browserReactionGraphRenderer.render(graph, i);
+            String displayTitle = GraphTitleFormatter.messageGraph(messageTypeName, graph.title());
+            renderedGraphs.add(new ConfluenceReactionGraph(displayTitle, renderedGraph.cdata()));
+        }
+        return renderedGraphs;
+    }
+}

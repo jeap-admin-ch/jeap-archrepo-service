@@ -5,14 +5,13 @@ This file provides guidance to codign agents when working with code in this repo
 ## What this is
 
 `jeap-archrepo-service` is a **jEAP Spring Boot library** (not a standalone deployable). It is embedded as a Maven
-dependency into a concrete jEAP microservice that supplies the runtime config (DB and external-service hosts).
-There is no `spring-boot-maven-plugin`/repackage and no `application.yml` in this repo —
+dependency into a concrete jEAP microservice that supplies the runtime config (DB, Confluence credentials,
+Prometheus/service hosts). There is no `spring-boot-maven-plugin`/repackage and no `application.yml` in this repo —
 `jeap-archrepo-web` ships the `@SpringBootApplication` (`ArchRepoApplication`) and all logic; `jeap-archrepo-instance`
 is a `pom`-packaged aggregator that pulls `web` + `test` together for a deployment.
 
 Its job: continuously import the architecture inventory of a jEAP landscape from multiple data sources into a unified
-model in PostgreSQL and expose it through REST APIs. The jEAP Doc Service consumes the OAuth2-protected Docs API to
-generate architecture documentation.
+model in PostgreSQL, then auto-generate Confluence documentation from that model.
 
 ## Build & test
 
@@ -23,8 +22,9 @@ required** - for every build, not only for the `*IT` integration tests.
 
 ```bash
 ./mvnw clean install                          # full reactor build + all tests
-./mvnw -q -pl jeap-archrepo-web -am test       # build one module (+ its deps) and test it
-./mvnw -pl jeap-archrepo-web test -Dtest=JobsControllerTest                    # single test class
+./mvnw -q -pl jeap-archrepo-docgen -am test   # build one module (+ its deps) and test it
+./mvnw -pl jeap-archrepo-docgen test -Dtest=ConfluenceAdapterImplTest          # single test class
+./mvnw -pl jeap-archrepo-docgen test -Dtest=ConfluenceAdapterImplTest#deleteOrphanPages  # single method
 ```
 
 Note: a full `clean install` regenerates `THIRD-PARTY-LICENSES.md` via the license plugin, but in a local/offline run it
@@ -36,13 +36,15 @@ produces an **incomplete** file (drops most deps). Do not commit that regenerati
 ### Data flow
 
 ```
-external sources → ArchRepoImporter plugins → ArchitectureModel → JPA entities → PostgreSQL → REST APIs → jEAP Doc Service
+external sources → ArchRepoImporter plugins → ArchitectureModel → JPA entities → PostgreSQL → DocumentationGenerator → Confluence
 ```
 
-The scheduled model-update job in `jeap-archrepo-web/.../web/service/UpdateService.java` is guarded by ShedLock
-(`@SchedulerLock`, so only one instance runs in a cluster):
+Two scheduled jobs in `jeap-archrepo-web/.../web/service/UpdateService.java`, each guarded by ShedLock (
+`@SchedulerLock`, so only one instance runs in a cluster):
 
 - `updateModel()` — cron `${archrepo.update-schedule}`: loads the model, runs every importer, saves the model.
+- `generateDocumentation()` — cron `${archrepo.documentation-generator.update-schedule}`: loads the model and renders it
+  to Confluence.
 
 ### Importer plugin pattern (the core extension point)
 
@@ -80,25 +82,39 @@ schemas). `ArchitectureModelRepository` in `jeap-archrepo-persistence` bridges t
 transient model from the JPA repositories, `save()` persists the graph back. Flyway migrations live in
 `jeap-archrepo-persistence/src/main/resources/db/migration/common`.
 
-### Documentation delivery → jEAP Doc Service
+### Documentation generation → Confluence
 
-The Doc Service reads the model through the OAuth2-protected `/docs-api` endpoints. Arch Repo no longer generates
-or publishes documentation to Confluence. Existing Confluence pages are deliberately left stale for one week after
-deployment, then removed manually.
+`jeap-archrepo-docgen`: `DocumentationGenerator` walks the model (system page → component/event/command sub-pages),
+renders HTML with Thymeleaf templates (`src/main/resources/template/documentation/`), and generates graph PNG
+attachments. All Confluence I/O goes through the `ConfluenceAdapter` interface:
+
+- `ConfluenceAdapterImpl` — real Confluence via the `asciidoc-confluence-publisher-client` library.
+- `ConfluenceAdapterMock` — selected when `archrepo.documentation-generator.confluence.mock-confluence-client=true` (
+  used by all tests).
+
+Confluence client specifics (changed recently — see CHANGELOG 6.2.0): the publisher client splits into v1 (Server/Data
+Center, `ConfluenceRestV1Client`, `/rest/api`) and v2 (Cloud) variants. This project uses **v1**. On v1,
+`getPageByTitle(spaceKey, ancestorId, title)` filters by ancestor, so the root page can't be found by title alone — it
+is configured by **ID** via `archrepo.documentation-generator.confluence.root-page-id` (not by name).
 
 ### Configuration prefixes
 
 - `archrepo-config` → `ArchRepoConfigProperties` (the `environment` enum, passed to every importer to filter
   stage-specific data).
-- `archrepo.update-schedule` → the model-update cron.
+- `archrepo.update-schedule`, `archrepo.documentation-generator.update-schedule` → the two scheduler crons.
+- `archrepo.documentation-generator.confluence.*` → `DocumentationGeneratorConfluenceProperties` (`url`, `space-key`,
+  `root-page-id`, credentials, `mock-confluence-client`). Bound with `ignoreUnknownFields = false`, so a stale/renamed
+  key here **fails startup** rather than being ignored.
 - Per-importer prefixes (e.g. `messages.message-contract-service-uri`, the prometheus host lists) gate importer
   activation.
 
 ## Testing patterns
 
 JUnit 5 + Mockito throughout. External HTTP is faked with WireMock. **Pact** is central: consumer contract tests for the
-upstream jEAP services this app calls (deploymentlog, message-contract) and provider verification,
-with shared base classes and stubs in the `jeap-archrepo-test` module.
+upstream jEAP services this app calls (deploymentlog, message-contract, reaction-observer) and provider verification,
+with shared base classes and stubs in the `jeap-archrepo-test` module. Confluence is never hit in tests — they run with
+`mock-confluence-client: true`, so the real `ConfluenceRestV1Client` path is unverified by the suite and needs a staging
+smoke test before release.
 
 **Everything that touches the database runs on a real PostgreSQL 17** — the version of the Aurora the service is
 deployed on — started as a Testcontainers container. There is no H2 any more: an in-memory stand-in accepted SQL

@@ -1,0 +1,44 @@
+<div id="@@GRAPH_ID@@" class="reaction-graph" data-node-count="@@NODE_COUNT@@"@@NAVIGATION_ATTRIBUTE@@ tabindex="0"
+     role="region" aria-label="@@ARIA_LABEL@@"
+     style="width:100%;height:@@INITIAL_HEIGHT@@;border:1px solid;overflow:hidden;">
+  <textarea id="@@GRAPH_ID@@-source" hidden>@@ESCAPED_DOT@@</textarea>
+  <span class="reaction-graph-navigation-status" role="status" aria-live="polite"></span>
+  <div id="@@GRAPH_ID@@-content" style="width:100%;height:100%;">Rendering reaction graph...</div>
+  <div class="reaction-graph-controls" aria-label="Reaction graph controls">
+    <div class="reaction-graph-search" role="search" hidden>
+      <input type="text" autocomplete="off" spellcheck="false"
+             aria-label="Search nodes in graph" placeholder="Search graph" />
+      <span class="reaction-graph-search-count" role="status" aria-live="polite">0/0</span>
+      <button type="button" data-search-action="previous" title="Previous result" aria-label="Previous result" disabled>
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 10l5-5 5 5" /></svg>
+      </button>
+      <button type="button" data-search-action="next" title="Next result" aria-label="Next result" disabled>
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 6l5 5 5-5" /></svg>
+      </button>
+      <button type="button" data-search-action="close" title="Close search" aria-label="Close search">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 3l10 10M13 3L3 13" /></svg>
+      </button>
+    </div>
+    <button type="button" data-action="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+    <button type="button" data-action="zoom-out" title="Zoom out" aria-label="Zoom out">-</button>
+    <button type="button" data-action="actual-size" title="Show at 100%" aria-label="Show at 100%">100%</button>
+    <button type="button" data-action="fit" title="Fit overview" aria-label="Fit overview">Fit</button>
+  </div>
+  <button type="button" class="reaction-graph-map-toggle" hidden
+          aria-controls="@@GRAPH_ID@@-minimap" aria-expanded="false"
+          aria-label="Show graph overview map" title="Show graph overview map">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" />
+      <path d="M9 3v15M15 6v15" />
+    </svg>
+  </button>
+  <div id="@@GRAPH_ID@@-minimap" class="reaction-graph-minimap" hidden tabindex="0" role="region"
+       aria-label="Reaction graph navigation overview">
+    <button type="button" class="reaction-graph-minimap-close"
+            aria-label="Close graph overview map" title="Close graph overview map">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+  </div>
+</div>

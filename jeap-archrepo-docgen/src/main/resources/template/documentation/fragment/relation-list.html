@@ -1,0 +1,14 @@
+<div th:fragment="relation-list" xmlns:th="http://www.thymeleaf.org" th:remove="tag">
+    <ul>
+        <li th:each="currentRelation: ${relation.value}">
+
+            <ac:link th:if="${currentRelation.counterpart}">
+                <ri:page th:ri:content-title="${currentRelation.counterpart}"/>
+                <ac:plain-text-link-body>
+                    <![CDATA[[[${currentRelation.counterpart}]]]]>
+                </ac:plain-text-link-body>
+            </ac:link>
+            <p th:unless="${currentRelation.counterpart}">unbekannt</p>
+        </li>
+    </ul>
+</div>
