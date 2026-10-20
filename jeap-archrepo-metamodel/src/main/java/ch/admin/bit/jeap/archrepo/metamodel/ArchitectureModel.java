@@ -84,6 +84,7 @@ public class ArchitectureModel {
      *     <li>Unused RestOperations</li>
      *     <li>Unused RestResource</li>
      * </ol>
+     * REST APIs imported from an OpenAPI spec count as used, so they are kept even if no relation references them.
      */
     public void cleanup() {
         ArchitectureModelHelper.cleanup(this);

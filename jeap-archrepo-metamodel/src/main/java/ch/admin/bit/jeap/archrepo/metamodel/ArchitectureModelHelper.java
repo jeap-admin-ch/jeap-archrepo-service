@@ -49,12 +49,17 @@ public class ArchitectureModelHelper {
                 .forEach(restApiRelation -> restApiRelation.getDefiningSystem().removeRestApiRelation(restApiRelation));
     }
 
+    /**
+     * A REST API imported from an OpenAPI spec is kept even without a relation: it documents what the provider
+     * offers, not what is being called, and the OpenAPI importer removes it itself once the spec no longer lists it.
+     */
     private static void removeNotReferencedRestApis(ArchitectureModel model) {
         Set<UUID> allRestApiIds = model.getAllRelationsByType(RestApiRelation.class).stream()
                 .map(relation -> relation.getRestApi().getId()).collect(toSet());
 
         model.getAllRestApis().stream()
                 .filter(restApi -> !allRestApiIds.contains(restApi.getId()))
+                .filter(restApi -> !restApi.getImporters().contains(Importer.OPEN_API))
                 .forEach(restApi -> restApi.getDefiningSystem().removeRestApi(restApi));
     }
 

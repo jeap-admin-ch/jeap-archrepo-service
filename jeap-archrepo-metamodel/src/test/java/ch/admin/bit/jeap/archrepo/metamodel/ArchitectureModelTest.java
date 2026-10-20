@@ -268,6 +268,26 @@ class ArchitectureModelTest {
                 .anyMatch(res -> "/api/foo2".equals(res.getPath())), "/api/foo2 is still used and has not been removed");
     }
 
+    @Test
+    void cleanup_keepsUnreferencedRestApisImportedFromOpenApiSpec() {
+        RestApi fromOpenApiSpec = RestApi.builder()
+                .provider(backend)
+                .method("GET")
+                .path("/api/documented")
+                .importer(Importer.OPEN_API)
+                .build();
+        system1.addRestApi(fromOpenApiSpec);
+        RestApi alsoSeenByGrafana = createRestApi(backend, "PUT", "/api/documented");
+        alsoSeenByGrafana.addImporter(Importer.OPEN_API);
+        RestApi onlySeenByGrafana = createRestApi(backend, "DELETE", "/api/documented");
+
+        model.cleanup();
+
+        assertTrue(system1.getRestApis().contains(fromOpenApiSpec));
+        assertTrue(system1.getRestApis().contains(alsoSeenByGrafana));
+        assertFalse(system1.getRestApis().contains(onlySeenByGrafana));
+    }
+
     private RestApi createRestApi(SystemComponent provider, String method, String path) {
         RestApi restApi = RestApi.builder()
                 .provider(provider)
