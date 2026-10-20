@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.1.2] - 2026-10-20
+
+### Fixed
+- A REST API listed in an OpenAPI spec both with and without a trailing slash no longer gains another duplicate
+  with every upload. The OpenAPI importer created a new REST API for the variant without an exact match, and the
+  next Grafana import, picking it as a loose match, renamed it into a copy of the other. Relations then spread
+  over the copies, and a Grafana relation left on another copy than the one its Pact was linked to was reported
+  as having no Pact. The importers now prefer the REST API with exactly the given path, and the OpenAPI importer
+  treats a path differing only in a trailing slash or a path variable name as the same operation.
+
 ## [16.1.1] - 2026-10-20
 
 ### Fixed

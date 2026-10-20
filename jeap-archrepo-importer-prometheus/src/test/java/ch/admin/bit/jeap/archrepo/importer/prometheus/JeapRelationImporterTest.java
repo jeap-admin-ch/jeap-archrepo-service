@@ -182,6 +182,47 @@ class JeapRelationImporterTest {
     }
 
 
+    @Test
+    void importRelation_restApiWithTrailingSlashListedFirst_exactPathUsedAndNothingRenamed() {
+
+        //given
+        JeapRelationImporter jeapRelationImporter = new JeapRelationImporter(consumer, provider);
+        RestApi withTrailingSlash = RestApi.builder()
+                .provider(provider)
+                .method("GET")
+                .path("/api/test/")
+                .importer(Importer.OPEN_API)
+                .build();
+        RestApiRelation pactRelation = getPactRelation("/api/test");
+        provider.getParent().addRestApi(withTrailingSlash);
+        provider.getParent().addRestApi(pactRelation.getRestApi());
+        provider.getParent().addRelation(pactRelation);
+
+        //when
+        JeapRelation jeapRelation = getJeapRelation(provider.getName(), consumer.getName());
+        jeapRelationImporter.importRelation(jeapRelation);
+
+        //then
+        assertEquals(1, system.getRelations().size());
+        assertTrue(system.getRelations().getFirst().getImporters().contains(Importer.GRAFANA));
+        assertSame(pactRelation.getRestApi(), ((RestApiRelation) system.getRelations().getFirst()).getRestApi());
+        assertEquals("/api/test/", withTrailingSlash.getPath());
+        assertFalse(withTrailingSlash.getImporters().contains(Importer.GRAFANA));
+    }
+
+    @Test
+    void getRestApi_exactAndTrailingSlashPathPresent_exactPathReturned() {
+        JeapRelationImporter jeapRelationImporter = new JeapRelationImporter(consumer, provider);
+
+        RestApi withTrailingSlash = getRestApi(provider, "/api/test/");
+        RestApi exact = getRestApi(provider, "/api/test");
+        provider.getParent().addRestApi(withTrailingSlash);
+        provider.getParent().addRestApi(exact);
+
+        assertSame(exact, jeapRelationImporter.getRestApi(provider, "GET", "/api/test").orElseThrow());
+        assertSame(withTrailingSlash, jeapRelationImporter.getRestApi(provider, "GET", "/api/test/").orElseThrow());
+    }
+
     private JeapRelation getJeapRelation(String provider, String consumer) {
         return new JeapRelation(provider, consumer, "GET", "http", "/api/test");
     }

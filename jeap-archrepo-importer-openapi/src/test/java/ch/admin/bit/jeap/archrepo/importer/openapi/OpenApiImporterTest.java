@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,53 @@ class OpenApiImporterTest {
         doImportTest("test-communication-scs.json", 14);
         verify(restApiRepository).deleteAll(List.of(apis.get(0), apis.get(1)));
         assertThat(apis.get(2).getImporters()).containsExactly(Importer.GRAFANA);
+    }
+
+    @Test
+    void importIntoModel_sameOperationWithAndWithoutTrailingSlash_oneApiSaved() {
+        byte[] spec = """
+                {"paths": {"/api/partner": {"post": {}}, "/api/partner/": {"post": {}}}}
+                """.getBytes(StandardCharsets.UTF_8);
+
+        importSpec(spec);
+
+        verify(restApiRepository, times(1)).save(any());
+    }
+
+    @Test
+    void importIntoModel_existingApiDiffersInTrailingSlash_existingApiReused() {
+        RestApi existing = new RestApi(mock(SystemComponent.class), "POST", "/api/partner", Importer.GRAFANA);
+        when(restApiRepository.findByProvider(any())).thenReturn(new ArrayList<>(List.of(existing)));
+        byte[] spec = """
+                {"paths": {"/api/partner/": {"post": {}}}}
+                """.getBytes(StandardCharsets.UTF_8);
+
+        importSpec(spec);
+
+        verify(restApiRepository, never()).save(any());
+        assertThat(existing.getImporters()).containsExactlyInAnyOrder(Importer.GRAFANA, Importer.OPEN_API);
+        assertThat(existing.getPath()).isEqualTo("/api/partner");
+    }
+
+    @Test
+    void importIntoModel_exactAndTrailingSlashApisExist_exactOneReused() {
+        RestApi withTrailingSlash = new RestApi(mock(SystemComponent.class), "POST", "/api/partner/", Importer.GRAFANA);
+        RestApi exact = new RestApi(mock(SystemComponent.class), "POST", "/api/partner", Importer.GRAFANA);
+        when(restApiRepository.findByProvider(any())).thenReturn(new ArrayList<>(List.of(withTrailingSlash, exact)));
+        byte[] spec = """
+                {"paths": {"/api/partner": {"post": {}}}}
+                """.getBytes(StandardCharsets.UTF_8);
+
+        importSpec(spec);
+
+        assertThat(exact.getImporters()).contains(Importer.OPEN_API);
+        assertThat(withTrailingSlash.getImporters()).doesNotContain(Importer.OPEN_API);
+    }
+
+    private void importSpec(byte[] spec) {
+        OpenApiImporter openApiImporter = new OpenApiImporter(new JsonMapper(), restApiRepository);
+        SystemComponent systemComponent = BackendService.builder().name("junit").build();
+        openApiImporter.importIntoModel(systemComponent, spec);
     }
 
     @SneakyThrows

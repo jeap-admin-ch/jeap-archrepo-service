@@ -38,8 +38,11 @@ public class OpenApiImporter {
     }
 
     private void updateOrAddRestApis(List<RestApi> restApisFromFile, List<RestApi> currentRestApis, List<RestApi> toDelete) {
+        // Also holds the REST APIs saved below, so that a spec listing the same operation twice (with and without
+        // a trailing slash) gets one REST API for it, not two
+        List<RestApi> knownRestApis = new ArrayList<>(currentRestApis);
         for (RestApi restApi : restApisFromFile) {
-            Optional<RestApi> currentRestApi = findMatchingRestApi(restApi, currentRestApis);
+            Optional<RestApi> currentRestApi = findMatchingRestApi(restApi, knownRestApis);
             if (currentRestApi.isPresent()) {
                 log.info("REST API already defined: {} {}", restApi.getMethod(), restApi.getPath());
                 currentRestApi.get().addImporter(Importer.OPEN_API);
@@ -47,6 +50,7 @@ public class OpenApiImporter {
             } else {
                 log.info("REST API not defined: {} {}", restApi.getMethod(), restApi.getPath());
                 restApiRepository.save(restApi);
+                knownRestApis.add(restApi);
             }
         }
 
@@ -73,10 +77,20 @@ public class OpenApiImporter {
         restApiRepository.deleteAll(toDelete);
     }
 
+    /**
+     * An exact match first, then one differing only in a trailing slash or a path variable name - the same
+     * operation, which the other importers resolve to the same REST API as well.
+     */
     private Optional<RestApi> findMatchingRestApi(RestApi restApi, List<RestApi> currentRestApis) {
-        return currentRestApis.stream()
-                .filter(current -> current.getPath().equals(restApi.getPath()) && current.getMethod().equals(restApi.getMethod()))
-                .findFirst();
+        List<RestApi> sameMethod = currentRestApis.stream()
+                .filter(current -> current.getMethod().equals(restApi.getMethod()))
+                .toList();
+        return sameMethod.stream()
+                .filter(current -> current.getPath().equals(restApi.getPath()))
+                .findFirst()
+                .or(() -> sameMethod.stream()
+                        .filter(current -> current.pathMatches(restApi.getPath()))
+                        .findFirst());
     }
 
     @SuppressWarnings("unchecked")
