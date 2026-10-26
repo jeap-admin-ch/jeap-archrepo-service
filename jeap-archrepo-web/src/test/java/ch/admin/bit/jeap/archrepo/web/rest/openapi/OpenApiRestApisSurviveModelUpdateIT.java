@@ -1,6 +1,5 @@
 package ch.admin.bit.jeap.archrepo.web.rest.openapi;
 
-import ch.admin.bit.jeap.archrepo.docgen.DocumentationGenerator;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.metamodel.Team;
@@ -70,8 +69,6 @@ class OpenApiRestApisSurviveModelUpdateIT extends PostgresIntegrationTestBase {
     // No importer may contribute a relation onto the uploaded REST APIs, or the cleanup would keep them anyway
     @MockitoBean
     private ArchRepoImporter importer;
-    @MockitoBean
-    private DocumentationGenerator documentationGenerator;
 
     @Test
     void restApisFromAnUploadedSpecSurviveTheModelUpdate() throws Exception {
