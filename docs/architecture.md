@@ -21,8 +21,8 @@ flowchart TB
     REST --> DOC["jEAP Doc Service"]
 ```
 
-    The Doc Service reads architecture inventory through the OAuth2-protected Docs API and accesses the Reaction Observer
-    directly using OAuth2. The Arch Repo Service does not call the Reaction Observer.
+The Doc Service reads architecture inventory through the OAuth2-protected Docs API and accesses the Reaction Observer
+directly using OAuth2. The Arch Repo Service does not call the Reaction Observer.
 
 ## Modules
 
