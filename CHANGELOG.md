@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [17.3.1] - 2026-10-29
+
+### Security
+- Fix CVE-2026-94029 (SNYK-JAVA-ORGAPACHESSHD-21715425, resource exhaustion in the SFTP v6 `check-file-name` / `check-file-handle` extension of `org.apache.sshd:sshd-sftp` 2.19.0) by removing the dependency on `org.eclipse.jgit:org.eclipse.jgit.ssh.apache`, which pulled in `sshd-sftp` and `sshd-osgi`. The repositories are cloned over HTTPS, so the SSH transport is not needed; `org.eclipse.jgit` itself is unchanged.
+
 ## [17.3.0] - 2026-10-28
 
 ### Dependencies
