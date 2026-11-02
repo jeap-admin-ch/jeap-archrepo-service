@@ -127,8 +127,10 @@ class ModelOnboardingServiceTest {
         SystemComponentFactory.createSystemComponent(old, "foo-service", Importer.DEPLOYMENT_LOG);
         var model = ArchitectureModel.builder().teams(List.of(owner)).systems(List.of(old)).build();
 
-        assertThatThrownBy(() -> service(List.of(team("blue")),
-                List.of(system("fo", "blue"), system("bar", "blue", "foo"))).apply(model))
+        var service = service(List.of(team("blue")),
+                List.of(system("fo", "blue"), system("bar", "blue", "foo")));
+
+        assertThatThrownBy(() -> service.apply(model))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("foo").hasMessageContaining("fo").hasMessageContaining("bar");
         assertModel(model).hasOnlySystems(old).hasNoRemovals();
@@ -157,8 +159,9 @@ class ModelOnboardingServiceTest {
         SystemComponentFactory.createSystemComponent(bar, "shared-service", Importer.DEPLOYMENT_LOG);
         var model = ArchitectureModel.builder().teams(List.of(owner)).systems(List.of(old, bar)).build();
 
-        assertThatThrownBy(() -> service(List.of(team("blue")), List.of(system("bar", "blue", "foo")))
-                .apply(model))
+        var service = service(List.of(team("blue")), List.of(system("bar", "blue", "foo")));
+
+        assertThatThrownBy(() -> service.apply(model))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("shared-service");
     }
@@ -188,8 +191,10 @@ class ModelOnboardingServiceTest {
         System existing = System.builder().name("foo").description("keep").aliases(List.of("shared"))
                 .defaultOwner(owner).build();
         var model = ArchitectureModel.builder().teams(List.of(owner)).systems(List.of(existing)).build();
-        assertThatThrownBy(() -> service(List.of(team("blue")),
-                List.of(system("foo", "blue", "shared"), system("SHARED", "blue"))).apply(model))
+        var service = service(List.of(team("blue")),
+                List.of(system("foo", "blue"), system("SHARED", "blue")));
+
+        assertThatThrownBy(() -> service.apply(model))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("SHARED", "foo");
         assertSystem(existing).hasDescription("keep").hasAliases("shared");
         assertTeam(owner).hasContactAddress("keep");
@@ -215,8 +220,10 @@ class ModelOnboardingServiceTest {
     void cannotTakeAnAliasFromASystemThatRemains() {
         var model = ArchitectureModel.builder().systems(List.of(
                 System.builder().name("foo").aliases(List.of("shared")).build())).build();
-        assertThatThrownBy(() -> service(List.of(team("blue")),
-                List.of(system("foo", "blue"), system("SHARED", "blue"))).apply(model))
+        var service = service(List.of(team("blue")),
+                List.of(system("foo", "blue"), system("SHARED", "blue")));
+
+        assertThatThrownBy(() -> service.apply(model))
                 .hasMessageContaining("SHARED", "foo");
         assertModel(model).hasOnlySystemNames("foo");
     }

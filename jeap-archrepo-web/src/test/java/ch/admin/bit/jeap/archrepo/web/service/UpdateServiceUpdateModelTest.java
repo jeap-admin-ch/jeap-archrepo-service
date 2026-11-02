@@ -97,7 +97,8 @@ class UpdateServiceUpdateModelTest extends PostgresIntegrationTestBase {
             return null;
         }).when(importer).importIntoModel(any(ArchitectureModel.class), eq("dev"));
 
-        assertThatThrownBy(() -> service.runImporter(importer.getClass().getSimpleName()))
+        String importerName = importer.getClass().getSimpleName();
+        assertThatThrownBy(() -> service.runImporter(importerName))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("rogue");
         verify(systemRepository, times(1)).saveAll(any());
     }
@@ -109,7 +110,8 @@ class UpdateServiceUpdateModelTest extends PostgresIntegrationTestBase {
             return null;
         }).when(importer).importIntoModel(any(ArchitectureModel.class), eq("dev"));
 
-        assertThatThrownBy(() -> service.runImporter(importer.getClass().getSimpleName()))
+        String importerName = importer.getClass().getSimpleName();
+        assertThatThrownBy(() -> service.runImporter(importerName))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("rogue-team");
     }
 
@@ -122,7 +124,8 @@ class UpdateServiceUpdateModelTest extends PostgresIntegrationTestBase {
             return null;
         }).when(importer).importIntoModel(any(ArchitectureModel.class), eq("dev"));
 
-        assertThatThrownBy(() -> service.runImporter(importer.getClass().getSimpleName()))
+        String importerName = importer.getClass().getSimpleName();
+        assertThatThrownBy(() -> service.runImporter(importerName))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining(SYSTEM_NAME);
     }
 

@@ -43,8 +43,9 @@ class ArchitectureModelSealTest {
     @Test
     void aSealedModelRejectsAddingASystem() {
         model.sealSystemsAndTeams();
+        System baz = System.builder().name("baz").build();
 
-        assertThatThrownBy(() -> model.addSystem(System.builder().name("baz").build()))
+        assertThatThrownBy(() -> model.addSystem(baz))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("baz").hasMessageContaining("archrepo.model");
         assertThat(model.getSystems()).containsExactly(system, other);
@@ -64,7 +65,8 @@ class ArchitectureModelSealTest {
     void aSealedModelRejectsAddingOrRemovingATeam() {
         model.sealSystemsAndTeams();
 
-        assertThatThrownBy(() -> model.addTeam(Team.builder().name("red").build()))
+        Team red = Team.builder().name("red").build();
+        assertThatThrownBy(() -> model.addTeam(red))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("red");
         assertThatThrownBy(() -> model.removeTeam(team))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("blue");
