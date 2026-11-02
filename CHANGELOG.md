@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.0.0] - 2026-11-02
+
+### Added
+- Config-as-master onboarding through `archrepo.model` and deterministic YAML export at `GET /api/model/export` for bootstrap and drift detection.
+
+### Changed
+- Split model onboarding reconciliation into focused validation, update, and removal steps without changing its behavior.
+- Systems and teams are created and deleted only from `archrepo.model`: the model is sealed after onboarding, and an importer that adds or removes a system or team fails the update.
+- Importers log an ERROR instead of a warning when a deployed component or message type belongs to a system that is not declared in `archrepo.model`, so alerting picks up configuration gaps.
+- A single-importer run (`POST /api/jobs/import/{importer}`) now takes the same ShedLock as the scheduled model update and is skipped while that runs.
+- A model onboarding document that is inconsistent in itself - duplicate names, conflicting aliases, a system referencing an undeclared team - now fails the startup instead of every later model update. Conflicts with stored data still fail the update.
+- Components and their REST APIs, OpenAPI specs and database schemas are no longer deleted through JPA orphan removal but explicitly, from the removals the model records. That is what lets them move between systems reliably.
+
+### Removed
+- **Breaking:** system/team creation endpoints (`POST /api/management/system`, `POST /api/management/team`); export existing metadata before configuring onboarding. Database-schema pushes now reject unknown systems with `422` instead of creating them.
+
+### Fixed
+- Renaming a system and keeping the old name as an alias no longer breaks every model update. The renamed system's components move to the system the old name or alias now belongs to, together with their REST APIs, OpenAPI specs and database schemas, instead of being recreated next to the still-present old rows (which violated the global unique index on `system_component.name` and rolled back the update). The same applies when an importer finds a component under a system it no longer resolves to (an alias moved between two systems). Moves no longer depend on the order the systems are loaded in.
+- A component of a system deleted by onboarding can be recreated under another system in the same update: the onboarding result is saved before the importers run.
+- A rename that takes over a former alias as the new system name now also carries the components over; two systems claiming parts of the same removed system are rejected as an ambiguous rename.
+- A component moves to another system only when its name belongs there. A component that RHOS reports from the namespace of a system its name does not belong to, or from two namespaces, stays where it is and an ERROR is logged, instead of moving back and forth on every run.
+- Saving a model no longer merges systems and teams that are already managed. A new REST API referenced by a new relation in another system was merged twice, and the update failed on `rest_api.created_at` being null.
+
 ## [17.3.2] - 2026-11-01
 
 ### Dependencies

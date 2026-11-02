@@ -74,17 +74,22 @@ starts. The database user therefore needs permission to create tables in its sch
 
 1. The service starts and the actuator reports it healthy.
 2. `GET /api/model` answers with the systems - an empty list on a fresh database.
-3. Create the first system. No importer does this, and an importer skips every component whose system it cannot
-   find, so an import into an empty model imports nothing:
+3. Declare the first system and its owning team in the instance configuration, then restart:
 
-   ```http
-   POST /api/management/system
-   Content-Type: application/json
-
-   { "name": "foo", "teamName": "team-blue" }
+   ```yaml
+   archrepo:
+     model:
+       teams:
+         - name: team-blue
+       systems:
+         - name: foo
+           team: team-blue
    ```
 
-4. Trigger an import without waiting for the schedule:
+   Both lists must be non-empty for onboarding to run. For an existing database, export its metadata first;
+   see [Configuration](configuration.md) for the bootstrap procedure and authoritative deletion semantics.
+
+4. Trigger an update to onboard the system and import its components without waiting for the schedule:
 
    ```http
    POST /api/jobs

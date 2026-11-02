@@ -8,9 +8,12 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -127,6 +130,56 @@ class DeploymentlogSystemComponentImporterTest {
                 .describedAs("Redeployed component is marked deployed again")
                 .matches(systemComponent -> !systemComponent.isUndeployed())
                 .matches(systemComponent -> systemComponent.getUndeployedAt() == null);
+    }
+
+    @Test
+    void importIntoModel_relocatesComponentWhenItsPrefixNowResolvesToADifferentSystem() {
+        String movedComponentName = "system-moved-component";
+        stubFor(get(urlEqualTo("/deploymentlog-service/api/environment/ref/components?includeUndeployed=true"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""
+                                [
+                                {"componentName":"%s", "version":"1.0.0"}
+                                ]""".formatted(movedComponentName))));
+        SystemComponent movedComponent = BackendService.builder()
+                .name(movedComponentName)
+                .importer(Importer.DEPLOYMENT_LOG)
+                .build();
+        System previousOwner = System.builder().name("previousOwner")
+                .systemComponents(List.of(movedComponent))
+                .build();
+        System newOwner = System.builder().name("newOwner").aliases(List.of("system")).build();
+        ArchitectureModel testModel = ArchitectureModel.builder().systems(List.of(previousOwner, newOwner)).build();
+
+        importer.importIntoModel(testModel, "ref");
+
+        assertThat(newOwner.findSystemComponent(movedComponentName))
+                .describedAs("Component moves to the system its prefix now resolves to, instead of being recreated there")
+                .contains(movedComponent);
+        assertThat(previousOwner.getSystemComponentsIncludingUndeployed())
+                .describedAs("Component no longer lives under its previous owner")
+                .isEmpty();
+    }
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void importIntoModel_logsAnErrorForAComponentOfAnUnknownSystem(CapturedOutput output) {
+        // Systems are declared in configuration; a deployed component of an undeclared system needs attention.
+        stubFor(get(urlEqualTo("/deploymentlog-service/api/environment/ref/components?includeUndeployed=true"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("""
+                                [
+                                {"componentName":"undeclared-service", "version":"1.0.0"}
+                                ]""")));
+        ArchitectureModel testModel = createTestModel();
+
+        importer.importIntoModel(testModel, "ref");
+
+        assertThat(testModel.findSystemComponent("undeclared-service")).isEmpty();
+        assertThat(output.getAll().lines().filter(line -> line.contains("undeclared-service")))
+                .anyMatch(line -> line.contains("ERROR") && line.contains("undeclared"));
     }
 
     private ArchitectureModel createTestModel() {

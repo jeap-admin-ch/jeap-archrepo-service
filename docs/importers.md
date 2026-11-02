@@ -56,8 +56,16 @@ See [Configuration](configuration.md) for the full properties of each.
 ## Components go into systems that already exist
 
 No importer creates a `System`. Each resolves a system name, looks it up as a name or alias, and **skips the
-element with a warning** when there is no match. A system is created deliberately, through
-`POST /api/management/system` - see [Operations](operations.md).
+element with an ERROR log** when there is no match - a system that is deployed or publishes messages but is not
+declared in `archrepo.model` is a configuration gap, and the error lets alerting pick it up. A system is created deliberately, through
+`archrepo.model` configuration, applied before every full or single-importer run - see [Configuration](configuration.md).
+This is enforced: after onboarding the model is sealed, and an importer that adds or removes a system or a team
+fails the whole update with an `IllegalStateException`.
+
+A component found under a different system than the one an importer reports it for moves only to the system its
+name belongs to - its prefix, resolved as a name or alias, which is what changes when an alias moves. RHOS resolves
+the system from the namespace instead, so it can report a component for a system its name does not belong to, or
+for two systems; the component then stays where it is and the conflicting report is logged as an ERROR.
 
 | Importer                          | Gets the system name from                                                       |
 | --------------------------------- | ------------------------------------------------------------------------------- |

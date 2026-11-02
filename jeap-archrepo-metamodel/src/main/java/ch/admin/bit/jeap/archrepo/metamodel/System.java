@@ -15,8 +15,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Persistable;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +41,23 @@ import static java.util.Comparator.comparing;
 @Entity
 @Getter
 @Slf4j
-public class System extends MutableDomainEntity {
+public class System extends MutableDomainEntity implements Persistable<UUID> {
+
+    @Transient
+    @EqualsAndHashCode.Exclude
+    // Assigned UUIDs must not make a newly onboarded aggregate look detached to Spring Data.
+    private boolean newEntity = true;
+
+    @Override
+    public boolean isNew() {
+        return newEntity;
+    }
+
+    @PostLoad
+    @PostPersist
+    private void markPersisted() {
+        newEntity = false;
+    }
 
     @Id
     @NotNull
@@ -66,7 +85,14 @@ public class System extends MutableDomainEntity {
     @CollectionTable(name = "system_aliases")
     private List<String> aliases = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "parent")
+    /*
+     * No orphan removal on the four collections whose elements can move to another system (components, and the
+     * REST APIs, OpenAPI specs and database schemas that move with them, see moveSystemComponentTo): JPA forbids
+     * reassigning an orphaned entity, and Hibernate deletes it or not depending on the order the systems were
+     * loaded in. A removal is recorded instead (removedSystemComponents / removedArtifacts) and deleted explicitly
+     * by ArchitectureModelRepository; a move is a plain foreign-key update. Deleting the whole system still cascades.
+     */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent")
     private List<SystemComponent> systemComponents = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "parent")
@@ -75,17 +101,25 @@ public class System extends MutableDomainEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "parent")
     private List<Command> commands = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "definingSystem")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "definingSystem")
     private List<RestApi> restApis = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "definingSystem")
     private List<AbstractRelation> relations = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "definingSystem")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "definingSystem")
     private List<OpenApiSpec> openApiSpecs = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "system")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "system")
     private List<SystemComponentDatabaseSchema> databaseSchemas = new ArrayList<>();
+
+    @Transient
+    @EqualsAndHashCode.Exclude
+    private final List<SystemComponent> removedSystemComponents = new ArrayList<>();
+
+    @Transient
+    @EqualsAndHashCode.Exclude
+    private final List<MutableDomainEntity> removedArtifacts = new ArrayList<>();
 
     @SuppressWarnings("java:S107")
     private System(String name, String description, String confluenceLink, Team defaultOwner, List<String> aliases,
@@ -96,7 +130,7 @@ public class System extends MutableDomainEntity {
         this.description = description;
         this.confluenceLink = confluenceLink;
         this.defaultOwner = defaultOwner;
-        this.aliases = aliases;
+        this.aliases = new ArrayList<>(aliases);
         this.systemComponents = new ArrayList<>();
         systemComponents.forEach(this::addSystemComponent);
         this.events = new ArrayList<>();
@@ -115,6 +149,26 @@ public class System extends MutableDomainEntity {
 
     public List<String> getAliases() {
         return unmodifiableList(aliases);
+    }
+
+    public void updateName(String name) {
+        if (!this.name.equalsIgnoreCase(name)) {
+            throw new IllegalArgumentException("System renames are not supported: " + this.name + " -> " + name);
+        }
+        this.name = name;
+    }
+
+    public void updateDetails(String description, String confluenceLink, Team defaultOwner) {
+        this.description = description;
+        this.confluenceLink = confluenceLink;
+        this.defaultOwner = defaultOwner;
+    }
+
+    public void replaceAliases(List<String> aliases) {
+        if (!this.aliases.equals(aliases)) {
+            this.aliases.clear();
+            this.aliases.addAll(aliases);
+        }
     }
 
     public List<Relation> getRelations() {
@@ -171,6 +225,59 @@ public class System extends MutableDomainEntity {
 
     public void sortSystemComponents() {
         systemComponents.sort(comparing(SystemComponent::getName));
+    }
+
+    /**
+     * Moves every component of this system (including undeployed ones) onto {@code target}, each together with
+     * its artifacts - see {@link #moveSystemComponentTo}. Used by onboarding when this system's name, or one of
+     * its aliases, is reassigned to {@code target} as an alias - i.e. this system was renamed, not actually
+     * removed. Without this, an importer resolves the alias to {@code target}, does not find the component there,
+     * and recreates it, colliding with the still-present old row on the database's global unique index on the
+     * component's name.
+     * <p>
+     * All or nothing: if {@code target} already has a component of one of the names, nothing is moved.
+     */
+    public void transferSystemComponentsTo(System target) {
+        List<SystemComponent> moved = new ArrayList<>(systemComponents);
+        moved.forEach(component -> target.requireNoSystemComponentNamed(component.getName()));
+        moved.forEach(component -> moveSystemComponentTo(component, target));
+    }
+
+    /**
+     * Moves {@code component} onto {@code target} together with what this system holds for it: the REST APIs it
+     * provides, its OpenAPI spec and its database schema. The artifacts have to follow it - every reader (the docs
+     * API, the Swagger link, the missing-spec report) looks them up on the component's current system, and a push
+     * updates the existing row in place without ever moving it, so an artifact left behind would stay invisible
+     * for good, and be deleted with this system. Relations referencing a moved REST API keep pointing at it.
+     */
+    public void moveSystemComponentTo(SystemComponent component, System target) {
+        if (!systemComponents.contains(component)) {
+            throw new IllegalArgumentException("System component " + component.getName() + " is not part of system " + name);
+        }
+        target.requireNoSystemComponentNamed(component.getName());
+        systemComponents.remove(component);
+        target.addSystemComponent(component);
+        moveMatching(restApis, restApi -> component.equals(restApi.getProvider()), restApi -> {
+            restApi.setDefiningSystem(target);
+            target.addRestApi(restApi);
+        });
+        moveMatching(openApiSpecs, spec -> component.equals(spec.getProvider()), target::addOpenApiSpec);
+        moveMatching(databaseSchemas, schema -> component.equals(schema.getSystemComponent()), schema -> {
+            schema.setSystem(target);
+            target.addDatabaseSchema(schema);
+        });
+    }
+
+    private static <T> void moveMatching(List<T> source, Predicate<T> belongsToComponent, Consumer<T> addToTarget) {
+        List<T> matching = source.stream().filter(belongsToComponent).toList();
+        source.removeAll(matching);
+        matching.forEach(addToTarget);
+    }
+
+    private void requireNoSystemComponentNamed(String componentName) {
+        if (findSystemComponent(componentName).isPresent()) {
+            throw new IllegalArgumentException("Cannot add duplicate system component " + componentName);
+        }
     }
 
     public void addEvent(Event event) {
@@ -253,7 +360,7 @@ public class System extends MutableDomainEntity {
 
     RemovedElements removeAllByImporter(Importer importer) {
         relations.removeAll(MultipleImportable.filterByImportedOnlyByImporter(relations, importer));
-        restApis.removeAll(MultipleImportable.filterByImportedOnlyByImporter(restApis, importer));
+        removeArtifacts(restApis, MultipleImportable.filterByImportedOnlyByImporter(restApis, importer)::contains);
 
         Set<SystemComponentRemoved> systemComponentRemovedList = new HashSet<>();
         Set<EventRemoved> eventRemovedList = new HashSet<>();
@@ -267,7 +374,9 @@ public class System extends MutableDomainEntity {
     }
 
     SystemComponentRemoved removeSystemComponent(SystemComponent systemComponent) {
-        systemComponents.remove(systemComponent);
+        if (systemComponents.remove(systemComponent)) {
+            removedSystemComponents.add(systemComponent);
+        }
         return SystemComponentRemoved.of(systemComponent);
     }
 
@@ -286,7 +395,43 @@ public class System extends MutableDomainEntity {
     }
 
     public void removeRestApi(RestApi restApi) {
-        restApis.remove(restApi);
+        removeArtifacts(restApis, restApi::equals);
+    }
+
+    /**
+     * The components removed from this system that still have to be deleted - see the comment on
+     * {@link #systemComponents} for why they are not left to orphan removal.
+     */
+    public List<SystemComponent> getRemovedSystemComponents() {
+        return unmodifiableList(removedSystemComponents);
+    }
+
+    /** The REST APIs, OpenAPI specs and database schemas removed from this system that still have to be deleted. */
+    public List<MutableDomainEntity> getRemovedArtifacts() {
+        return unmodifiableList(removedArtifacts);
+    }
+
+    /**
+     * Brings back a component removed from this system earlier in the same update, onto {@code target}, instead of
+     * having a new one of the same name created - which would collide with the old row on the global unique index
+     * of the component name, as Hibernate inserts before it deletes. Its artifacts stay removed.
+     */
+    Optional<SystemComponent> reviveRemovedSystemComponent(String componentName, System target) {
+        Optional<SystemComponent> removed = removedSystemComponents.stream()
+                .filter(component -> component.getName().equalsIgnoreCase(componentName))
+                .findFirst();
+        removed.ifPresent(component -> {
+            target.requireNoSystemComponentNamed(component.getName());
+            removedSystemComponents.remove(component);
+            target.addSystemComponent(component);
+        });
+        return removed;
+    }
+
+    private <T extends MutableDomainEntity> void removeArtifacts(List<T> artifacts, Predicate<T> toRemove) {
+        List<T> removed = artifacts.stream().filter(toRemove).toList();
+        artifacts.removeAll(removed);
+        removedArtifacts.addAll(removed);
     }
 
 
@@ -296,9 +441,9 @@ public class System extends MutableDomainEntity {
     void onSystemComponentRemoved(SystemComponentRemoved event) {
         String removedSystemComponentName = event.getSystemComponentName();
         relations.removeIf(rel -> removedSystemComponentName.equals(rel.getProviderName()) || removedSystemComponentName.equals(rel.getConsumerName()));
-        restApis.removeIf(restApi -> restApi.getProvider().getName().equals(removedSystemComponentName));
-        openApiSpecs.removeIf(openApiSpec -> openApiSpec.getProvider().getName().equals(removedSystemComponentName));
-        databaseSchemas.removeIf(dbSchema -> dbSchema.getSystemComponent().getName().equals(removedSystemComponentName));
+        removeArtifacts(restApis, restApi -> restApi.getProvider().getName().equals(removedSystemComponentName));
+        removeArtifacts(openApiSpecs, openApiSpec -> openApiSpec.getProvider().getName().equals(removedSystemComponentName));
+        removeArtifacts(databaseSchemas, dbSchema -> dbSchema.getSystemComponent().getName().equals(removedSystemComponentName));
     }
 
     /**

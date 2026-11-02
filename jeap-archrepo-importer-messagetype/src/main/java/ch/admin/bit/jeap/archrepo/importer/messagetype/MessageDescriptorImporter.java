@@ -40,7 +40,7 @@ public class MessageDescriptorImporter {
     private void importEvent(ArchitectureModel architectureModel, MessageTypeRepository messageTypeRepository, EventDescriptor eventDescriptor) {
         Optional<System> definingSystem = architectureModel.findSystem(eventDescriptor.getDefiningSystem());
         if (definingSystem.isEmpty()) {
-            log.warn("Event {} is defined by {} but this system is not known, ignore it",
+            log.error("Event {} is defined by {} but this system is not declared in archrepo.model, ignore it",
                     kv("messageType", eventDescriptor.getMessageTypeName()), kv("unknownSystem", eventDescriptor.getDefiningSystem()));
             return;
         }
@@ -69,7 +69,7 @@ public class MessageDescriptorImporter {
     private void importCommand(ArchitectureModel architectureModel, MessageTypeRepository messageTypeRepository, CommandDescriptor commandDescriptor) {
         Optional<System> definingSystem = architectureModel.findSystem(commandDescriptor.getDefiningSystem());
         if (definingSystem.isEmpty()) {
-            log.warn("Command {} is defined by {} but this system is not known, ignore it",
+            log.error("Command {} is defined by {} but this system is not declared in archrepo.model, ignore it",
                     kv("messageType", commandDescriptor.getMessageTypeName()), kv("unknownSystem", commandDescriptor.getDefiningSystem()));
             return;
         }

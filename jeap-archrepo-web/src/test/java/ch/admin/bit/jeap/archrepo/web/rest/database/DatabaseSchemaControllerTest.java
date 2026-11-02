@@ -10,6 +10,7 @@ import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepos
 import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
+import ch.admin.bit.jeap.archrepo.web.service.UnknownSystemException;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplicationRole;
 import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationContext;
 import ch.admin.bit.jeap.security.test.jws.JwsBuilder;
@@ -96,6 +97,18 @@ class DatabaseSchemaControllerTest extends PostgresIntegrationTestBase {
     SystemComponentDatabaseSchemaRepository systemComponentDatabaseSchemaRepository;
 
     ArgumentCaptor<SystemComponentDatabaseSchema> systemComponentDatabaseSchemaArgumentCaptor = ArgumentCaptor.forClass(SystemComponentDatabaseSchema.class);
+
+    @Test
+    void unknownSystemReturns422WithoutPersistingSchema() throws Exception {
+        when(systemComponentService.findOrCreateSystemComponent(COMPONENT_NAME))
+                .thenThrow(new UnknownSystemException(COMPONENT_NAME, "test"));
+        mockMvc.perform(post(DB_SCHEMA_API_PATH)
+                        .header(HttpHeaders.AUTHORIZATION, createBearerAuthForUserRoles(DB_SCHEMA_WRITE_ROLE))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(getJsonString(getCreateOrUpdateDbSchemaDto())))
+                .andExpect(status().isUnprocessableEntity());
+        verifyNoInteractions(systemComponentDatabaseSchemaRepository);
+    }
 
     @Test
     void testCreateOrUpdateDbSchema_CreateValid() throws Exception {

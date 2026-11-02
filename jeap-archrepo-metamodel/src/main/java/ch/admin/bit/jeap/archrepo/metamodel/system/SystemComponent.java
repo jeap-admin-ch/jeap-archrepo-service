@@ -50,7 +50,8 @@ public abstract class SystemComponent implements Importable {
     @Enumerated(EnumType.STRING)
     Importer importer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // A cross-system REST relation can reach a new provider before its new system is saved.
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "system_id")
     @Setter
     System parent;

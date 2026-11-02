@@ -28,6 +28,7 @@ The OpenAPI description is served by the jEAP Swagger starter and grouped by roo
 | Method and resource                                      | Purpose                                                                    |
 | -------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `GET /api/model`                                         | All systems with their components, without relations                       |
+| `GET /api/model/export`                                  | Complete systems/teams configuration as deterministic YAML                 |
 | `GET /api/model/{system}/relations`                      | Every active relation - REST, event, command - with one end in a system    |
 | `GET /api/model/rest-api-relation-without-pact`          | Governance query: active REST relations with no Pact contract              |
 | `GET /api/model/system-components-without-open-api-spec` | Governance query: backend services and self-contained systems with no spec |
@@ -43,8 +44,6 @@ The OpenAPI description is served by the jEAP Swagger starter and grouped by roo
 | `GET /external-api/dbschemas`                            | The stored database schema of one component                                |
 | `POST /api/jobs`                                         | Run the model update or the documentation generation now                   |
 | `POST /api/jobs/import/{importerName}`                   | Run a single importer now                                                  |
-| `POST /api/management/system`                            | Create a system that no importer can derive                                |
-| `POST /api/management/team`                              | Create a team                                                              |
 | `DELETE /api/management/rest-api`                        | Mark one REST API relation deleted                                         |
 
 `{component}` is always matched by **name, ignoring case**, and never by an alias. `{system}` is matched by name,
@@ -63,7 +62,7 @@ whole picture.
 
 On the basic chain these `GET`s are `permitAll()` and need no credentials at all:
 
-- `GET /api/model`, `GET /api/model/{system}/relations`
+- `GET /api/model`, `GET /api/model/{system}/relations`, `GET /api/model/export`
 - `GET /api/model/rest-api-relation-without-pact`, `GET /api/model/system-components-without-open-api-spec`
 - `GET /api/openapi/**`, `GET /api/dbschemas/**`
 
@@ -580,10 +579,11 @@ The body is a `CreateOrUpdateDbSchemaDto` and is validated with `@Valid`:
 | `tables[].primaryKey`  | no       | `name` and a non-empty `columnNames`                                               |
 | `tables[].foreignKeys` | no       | Each with `name`, `columnNames`, `referencedTableName` and `referencedColumnNames` |
 
-Unlike the OpenAPI push, this one **creates the component when it does not exist** - and, when the system named by
-the part of the component name before the first `-` is unknown as well, that system plus a team of the same name.
-It is the only endpoint that does so; see [Concepts](concepts.md). A component created this way is recorded with
-the importer `REST_CONTROLLER`.
+Unlike the OpenAPI push, this one **creates the component when it does not exist**, provided the system derived
+from the prefix before the first `-` is already onboarded. The prefix resolves by name or alias ignoring case.
+An unknown system is logged as an ERROR and returns `422`, without creating a system, team, component or schema.
+Declare the system in configuration and run a model update before its first push. A new component is recorded
+with importer `REST_CONTROLLER`.
 
 The push replaces the component's single schema in place, or creates it. Two concurrent creations are handled: the
 loser of the unique constraint retries as an update in a new transaction.
@@ -599,6 +599,7 @@ Empty body in every case.
 | `400`  | The body fails its constraints - a missing `tables`, an empty column name, and so on                            |
 | `401`  | No bearer token                                                                                                 |
 | `403`  | A token without `database-schema` / `write`                                                                     |
+| `422`  | The system derived from the component name has not been onboarded; nothing is persisted                         |
 | `500`  | The schema could not be serialized, or any other unexpected failure - plain text from `DatabaseSchemaException` |
 
 ## `GET /api/dbschemas/versions`
@@ -769,95 +770,20 @@ the response is still `200`.
 | `200`  | The import was handed to the executor |
 | `401`  | No basic credentials                  |
 
-## `POST /api/management/system`
+## `GET /api/model/export`
 
-Create a system that no importer can derive.
+Returns `200` with `Content-Type: application/yaml`; no authentication is required. The document has exactly the
+`archrepo.model.teams` and `archrepo.model.systems` shape accepted by configuration binding.
+It contains every team and system, including empty systems and those with only undeployed components.
+Only config-owned metadata is exported: no IDs, timestamps, components or relations. Teams/systems are sorted
+by name, aliases are sorted, and null fields are omitted for stable Git diffs.
 
-### Request
+The endpoint reads the **primary**, not a replica, so a bootstrap export includes recent changes. It faithfully
+exports legacy duplicate names/aliases; review and resolve those case-insensitively before applying the document.
+See [Configuration](configuration.md) for the full format, bootstrap, activation guard and destructive semantics.
 
-`POST /api/management/system`
-
-No path parameters and no query parameters.
-
-| Request header  | Required | Value                                  |
-| --------------- | -------- | -------------------------------------- |
-| `Authorization` | yes      | HTTP basic - there is no public access |
-| `Content-Type`  | yes      | `application/json`                     |
-
-```json
-{
-  "name": "system",
-  "description": "Warenverkehrssystem",
-  "confluenceLink": "https://confluence.example.com/display/system",
-  "aliases": ["SYSTEM-ALIAS"],
-  "teamName": "Team Example"
-}
-```
-
-| Field            | Required | Meaning                                                                                    |
-| ---------------- | -------- | ------------------------------------------------------------------------------------------ |
-| `name`           | yes      | The system's name                                                                          |
-| `description`    | no       | Free text                                                                                  |
-| `confluenceLink` | no       | The system's Confluence space                                                              |
-| `aliases`        | no       | Further names the system is to be known under                                              |
-| `teamName`       | yes      | The default owner. An existing team of that name is reused, otherwise a new one is created |
-
-`CreateSystemDto` declares `@NotNull` on `name` and `teamName`, but the handler does **not** annotate the body
-with `@Valid`, so those constraints are not enforced on the request.
-
-### Response
-
-`201 Created`, empty body.
-
-| Status | When                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------- |
-| `201`  | The system was created                                                                            |
-| `400`  | A system with that **name or alias** already exists - `System with name or alias already exists.` |
-| `401`  | No basic credentials                                                                              |
-
-## `POST /api/management/team`
-
-Create a team. Its parameters are **query parameters**, not a JSON body - the only write endpoint on this page
-shaped that way.
-
-### Request
-
-`POST /api/management/team`
-
-No path parameters and no request body.
-
-| Query parameter  | Required           | Meaning                     |
-| ---------------- | ------------------ | --------------------------- |
-| `name`           | yes, but see below | The team's name             |
-| `contactAddress` | no                 | The team's contact address  |
-| `confluenceLink` | no                 | The team's Confluence space |
-| `jiraLink`       | no                 | The team's Jira project     |
-
-`name` is an un-annotated handler parameter, so the binder resolves it as an **optional** request parameter rather
-than a required one. A call without it does not fail at binding; it fails when the transaction commits, because
-`Team.name` is `@NotNull`.
-
-| Request header  | Required | Value                                  |
-| --------------- | -------- | -------------------------------------- |
-| `Authorization` | yes      | HTTP basic - there is no public access |
-
-```bash
-curl -u api:$ARCHREPO_API_SECRET -X POST \
-     "https://archrepo.example.com/my-archrepo-service/api/management/team?name=Team+Blue&contactAddress=team-blue@example.com"
-```
-
-### Response
-
-`200 OK`, empty body - the handler returns `void`.
-
-It always **saves a new team**: there is no lookup and no uniqueness check, so calling it twice with the same name
-is not an update.
-
-| Status | When                                                               |
-| ------ | ------------------------------------------------------------------ |
-| `200`  | The team was saved                                                 |
-| `401`  | No basic credentials                                               |
-| `500`  | `name` was omitted - the `@NotNull` of `Team.name` fails at commit |
+System/team creation endpoints were removed in 18.0.0. Declare both lists in configuration instead; deploying
+without them leaves existing systems and teams untouched.
 
 ## `DELETE /api/management/rest-api`
 

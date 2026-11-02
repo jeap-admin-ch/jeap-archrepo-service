@@ -4,6 +4,9 @@ import ch.admin.bit.jeap.archrepo.importer.messagetype.repository.MessageTypeRep
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import java.util.List;
 
@@ -32,5 +35,23 @@ class MessageDescriptorImporterIT extends CreateLocalGitRepoBaseTest {
 
         assertThat(model.getAllMessageTypes())
                 .anyMatch(mt -> mt.getMessageTypeName().equals("SharedArchivedArtifactVersionCreatedEvent"));
+    }
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void logsAnErrorForAMessageTypeOfAnUnknownSystem(CapturedOutput output) {
+        // Systems are declared in configuration; a message type of an undeclared system needs attention.
+        MessageTypeImporterProperties props = new MessageTypeImporterProperties(
+                List.of(repoUrl),
+                null,
+                List.of(new RepositoryProperties(repoUrl, RepositoryProperties.RepositoryType.BITBUCKET)));
+        MessageDescriptorImporter importer = new MessageDescriptorImporter(new MessageTypeRepositoryFactory(props));
+        ArchitectureModel model = ArchitectureModel.builder().build();
+
+        importer.importDescriptors(model);
+
+        assertThat(model.getAllMessageTypes()).isEmpty();
+        assertThat(output.getAll().lines().filter(line -> line.contains("SharedArchivedArtifactVersionCreatedEvent")))
+                .anyMatch(line -> line.contains("ERROR") && line.contains("_SHARED"));
     }
 }

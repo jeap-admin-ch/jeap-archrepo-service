@@ -45,18 +45,22 @@ class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
         String systemName = componentName.split("-")[0];
         Optional<System> system = architectureModel.findSystem(systemName);
         if (system.isEmpty()) {
-            log.warn("Skipped system component {}: System with name {} not found in model", componentName, systemName);
+            log.error("Skipped system component {}: system {} is not declared in archrepo.model", componentName, systemName);
             return;
         }
         if (component.undeployed()) {
-            markUndeployedIfPresent(system.get(), component);
+            markUndeployedIfPresent(architectureModel, system.get(), component);
         } else {
-            createOrRedeploySystemComponent(system.get(), componentName);
+            createOrRedeploySystemComponent(architectureModel, system.get(), componentName);
         }
     }
 
-    private void createOrRedeploySystemComponent(System system, String componentName) {
-        Optional<SystemComponent> existing = system.findSystemComponent(componentName);
+    private void createOrRedeploySystemComponent(ArchitectureModel architectureModel, System system, String componentName) {
+        // Relocated rather than freshly looked up on system: the name's prefix may now resolve to a different
+        // system than before (an alias moved between two systems that both still exist), and the component - with
+        // its own history - has to move there too instead of being recreated, which would collide with the
+        // database's global unique index on the component's name while the old row is still present.
+        Optional<SystemComponent> existing = architectureModel.findOrRelocateSystemComponent(system, componentName);
         if (existing.isEmpty()) {
             log.info("Create new system component from deploymentlog {} in system {}", componentName, system.getName());
             SystemComponentFactory.createSystemComponent(system, componentName, Importer.DEPLOYMENT_LOG);
@@ -68,8 +72,8 @@ class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
         }
     }
 
-    private void markUndeployedIfPresent(System system, ComponentVersionSummaryDto component) {
-        system.findSystemComponent(component.componentName()).ifPresentOrElse(
+    private void markUndeployedIfPresent(ArchitectureModel architectureModel, System system, ComponentVersionSummaryDto component) {
+        architectureModel.findOrRelocateSystemComponent(system, component.componentName()).ifPresentOrElse(
                 systemComponent -> {
                     if (!systemComponent.isUndeployed()) {
                         log.info("Marking system component {} in system {} as undeployed", component.componentName(), system.getName());

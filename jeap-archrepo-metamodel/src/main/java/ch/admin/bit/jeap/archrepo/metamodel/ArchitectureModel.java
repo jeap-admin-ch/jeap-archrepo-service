@@ -12,6 +12,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentType;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,21 +22,100 @@ import static java.util.Collections.unmodifiableList;
 
 @EqualsAndHashCode
 @ToString
+@Slf4j
 public class ArchitectureModel {
-    // Read by the equals/hashCode/toString Lombok generates from the annotations above, which Sonar cannot see
-    @SuppressWarnings("java:S1068")
     private final List<Team> teams;
     private final List<System> systems;
+    private final List<System> removedSystems = new ArrayList<>();
+    private final List<Team> removedTeams = new ArrayList<>();
     private final String openApiBaseUrl;
+    @EqualsAndHashCode.Exclude
+    private boolean systemsAndTeamsSealed;
 
     private ArchitectureModel(List<Team> teams, List<System> systems, String openApiBaseUrl) {
-        this.teams = teams;
-        this.systems = systems;
+        this.teams = new ArrayList<>(teams);
+        this.systems = new ArrayList<>(systems);
         this.openApiBaseUrl = openApiBaseUrl;
     }
 
     public List<System> getSystems() {
         return unmodifiableList(systems);
+    }
+
+    public List<Team> getTeams() {
+        return unmodifiableList(teams);
+    }
+
+    public List<System> getRemovedSystems() {
+        return unmodifiableList(removedSystems);
+    }
+
+    public List<Team> getRemovedTeams() {
+        return unmodifiableList(removedTeams);
+    }
+
+    /**
+     * The configuration ({@code archrepo.model}) is the master of systems and teams. Once onboarding has applied
+     * it, the model is sealed: adding or removing a system or a team - by an importer, say - then throws instead
+     * of quietly creating data outside the declaration. Everything below systems (components, messages, relations,
+     * REST APIs, ...) stays open to the importers.
+     */
+    public void sealSystemsAndTeams() {
+        systemsAndTeamsSealed = true;
+    }
+
+    private void requireUnsealed(String change, String name) {
+        if (systemsAndTeamsSealed) {
+            throw new IllegalStateException(("Cannot %s '%s': systems and teams are declared in the archrepo.model "
+                    + "configuration and only onboarding may change them").formatted(change, name));
+        }
+    }
+
+    public void addTeam(Team team) {
+        requireUnsealed("add team", team.getName());
+        teams.add(team);
+    }
+
+    public void addSystem(System system) {
+        requireUnsealed("add system", system.getName());
+        systems.add(system);
+    }
+
+    public Optional<Team> findTeamByNameIgnoreCase(String name) {
+        return teams.stream().filter(team -> team.getName().equalsIgnoreCase(name)).findFirst();
+    }
+
+    public Optional<System> findSystemByNameIgnoreCase(String name) {
+        return systems.stream().filter(system -> system.getName().equalsIgnoreCase(name)).findFirst();
+    }
+
+    public void removeSystem(System removed) {
+        requireUnsealed("remove system", removed.getName());
+        for (System remaining : systems) {
+            if (remaining == removed) {
+                continue;
+            }
+            // A REST relation may be owned by a different system than its API.
+            remaining.getRelations().stream()
+                    .filter(RestApiRelation.class::isInstance)
+                    .map(RestApiRelation.class::cast)
+                    .filter(relation -> removed.getRestApis().contains(relation.getRestApi()))
+                    .toList().forEach(remaining::removeRestApiRelation);
+            removed.getSystemComponentsIncludingUndeployed()
+                    .forEach(component -> remaining.onSystemComponentRemoved(SystemComponentRemoved.of(component)));
+            removed.getEvents().forEach(event -> remaining.onEventRemoved(EventRemoved.of(event)));
+            removed.getCommands().forEach(command -> remaining.onCommandRemoved(CommandRemoved.of(command)));
+        }
+        if (systems.remove(removed)) {
+            removedSystems.add(removed);
+        }
+    }
+
+    public void removeTeam(Team team) {
+        requireUnsealed("remove team", team.getName());
+        if (teams.remove(team)) {
+            removedTeams.add(team);
+        }
     }
 
     private static boolean nameMatches(String systemName, System system) {
@@ -120,6 +200,100 @@ public class ArchitectureModel {
         return systems.stream()
                 .flatMap(system -> system.findSystemComponent(componentName).stream())
                 .findFirst();
+    }
+
+    /**
+     * The component already known as {@code componentName}, moved onto {@code system} first - with its REST APIs,
+     * OpenAPI spec and database schema, see {@link System#moveSystemComponentTo} - if it currently lives under a
+     * different one. An importer resolves a component's system by a name or alias that can be
+     * reassigned from one surviving system to another between runs; without this, the importer would not find
+     * the component under the newly resolved system and recreate it there, colliding with the database's global
+     * unique index on the component's name while the old row is still present under its previous owner. Empty if
+     * the model has no component of that name anywhere - the caller then creates one.
+     */
+    public Optional<SystemComponent> findOrRelocateSystemComponent(System system, String componentName) {
+        Optional<SystemComponent> local = system.findSystemComponent(componentName);
+        if (local.isPresent()) {
+            return local;
+        }
+        return findSystemComponent(componentName)
+                .map(component -> relocateIfItsNameBelongsTo(component, system))
+                .or(() -> reviveRemovedSystemComponent(componentName, system));
+    }
+
+    /**
+     * A component moves only to the system its name belongs to - its prefix, resolved as a name or alias. That is
+     * what changes when an alias moves from one system to another. An importer that resolves the system some
+     * other way (RHOS: from the namespace) can report a component under a system its name does not belong to, or
+     * under two systems; moving it each time would move it back and forth on every run. It stays where it is
+     * instead, and the conflicting report is logged as an error so it gets fixed at the source.
+     */
+    private SystemComponent relocateIfItsNameBelongsTo(SystemComponent component, System reporting) {
+        if (nameBelongsTo(component.getName(), reporting)) {
+            relocate(component, reporting);
+        } else {
+            logMisplacedReport(component.getName(), reporting, component.getParent());
+        }
+        return component;
+    }
+
+    private boolean nameBelongsTo(String componentName, System system) {
+        return systemOfName(componentName).filter(owner -> owner == system).isPresent();
+    }
+
+    private Optional<System> systemOfName(String componentName) {
+        return findSystem(componentName.split("-")[0]);
+    }
+
+    private void logMisplacedReport(String componentName, System reporting, System keeping) {
+        log.error("System component {} is reported for system {}, but its name belongs to {}; it stays in system {}",
+                componentName, reporting.getName(),
+                systemOfName(componentName).map(owner -> "system " + owner.getName()).orElse("no system"),
+                keeping.getName());
+    }
+
+    /**
+     * A component removed earlier in this update - by an importer that no longer reports it, while a later one
+     * still does - comes back instead of being created again, see {@link System#reviveRemovedSystemComponent}.
+     */
+    private Optional<SystemComponent> reviveRemovedSystemComponent(String componentName, System reporting) {
+        return getAllSystemsIncludingRemoved()
+                .filter(former -> former.getRemovedSystemComponents().stream()
+                        .anyMatch(component -> component.getName().equalsIgnoreCase(componentName)))
+                .findFirst()
+                .flatMap(former -> former.reviveRemovedSystemComponent(componentName,
+                        revivalTarget(componentName, reporting, former)));
+    }
+
+    /** Where it was, unless its name belongs to the reporting system - the same rule as for a move. */
+    private System revivalTarget(String componentName, System reporting, System former) {
+        if (former == reporting || nameBelongsTo(componentName, reporting) || !systems.contains(former)) {
+            return reporting;
+        }
+        logMisplacedReport(componentName, reporting, former);
+        return former;
+    }
+
+    /**
+     * Components removed from any system - retained or removed - in this update, for the repository to delete.
+     * They are not deleted by orphan removal, see the comment on {@code System.systemComponents}.
+     */
+    public List<SystemComponent> getRemovedSystemComponents() {
+        return getAllSystemsIncludingRemoved().flatMap(system -> system.getRemovedSystemComponents().stream()).toList();
+    }
+
+    /** The REST APIs, OpenAPI specs and database schemas removed from any system in this update, to be deleted. */
+    public List<MutableDomainEntity> getRemovedArtifacts() {
+        return getAllSystemsIncludingRemoved().flatMap(system -> system.getRemovedArtifacts().stream()).toList();
+    }
+
+    private Stream<System> getAllSystemsIncludingRemoved() {
+        return Stream.concat(systems.stream(), removedSystems.stream());
+    }
+
+    private static SystemComponent relocate(SystemComponent component, System target) {
+        component.getParent().moveSystemComponentTo(component, target);
+        return component;
     }
 
     /**

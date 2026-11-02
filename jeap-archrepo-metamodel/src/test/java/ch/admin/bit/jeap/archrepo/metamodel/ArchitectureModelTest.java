@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.metamodel;
 
+import ch.admin.bit.jeap.archrepo.metamodel.database.SystemComponentDatabaseSchema;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Command;
 import ch.admin.bit.jeap.archrepo.metamodel.message.Event;
 import ch.admin.bit.jeap.archrepo.metamodel.relation.CommandRelation;
@@ -28,6 +29,7 @@ class ArchitectureModelTest {
     private BackendService backend;
     private BackendService backend2;
     private Gateway gateway;
+    private SelfContainedSystem scs2;
     private System otherSystem;
     private final BackendService otherBackendService1 = BackendService.builder().name("other-backend-service-1").build();
     private final BackendService otherBackendService2 = BackendService.builder().name("other-backend-service-2").build();
@@ -70,6 +72,113 @@ class ArchitectureModelTest {
         assertTrue(ignoredCase.isPresent());
         assertSame(frontend, ignoredCase.get());
         assertTrue(inexistant.isEmpty());
+    }
+
+    @Test
+    void findOrRelocateSystemComponent_returnsTheLocalComponentWithoutMovingIt() {
+        Optional<SystemComponent> found = model.findOrRelocateSystemComponent(system1, frontend.getName());
+
+        assertSame(frontend, found.orElseThrow());
+        assertSame(system1, frontend.getParent());
+    }
+
+    @Test
+    void findOrRelocateSystemComponent_movesAComponentToTheSystemItsNameNowBelongsTo() {
+        otherSystem.replaceAliases(List.of("frontend")); // e.g. an alias moved here from another system
+        Optional<SystemComponent> found = model.findOrRelocateSystemComponent(otherSystem, frontend.getName());
+
+        assertSame(frontend, found.orElseThrow());
+        assertSame(otherSystem, frontend.getParent());
+        assertFalse(system1.getSystemComponentsIncludingUndeployed().contains(frontend));
+        assertTrue(otherSystem.getSystemComponentsIncludingUndeployed().contains(frontend));
+    }
+
+    @Test
+    void findOrRelocateSystemComponent_movesTheComponentsRestApisOpenApiSpecAndDatabaseSchemaAlong() {
+        RestApi movedApi = createRestApi(backend2, "GET", "/moved");
+        RestApi stayingApi = createRestApi(backend, "GET", "/staying");
+        SystemComponentDatabaseSchema schema = databaseSchema(backend2);
+        system1.addDatabaseSchema(schema);
+        otherSystem.replaceAliases(List.of("backend2"));
+
+        model.findOrRelocateSystemComponent(otherSystem, backend2.getName());
+
+        assertThat(otherSystem.getRestApis()).containsExactly(movedApi);
+        assertSame(otherSystem, movedApi.getDefiningSystem());
+        assertThat(system1.getRestApis()).containsExactly(stayingApi);
+        assertThat(otherSystem.getOpenApiSpecs()).extracting(OpenApiSpec::getProvider).containsExactly(backend2);
+        assertThat(otherSystem.getOpenApiSpecs()).allSatisfy(spec -> assertSame(otherSystem, spec.getDefiningSystem()));
+        assertThat(system1.getOpenApiSpecs()).extracting(OpenApiSpec::getProvider).containsExactly(scs2);
+        assertThat(otherSystem.getDatabaseSchemas()).containsExactly(schema);
+        assertSame(otherSystem, schema.getSystem());
+        assertThat(system1.getDatabaseSchemas()).isEmpty();
+        assertThat(model.getRestApiForSystemComponent(backend2)).isPresent();
+    }
+
+    @Test
+    void findOrRelocateSystemComponent_leavesAComponentWhoseNameBelongsToItsCurrentSystemWhereItIs() {
+        // RHOS takes the system from the namespace: a component reported in another system's namespace must not
+        // be pulled away from the system its name belongs to, and back again on the next report.
+        SystemComponent owned = SystemComponentFactory.createSystemComponent(system1, "system1-owned", Importer.GRAFANA);
+
+        Optional<SystemComponent> found = model.findOrRelocateSystemComponent(otherSystem, "system1-owned");
+
+        assertSame(owned, found.orElseThrow());
+        assertSame(system1, owned.getParent());
+        assertTrue(otherSystem.findSystemComponent("system1-owned").isEmpty());
+    }
+
+    @Test
+    void findOrRelocateSystemComponent_leavesAComponentWhoseNameBelongsToNoSystemWhereItIs() {
+        // "frontend" resolves to no system: the first system it was imported into keeps it.
+        Optional<SystemComponent> found = model.findOrRelocateSystemComponent(otherSystem, frontend.getName());
+
+        assertSame(frontend, found.orElseThrow());
+        assertSame(system1, frontend.getParent());
+    }
+
+    @Test
+    void transferSystemComponentsTo_movesEveryComponentWithItsArtifacts() {
+        System target = System.builder().name("target").build();
+        RestApi api = createRestApi(backend2, "GET", "/moved");
+        SystemComponentDatabaseSchema schema = databaseSchema(backend2);
+        system1.addDatabaseSchema(schema);
+        var components = List.copyOf(system1.getSystemComponentsIncludingUndeployed());
+
+        system1.transferSystemComponentsTo(target);
+
+        assertThat(target.getSystemComponentsIncludingUndeployed()).containsExactlyInAnyOrderElementsOf(components);
+        assertThat(system1.getSystemComponentsIncludingUndeployed()).isEmpty();
+        assertThat(target.getRestApis()).containsExactly(api);
+        assertThat(target.getOpenApiSpecs()).extracting(OpenApiSpec::getProvider).containsExactlyInAnyOrder(backend2, scs2);
+        assertThat(target.getDatabaseSchemas()).containsExactly(schema);
+        assertThat(system1.getRestApis()).isEmpty();
+        assertThat(system1.getOpenApiSpecs()).isEmpty();
+        assertThat(system1.getDatabaseSchemas()).isEmpty();
+    }
+
+    @Test
+    void transferSystemComponentsTo_movesNothingWhenTheTargetAlreadyHasOneOfTheNames() {
+        System target = System.builder().name("target")
+                .systemComponents(List.of(BackendService.builder().name(gateway.getName().toUpperCase()).build()))
+                .build();
+        var components = List.copyOf(system1.getSystemComponentsIncludingUndeployed());
+
+        assertThrows(IllegalArgumentException.class, () -> system1.transferSystemComponentsTo(target));
+
+        assertThat(system1.getSystemComponentsIncludingUndeployed()).containsExactlyElementsOf(components);
+        assertThat(target.getSystemComponentsIncludingUndeployed()).hasSize(1);
+        assertThat(system1.getOpenApiSpecs()).hasSize(2);
+    }
+
+    private static SystemComponentDatabaseSchema databaseSchema(SystemComponent component) {
+        return SystemComponentDatabaseSchema.builder().systemComponent(component)
+                .schema("{}".getBytes(StandardCharsets.UTF_8)).schemaVersion("1").build();
+    }
+
+    @Test
+    void findOrRelocateSystemComponent_isEmptyWhenTheModelHasNoSuchComponentAnywhere() {
+        assertTrue(model.findOrRelocateSystemComponent(system1, "unknown-component").isEmpty());
     }
 
     @Test
@@ -445,7 +554,7 @@ class ArchitectureModelTest {
         gateway = Gateway.builder().name("gateway").build();
         MobileApp mobileApp = MobileApp.builder().name("app").build();
         SelfContainedSystem scs = SelfContainedSystem.builder().name("scs").build();
-        SelfContainedSystem scs2 = SelfContainedSystem.builder().name("scs2").build();
+        scs2 = SelfContainedSystem.builder().name("scs2").build();
         UnknownSystemComponent unknown = UnknownSystemComponent.builder().name("unknown").build();
         system1 = System.builder()
                 .name("system1")

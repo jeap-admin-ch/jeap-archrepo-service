@@ -6,6 +6,7 @@ import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.persistence.DatabaseSchemaVersion;
 import ch.admin.bit.jeap.archrepo.persistence.SystemComponentDatabaseSchemaRepository;
 import ch.admin.bit.jeap.archrepo.web.service.SystemComponentService;
+import ch.admin.bit.jeap.archrepo.web.service.UnknownSystemException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +26,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +56,7 @@ class DatabaseSchemaController {
             @ApiResponse(responseCode = "201", description = "Database schema created successfully."),
             @ApiResponse(responseCode = "200", description = "Database schema updated successfully."),
             @ApiResponse(responseCode = "400", description = "Invalid input data, e.g. database schema is not valid."),
+            @ApiResponse(responseCode = "422", description = "The component's system has not been onboarded."),
             @ApiResponse(responseCode = "500", description = "Unexpected server error.")
     })
     @PreAuthorize("hasRole('database-schema', 'write')")
@@ -67,6 +70,8 @@ class DatabaseSchemaController {
                         schemaDto.getSystemComponentName(), schemaDto.getSchema().version());
             }
             return response;
+        } catch (UnknownSystemException e) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
         } catch (DatabaseSchemaException e) {
             log.error("Updating or creating the database schema '{}' failed.", schemaDto, e);
             throw e;

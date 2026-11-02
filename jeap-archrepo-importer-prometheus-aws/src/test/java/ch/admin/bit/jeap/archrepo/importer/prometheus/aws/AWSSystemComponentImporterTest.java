@@ -4,12 +4,15 @@ import ch.admin.bit.jeap.archrepo.importer.prometheus.aws.client.AWSPrometheusCl
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
+import ch.admin.bit.jeap.archrepo.metamodel.system.BackendService;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SelfContainedSystem;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
@@ -62,6 +65,55 @@ class AWSSystemComponentImporterTest {
         assertThat(component.isUndeployed()).isTrue();
         assertThat(component.getUndeployedAt()).isEqualTo(undeployedAt);
         assertThat(component.getImporter()).isEqualTo(Importer.GRAFANA);
+    }
+
+    @Test
+    void importIntoModel_relocatesComponentFoundUnderADifferentSystemInsteadOfRecreatingIt() {
+        String movedApp = "shared-moved-service";
+        SystemComponent movedComponent = BackendService.builder()
+                .name(movedApp)
+                .importer(Importer.DEPLOYMENT_LOG)
+                .build();
+        System previousOwner = System.builder().name("previousOwner")
+                .systemComponents(List.of(movedComponent))
+                .build();
+        System newOwner = System.builder().name("newOwner").aliases(List.of("shared")).build();
+        ArchitectureModel testModel = ArchitectureModel.builder().systems(List.of(previousOwner, newOwner)).build();
+        doReturn(Set.of("newOwner")).when(awsPrometheusClient).listApplications("ref");
+        doReturn(Set.of(movedApp)).when(awsPrometheusClient).listServices("newOwner", SPACE);
+
+        awsSystemComponentImporter.importIntoModel(testModel, "ref");
+
+        assertThat(newOwner.findSystemComponent(movedApp))
+                .describedAs("Component moves to the system its prefix now resolves to, instead of being recreated there")
+                .contains(movedComponent);
+        assertThat(previousOwner.getSystemComponentsIncludingUndeployed())
+                .describedAs("Component no longer lives under its previous owner")
+                .isEmpty();
+    }
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void importIntoModel_logsAnErrorForAnApplicationOfAnUnknownSystem(CapturedOutput output) {
+        doReturn(Set.of("undeclared")).when(awsPrometheusClient).listApplications("ref");
+
+        awsSystemComponentImporter.importIntoModel(model, "ref");
+
+        assertThat(output.getAll().lines().filter(line -> line.contains("undeclared")))
+                .anyMatch(line -> line.contains("ERROR"));
+    }
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void importIntoModel_logsAnErrorForAComponentOfAnUnknownSystem(CapturedOutput output) {
+        doReturn(Set.of(SYSTEM)).when(awsPrometheusClient).listApplications("ref");
+        doReturn(Set.of("undeclared-app-service")).when(awsPrometheusClient).listServices(SYSTEM, SPACE);
+
+        awsSystemComponentImporter.importIntoModel(model, "ref");
+
+        assertThat(model.findSystemComponent("undeclared-app-service")).isEmpty();
+        assertThat(output.getAll().lines().filter(line -> line.contains("undeclared-app-service")))
+                .anyMatch(line -> line.contains("ERROR"));
     }
 
     @BeforeEach

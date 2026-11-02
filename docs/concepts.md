@@ -1,9 +1,10 @@
 # Concepts
 
-The arch repo service is an inventory of the architecture a landscape **actually has**, not of the architecture
-someone once designed. Its guiding principle is that the inventory is kept current **automatically wherever
-possible**: everything that another system already knows is imported from there, and only what nothing can derive
-is maintained by hand.
+The arch repo service combines **declared systems and teams** with the **observed architecture** of a landscape.
+Systems can be documented before they are deployed, while components, messages and relations come from the sources
+that observe or define them. Its guiding principle is that the inventory is kept current **automatically wherever
+possible**: system/team metadata is maintained in Git, and information another system already knows is imported
+rather than maintained twice.
 
 ## The problem it solves
 
@@ -17,7 +18,7 @@ A landscape of a few dozen jEAP microservices knows all of its own facts, but no
 
 Hand-maintained architecture documentation goes stale the moment any of that changes. The arch repo instead reads
 all of these sources on a schedule, merges them into one model, and keeps that model - and the documentation
-generated from it - in step with reality.
+generated from it - in step with the declaration and observed reality.
 
 ## Scope
 
@@ -29,11 +30,14 @@ The arch repo describes **system architecture**, in black-box terms:
 - which REST APIs the components provide, and who calls them
 - which OpenAPI spec and which database schema each component published
 
+Configured systems without components are included too, so the Doc Service can document their description and
+owning team even when they are not yet deployed on the platform.
+
 Deliberately **not** in scope:
 
 - the white-box view of a single service - its internal design belongs to that service's own documentation
 - business or enterprise architecture
-- the *target* architecture; the model only ever describes what is there now
+- planning a future component topology; declaring a system does not invent components or relations that no source reports
 
 ## The conventions the automation relies on
 
@@ -58,14 +62,13 @@ ending in `-scs`, and a `BackendService` for everything else. `MobileApp` and `U
 An importer only ever files a component into a system **that already exists**. Both the deployment log importer and
 the metrics importers log a warning and skip a component whose system they cannot find, and neither creates one.
 
-So onboarding a system is a deliberate act: create it - with its name, its owning team and any aliases - through
-`POST /api/management/system`, and the importers fill in its components from then on. See
-[Operations](operations.md).
+Onboarding is declarative: define the complete set of systems and teams in `archrepo.model` in Git.
+The next model update after deployment/restart reconciles that desired state before importers add components.
+Configuration owns system/team existence and metadata; the database is a materialized view. See
+[Configuration](configuration.md) for activation guards, validation and deletion semantics.
 
-The one exception is a database schema push: `SystemComponentService.findOrCreateSystemComponent()` creates the
-component it names, and if the system derived from its prefix does not exist either, it creates that too - with a
-team of the same name as its default owner. That is the only path on which a system appears without anyone asking
-for it. See [API](api.md).
+A database-schema push can create a component of an existing system, resolved by name or alias ignoring case,
+but never a system or team. An unknown system returns `422`; onboard it before the first push. See [API](api.md).
 
 ## What consumes the model
 

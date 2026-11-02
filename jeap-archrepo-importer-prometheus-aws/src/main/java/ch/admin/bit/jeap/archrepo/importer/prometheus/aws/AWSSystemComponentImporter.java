@@ -53,7 +53,7 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
                 log.info("Importing SystemComponents from application {}", application);
                 importSystemComponent(architectureModel, application, environment);
             } else {
-                log.warn("Skipped Application {} (not found in model)", application);
+                log.error("Skipped application {}: system is not declared in archrepo.model", application);
             }
         }
 
@@ -87,14 +87,18 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
         String systemName = componentName.split("-")[0];
         Optional<System> system = architectureModel.findSystem(systemName);
         if (system.isPresent()) {
-            createOrUpdateSystemComponent(system.get(), componentName);
+            createOrUpdateSystemComponent(architectureModel, system.get(), componentName);
         } else {
-            log.warn("Skipped SystemComponent {}: System with name {} not found in model", componentName, systemName);
+            log.error("Skipped SystemComponent {}: system {} is not declared in archrepo.model", componentName, systemName);
         }
     }
 
-    private void createOrUpdateSystemComponent(System system, String componentName) {
-        system.findSystemComponent(componentName).ifPresentOrElse(
+    private void createOrUpdateSystemComponent(ArchitectureModel architectureModel, System system, String componentName) {
+        // Relocated rather than freshly looked up on system: the name's prefix may now resolve to a different
+        // system than before (an alias moved between two systems that both still exist), and the component - with
+        // its own history - has to move there too instead of being recreated, which would collide with the
+        // database's global unique index on the component's name while the old row is still present.
+        architectureModel.findOrRelocateSystemComponent(system, componentName).ifPresentOrElse(
                 systemComponent -> {
                     log.info("Update SystemComponent {} in System {}", componentName, system.getName());
                     // When a component is imported from metrics, the grafana importer takes precedence over any other importers.

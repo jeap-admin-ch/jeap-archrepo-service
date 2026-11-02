@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "10m")
-@EnableConfigurationProperties(ArchRepoConfigProperties.class)
+@EnableConfigurationProperties({ArchRepoConfigProperties.class, ArchRepoModelProperties.class})
 public class ArchRepoApplication {
 
     public static void main(String[] args) {

@@ -41,6 +41,7 @@ public class WebSecurityConfig {
         http.securityMatcher(apiExcludedDatabaseSchemaExcludedOpenApiPostWithBearerAuth);
         http.authorizeHttpRequests(r -> r
                 .requestMatchers(HttpMethod.GET, "/api/model").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/model/export").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/*/relations").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/rest-api-relation-without-pact").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/model/system-components-without-open-api-spec").permitAll()

@@ -27,11 +27,13 @@ permitted need it.
 
 These endpoints are deliberately **public**, because they are read-only inventory queries consumed by dashboards:
 
-- `GET /api/model`, `GET /api/model/{system}/relations`
+- `GET /api/model`, `GET /api/model/{system}/relations`, `GET /api/model/export`
 - `GET /api/model/rest-api-relation-without-pact`, `GET /api/model/system-components-without-open-api-spec`
 - `GET /api/dbschemas/**`, `GET /api/openapi/**`
 
 Everything else under `/api/**` requires the basic credentials.
+
+The YAML export includes all team contact addresses and links as well as system metadata, without authentication.
 
 > The chain also permits `GET /api/reactions/**`, but no controller serves that path - it is a leftover matcher
 > from an endpoint that no longer exists.
@@ -76,6 +78,9 @@ Reads from a replica are eventually consistent, which is why only endpoints that
 carry the annotation - and why none of them writes. The [docs API](docs-api.md) is deliberately free of writes for
 that reason: the content hash it serves as an entity tag is written when an artifact is stored, and for artifacts
 predating the column by the `V2_6_0` migration, never by a request.
+
+`GET /api/model/export` deliberately uses an ordinary primary transaction instead: bootstrap must include
+recently written systems and teams before configuration becomes authoritative.
 
 ## Related
 

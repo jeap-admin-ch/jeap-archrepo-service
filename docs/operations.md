@@ -13,7 +13,7 @@ maintained by hand.
 
 The cron expression is **required** - the application does not start without it. Set it to `-` to disable the job.
 
-`updateModel()` loads the model, runs every registered importer sorted by `getOrder()`, calls
+`updateModel()` loads the model, reconciles systems and teams from `archrepo.model`, runs every registered importer sorted by `getOrder()`, calls
 `ArchitectureModel.cleanup()` and saves the model.
 
 ### In a cluster
@@ -61,7 +61,7 @@ The method is also `@Timed`, which yields the `archrepo_model_update` timer for 
 
 Both are `@Async`: the response says the job started, not that it finished. Watch the log for the outcome.
 
-Running a single importer loads and saves the model like a full run, but it does **not** call
+Running a single importer loads, applies onboarding and saves the model like a full run, but it does **not** call
 `ArchitectureModel.cleanup()` - use it to refresh one source, not as a substitute for the scheduled run.
 
 Both need the HTTP basic credentials, see [Security](security.md).
@@ -74,29 +74,14 @@ It is manually removed one week after deployment; this service no longer refresh
 
 ## Maintenance by hand
 
-Almost everything is imported. Four things are not.
-
-**Creating a system.** Importers file components into systems that already exist and skip everything else, so a
-new system has to be created first:
-
-```http
-POST /api/management/system
-Content-Type: application/json
-
-{
-  "name": "foo",
-  "description": "The foo system",
-  "confluenceLink": "https://example.com/wiki/foo",
-  "aliases": ["fo"],
-  "teamName": "team-blue"
-}
-```
-
-`name` and `teamName` are required; the team is created if it does not exist yet. The call fails with `400` when
-the name or alias collides with an existing system. Answer is `201`.
-
-**Creating a team** with its contact details: `POST /api/management/team`, with `name` and the optional
-`contactAddress`, `confluenceLink` and `jiraLink` as **query parameters**, not as a body.
+**Systems and teams** are maintained in Git under `archrepo.model`, not through management endpoints.
+Export existing metadata with `GET /api/model/export`, review and commit the YAML, mount it and restart.
+A change follows commit → deploy/restart → next model update. Both full and single-importer updates apply it.
+See [Configuration](configuration.md) for bootstrap, drift checks and deletion warnings. A missing or partially empty
+document is inert; a complete one is authoritative, so removing entries deletes them. A rename deletes the old
+system; its components move, with their REST APIs, OpenAPI specs and database schemas, to the system that lists
+the old name as an alias. A case-only edit preserves it. A document that is inconsistent in itself (duplicate
+names, conflicting aliases, undeclared teams) fails the startup.
 
 **Removing a wrong REST relation**, for instance one a superseded Pact contract created:
 
@@ -115,8 +100,8 @@ Content-Type: application/json
 All four fields are required. The relation is marked `DELETED` rather than removed, so a later import does not
 simply recreate it. `404` when nothing matches.
 
-**Descriptions.** `System`, `SystemComponent` and `MessageType` each have a `description` no importer sets. Fill
-them in directly in the database to add prose to the architecture documentation produced by the Doc Service.
+**Descriptions.** System descriptions belong in configuration. `SystemComponent` and `MessageType` descriptions
+can still be maintained directly in the database; no importer sets them.
 
 ## How elements disappear again
 
@@ -124,6 +109,7 @@ Removal is not one mechanism but several, which is worth knowing when something 
 
 | What                                    | Removed by                                                                            | When                                                                               |
 | --------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| A system or team                        | Model onboarding before the importers                                                 | A complete active configuration no longer declares it; system aggregates and cross-system relations are removed |
 | A component the deployment log created  | `DeploymentlogSystemComponentImporter`, at the end of its run                         | The deployment log no longer reports it at all - one still reported as undeployed from this environment is marked `undeployed` instead and kept |
 | A component the metrics created         | `AWSSystemComponentImporter` / `RhosSystemComponentImporter`, at the end of their run | Its `lastSeen` is more than 14 days old                                            |
 | A REST relation                         | `ArchitectureModel.cleanup()`, at the end of a full run                               | It was imported and its `lastSeen` is more than 3 months old, or it was never seen |

@@ -1,10 +1,11 @@
 # jEAP Arch Repo Service
 
 The jEAP Arch Repo Service maintains the **architecture inventory of a jEAP landscape**: which systems and
-components exist, who owns them, which messages they exchange and which REST APIs they call. It imports that
-inventory continuously from the systems that already know it - deployment logs, metrics, the message type
-registry, the Pact broker - keeps it in one model in PostgreSQL, and exposes it over REST, including the OAuth2-protected
-Docs API consumed by the jEAP Doc Service.
+components exist, who owns them, which messages they exchange and which REST APIs they call. Systems and teams are
+declared in Git configuration, including systems not yet deployed. Deployment logs, metrics, the message type registry
+and the Pact broker supply the observed architecture; components push OpenAPI specs and database schemas.
+The service reconciles these inputs into one model in PostgreSQL and exposes it over REST, including the
+OAuth2-protected Docs API consumed by the jEAP Doc Service.
 
 The Doc Service also accesses the Reaction Observer directly using OAuth2; Arch Repo does not call the Reaction Observer.
 
@@ -15,6 +16,9 @@ configuration. See [Getting started](docs/getting-started.md).
 flowchart LR
     S["Deployment log<br/>Metrics<br/>Message type registry<br/>Pact broker"] --> I["Importers"]
     I --> M["Architecture model"]
+    C["Git configuration<br/>Systems and teams"] --> O["Onboarding"]
+    O --> M
+    P["OpenAPI specs<br/>Database schemas"] --> M
     M --> DB[("PostgreSQL")]
     DB --> A["REST APIs"]
     A --> D["jEAP Doc Service"]
@@ -28,7 +32,7 @@ The new architecture documentation is available from the jEAP Doc Service.
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | [Concepts](docs/concepts.md)                               | Why the arch repo exists, what it covers, and the conventions it relies on       |
 | [Getting started](docs/getting-started.md)                 | Embedding the library into a microservice instance and running it                |
-| [Architecture](docs/architecture.md)                       | The modules, the architecture model, and the scheduled model update              |
+| [Architecture](docs/architecture.md)                       | The modules, architecture model, onboarding decisions and scheduled model update |
 | [Data model](docs/data-model.md)                           | The entities, their relationships and their tables                               |
 | [Importers](docs/importers.md)                             | The importer plugin extension point and the importers that ship with the library |
 | [API](docs/api.md)                                         | The REST API: the model, OpenAPI specs, database schemas and jobs                |

@@ -25,6 +25,7 @@ public class RestApi extends MutableDomainEntity implements MultipleImportable {
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "system_id")
+    @Setter
     private System definingSystem;
 
     @NotNull

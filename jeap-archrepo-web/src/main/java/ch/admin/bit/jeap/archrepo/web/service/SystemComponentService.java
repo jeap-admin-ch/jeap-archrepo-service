@@ -3,12 +3,10 @@ package ch.admin.bit.jeap.archrepo.web.service;
 import ch.admin.bit.jeap.db.tx.TransactionalReadReplica;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
-import ch.admin.bit.jeap.archrepo.metamodel.Team;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponent;
 import ch.admin.bit.jeap.archrepo.metamodel.system.SystemComponentFactory;
 import ch.admin.bit.jeap.archrepo.persistence.SystemComponentRepository;
 import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
-import ch.admin.bit.jeap.archrepo.persistence.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,7 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SystemComponentService {
 
-    private final TeamRepository teamRepository;
     private final SystemRepository systemRepository;
     private final SystemComponentRepository systemComponentRepository;
 
@@ -47,7 +44,13 @@ public class SystemComponentService {
     }
 
     private SystemComponent createSystemComponent(String componentName) {
-        System system = findOrCreateSystem(extractSystemName(componentName));
+        String systemName = extractSystemName(componentName);
+        System system = systemRepository.findByNameIgnoreCase(systemName)
+                .or(() -> findSystemAliases(systemName))
+                .orElseThrow(() -> {
+                    log.error("Cannot create component '{}': system '{}' is not onboarded", componentName, systemName);
+                    return new UnknownSystemException(componentName, systemName);
+                });
 
         // If this component is imported by grafana afterward, the importer 'REST_CONTROLLER' is replaced by 'GRAFANA'.
         SystemComponent systemComponent = SystemComponentFactory.createSystemComponent(system, componentName, Importer.REST_CONTROLLER);
@@ -57,21 +60,6 @@ public class SystemComponentService {
 
     private String extractSystemName(String componentName) {
         return componentName.split("-")[0];
-    }
-
-    private System findOrCreateSystem(String systemName) {
-        return systemRepository.findByNameIgnoreCase(systemName)
-                .or(() -> findSystemAliases(systemName))
-                .orElseGet(() -> createSystem(systemName));
-    }
-
-    private System createSystem(String systemName) {
-        log.info("Creating system and team: {}", systemName);
-        return systemRepository.save(
-                System.builder()
-                        .name(systemName)
-                        .defaultOwner(teamRepository.save(Team.builder().name(systemName).build()))
-                        .build());
     }
 
     public Optional<System> findSystemAliases(String systemName) {
