@@ -53,5 +53,4 @@ for more information.
 
 ## License
 
-This repository is Open Source Software licensed under the [Apache License 2.0](./LICENSE)
-
+This repository is Open Source Software licensed under the [Apache License 2.0](./LICENSE).
