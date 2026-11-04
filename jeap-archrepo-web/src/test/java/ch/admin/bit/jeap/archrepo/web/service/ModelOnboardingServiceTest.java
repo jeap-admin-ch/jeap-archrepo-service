@@ -314,9 +314,10 @@ class ModelOnboardingServiceTest {
         System foo = System.builder().name("foo").aliases(List.of("FOO", "BAR")).build();
         System bar = System.builder().name("bar").build();
         var model = ArchitectureModel.builder().systems(List.of(foo, bar)).build();
+        var service = service(List.of(team("blue")),
+                List.of(system("foo", "blue"), system("bar", "blue")));
 
-        assertThatThrownBy(() -> service(List.of(team("blue")),
-                List.of(system("foo", "blue"), system("bar", "blue"))).apply(model))
+        assertThatThrownBy(() -> service.apply(model))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("BAR", "foo", "bar");
         assertSystem(foo).hasAliases("FOO", "BAR");
         assertModel(model).hasNoRemovals();
