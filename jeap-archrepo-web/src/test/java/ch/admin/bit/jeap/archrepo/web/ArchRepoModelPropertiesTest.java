@@ -3,6 +3,8 @@ package ch.admin.bit.jeap.archrepo.web;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoModelProperties.SystemDefinition;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoModelProperties.TeamDefinition;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Configuration;
@@ -83,6 +85,16 @@ class ArchRepoModelPropertiesTest {
                         "archrepo.model.systems[0].name=foo", "archrepo.model.systems[0].team=red")
                 .run(context -> assertThat(context).hasFailed().getFailure()
                         .rootCause().hasMessageContaining("foo").hasMessageContaining("red"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"foo", "FOO", "Foo"})
+    void rejectsConfiguredAliasMatchingItsOwnSystemNameAtStartup(String alias) {
+        runner.withPropertyValues("archrepo.model.teams[0].name=blue",
+                        "archrepo.model.systems[0].name=foo", "archrepo.model.systems[0].team=blue",
+                        "archrepo.model.systems[0].aliases[0]=" + alias)
+                .run(context -> assertThat(context).hasFailed().getFailure()
+                        .rootCause().hasMessageContaining("Conflicting configured name/alias", alias, "foo"));
     }
 
     @Test

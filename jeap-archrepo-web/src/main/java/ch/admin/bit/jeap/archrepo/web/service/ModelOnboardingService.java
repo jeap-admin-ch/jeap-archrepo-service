@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static ch.admin.bit.jeap.archrepo.web.ModelNames.index;
@@ -44,13 +45,13 @@ public class ModelOnboardingService {
         var existingSystems = index(model.getSystems(), System::getName, "stored system");
         validateAgainstStoredModel(model, systems, existingSystems);
 
-        int createdTeams = reconcileTeams(model, teams, existingTeams);
-        int createdSystems = reconcileSystems(model, systems, existingSystems, existingTeams);
+        var teamCounts = reconcileTeams(model, teams, existingTeams);
+        var systemCounts = reconcileSystems(model, systems, existingSystems, existingTeams);
         int removedSystems = removeObsoleteSystems(model, systems, existingSystems);
         int removedTeams = removeObsoleteTeams(model, teams);
         log.info("Model onboarding: systems created={}, updated={}, deleted={}; teams created={}, updated={}, deleted={}",
-                createdSystems, systems.size() - createdSystems, removedSystems,
-                createdTeams, teams.size() - createdTeams, removedTeams);
+                systemCounts.created(), systemCounts.updated(), removedSystems,
+                teamCounts.created(), teamCounts.updated(), removedTeams);
     }
 
     /**
@@ -61,7 +62,10 @@ public class ModelOnboardingService {
     private static void validateAgainstStoredModel(ArchitectureModel model,
                                                    Map<String, ArchRepoModelProperties.SystemDefinition> systems,
                                                    Map<String, System> existingSystems) {
-        validateNamespace(model.getSystems(), System::getName, System::getAliases, "stored");
+        // Legacy stored aliases may repeat their own system's name; configuration remains strictly validated.
+        validateNamespace(model.getSystems(), System::getName,
+                system -> system.getAliases().stream()
+                        .filter(alias -> !alias.equalsIgnoreCase(system.getName())).toList(), "stored");
         validateRetainedNamespace(systems, existingSystems);
         existingSystems.forEach((name, stored) -> {
             if (!systems.containsKey(name)) {
@@ -70,10 +74,11 @@ public class ModelOnboardingService {
         });
     }
 
-    private static int reconcileTeams(ArchitectureModel model,
-                                      Map<String, ArchRepoModelProperties.TeamDefinition> teams,
-                                      Map<String, Team> existingTeams) {
+    private static ReconciliationCounts reconcileTeams(ArchitectureModel model,
+                                                       Map<String, ArchRepoModelProperties.TeamDefinition> teams,
+                                                       Map<String, Team> existingTeams) {
         int createdTeams = 0;
+        int updatedTeams = 0;
         for (var definition : teams.values()) {
             Team team = existingTeams.get(key(definition.name()));
             if (team == null) {
@@ -81,32 +86,48 @@ public class ModelOnboardingService {
                 model.addTeam(team);
                 existingTeams.put(key(definition.name()), team);
                 createdTeams++;
+            } else if (!Objects.equals(team.getName(), definition.name())
+                    || !Objects.equals(team.getContactAddress(), definition.contactAddress())
+                    || !Objects.equals(team.getConfluenceLink(), definition.confluenceLink())
+                    || !Objects.equals(team.getJiraLink(), definition.jiraLink())) {
+                updatedTeams++;
             }
             team.updateName(definition.name());
             team.updateDetails(definition.contactAddress(), definition.confluenceLink(), definition.jiraLink());
         }
-        return createdTeams;
+        return new ReconciliationCounts(createdTeams, updatedTeams);
     }
 
-    private static int reconcileSystems(ArchitectureModel model,
-                                        Map<String, ArchRepoModelProperties.SystemDefinition> systems,
-                                        Map<String, System> existingSystems,
-                                        Map<String, Team> existingTeams) {
+    private static ReconciliationCounts reconcileSystems(ArchitectureModel model,
+                                                         Map<String, ArchRepoModelProperties.SystemDefinition> systems,
+                                                         Map<String, System> existingSystems,
+                                                         Map<String, Team> existingTeams) {
         int createdSystems = 0;
+        int updatedSystems = 0;
         for (var definition : systems.values()) {
             System system = existingSystems.get(key(definition.name()));
+            Team owner = existingTeams.get(key(definition.team()));
             if (system == null) {
                 system = System.builder().name(definition.name()).build();
                 model.addSystem(system);
                 existingSystems.put(key(definition.name()), system);
                 createdSystems++;
+            } else if (!Objects.equals(system.getName(), definition.name())
+                    || !Objects.equals(system.getDescription(), definition.description())
+                    || !Objects.equals(system.getConfluenceLink(), definition.confluenceLink())
+                    || !Objects.equals(system.getDefaultOwner(), owner)
+                    || !Objects.equals(system.getAliases(), definition.aliases())) {
+                updatedSystems++;
             }
             system.updateName(definition.name());
             system.updateDetails(definition.description(), definition.confluenceLink(),
-                    existingTeams.get(key(definition.team())));
+                    owner);
             system.replaceAliases(definition.aliases());
         }
-        return createdSystems;
+        return new ReconciliationCounts(createdSystems, updatedSystems);
+    }
+
+    private record ReconciliationCounts(int created, int updated) {
     }
 
     private static int removeObsoleteSystems(ArchitectureModel model,

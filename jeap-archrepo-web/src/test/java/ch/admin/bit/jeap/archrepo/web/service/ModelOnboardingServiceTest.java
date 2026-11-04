@@ -9,15 +9,24 @@ import ch.admin.bit.jeap.archrepo.web.ArchRepoModelProperties;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoModelProperties.SystemDefinition;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoModelProperties.TeamDefinition;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static ch.admin.bit.jeap.archrepo.web.service.ModelOnboardingAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ExtendWith(OutputCaptureExtension.class)
 class ModelOnboardingServiceTest {
     @Test
-    void createsCompleteDeclarationAndIsIdempotent() {
+    void createsCompleteDeclarationAndIsIdempotent(CapturedOutput output) {
         var properties = new ArchRepoModelProperties(List.of(new TeamDefinition("Team Blue", "contact", "team-link", "jira")),
                 List.of(new SystemDefinition("foo", "TEAM BLUE", "description", "system-link", List.of("fo"))));
         var model = ArchitectureModel.builder().build();
@@ -38,10 +47,13 @@ class ModelOnboardingServiceTest {
                 .hasContactAddress("contact")
                 .hasConfluenceLink("team-link")
                 .hasJiraLink("jira");
+        assertThat(output.getOut())
+                .contains("systems created=1, updated=0, deleted=0; teams created=1, updated=0, deleted=0")
+                .contains("systems created=0, updated=0, deleted=0; teams created=0, updated=0, deleted=0");
     }
 
     @Test
-    void normalizesCaseWithoutRecreatingAndClearsAbsentFields() {
+    void normalizesCaseWithoutRecreatingAndClearsAbsentFields(CapturedOutput output) {
         Team team = Team.builder().name("BLUE").contactAddress("old").confluenceLink("old").jiraLink("old").build();
         System system = System.builder().name("FOO").defaultOwner(team).description("old")
                 .confluenceLink("old").aliases(List.of("old")).build();
@@ -58,6 +70,74 @@ class ModelOnboardingServiceTest {
                 .isSameAs(team)
                 .hasName("blue")
                 .hasNoContactDetails();
+        assertThat(output.getOut())
+                .contains("systems created=0, updated=1, deleted=0; teams created=0, updated=1, deleted=0");
+    }
+
+    @ParameterizedTest
+    @MethodSource("changedTeams")
+    void countsEachChangedTeamOnce(TeamDefinition definition, CapturedOutput output) {
+        Team owner = Team.builder().name("blue").contactAddress("contact").confluenceLink("link").jiraLink("jira").build();
+        System existing = System.builder().name("foo").defaultOwner(owner).build();
+        var model = ArchitectureModel.builder().teams(List.of(owner)).systems(List.of(existing)).build();
+
+        service(List.of(definition), List.of(system("foo", "blue"))).apply(model);
+
+        assertThat(output.getOut())
+                .contains("systems created=0, updated=0, deleted=0; teams created=0, updated=1, deleted=0");
+    }
+
+    private static Stream<TeamDefinition> changedTeams() {
+        return Stream.of(
+                new TeamDefinition("BLUE", "contact", "link", "jira"),
+                new TeamDefinition("blue", null, "link", "jira"),
+                new TeamDefinition("blue", "contact", null, "jira"),
+                new TeamDefinition("blue", "contact", "link", null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("changedSystems")
+    void countsEachChangedSystemOnce(SystemDefinition definition, CapturedOutput output) {
+        Team owner = Team.builder().name("blue").build();
+        Team other = Team.builder().name("other").build();
+        System existing = System.builder().name("foo").defaultOwner(owner).description("description")
+                .confluenceLink("link").aliases(List.of("fo", "f")).build();
+        var model = ArchitectureModel.builder().teams(List.of(owner, other)).systems(List.of(existing)).build();
+
+        service(List.of(team("blue"), team("other")), List.of(definition)).apply(model);
+
+        assertThat(output.getOut())
+                .contains("systems created=0, updated=1, deleted=0; teams created=0, updated=0, deleted=0");
+    }
+
+    private static Stream<SystemDefinition> changedSystems() {
+        return Stream.of(
+                new SystemDefinition("FOO", "blue", "description", "link", List.of("fo", "f")),
+                new SystemDefinition("foo", "blue", null, "link", List.of("fo", "f")),
+                new SystemDefinition("foo", "blue", "description", null, List.of("fo", "f")),
+                new SystemDefinition("foo", "other", "description", "link", List.of("fo", "f")),
+                new SystemDefinition("foo", "blue", "description", "link", List.of()),
+                new SystemDefinition("foo", "blue", "description", "link", List.of("f", "fo")),
+                new SystemDefinition("foo", "blue", "description", "link", List.of("FO", "f")));
+    }
+
+    @Test
+    void separatesCreatedUpdatedDeletedAndUnchangedEntries(CapturedOutput output) {
+        Team unchanged = Team.builder().name("blue").build();
+        Team changed = Team.builder().name("changed").contactAddress("old").build();
+        Team removed = Team.builder().name("removed").build();
+        System unchangedSystem = System.builder().name("foo").defaultOwner(unchanged).build();
+        System changedSystem = System.builder().name("changed").defaultOwner(changed).description("old").build();
+        System removedSystem = System.builder().name("removed").defaultOwner(removed).build();
+        var model = ArchitectureModel.builder().teams(List.of(unchanged, changed, removed))
+                .systems(List.of(unchangedSystem, changedSystem, removedSystem)).build();
+
+        service(List.of(team("blue"), team("changed"), team("new")),
+                List.of(system("foo", "blue"), system("changed", "changed"), system("new", "new"))).apply(model);
+
+        assertThat(output.getOut())
+                .contains("systems created=1, updated=1, deleted=1; teams created=1, updated=1, deleted=1");
+        assertModel(model).hasRemovedSystems(removedSystem).hasRemovedTeams(removed);
     }
 
     @Test
@@ -214,6 +294,32 @@ class ModelOnboardingServiceTest {
                 System.builder().name("foo").aliases(List.of("shared")).build(),
                 System.builder().name("bar").aliases(List.of("SHARED")).build())).build();
         assertThatThrownBy(() -> service.apply(duplicateAliases)).hasMessageContaining("foo", "bar", "SHARED");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"foo", "FOO", "Foo"})
+    void acceptsStoredAliasMatchingItsOwnSystemName(String alias) {
+        Team owner = Team.builder().name("blue").build();
+        System existing = System.builder().name("foo").defaultOwner(owner).aliases(List.of(alias, "fo")).build();
+        var model = ArchitectureModel.builder().teams(List.of(owner)).systems(List.of(existing)).build();
+
+        service(List.of(team("blue")), List.of(system("foo", "blue", "fo"))).apply(model);
+
+        assertModel(model).hasOnlySystems(existing).hasOnlyTeams(owner).hasNoRemovals();
+        assertSystem(existing).hasAliases("fo");
+    }
+
+    @Test
+    void stillRejectsStoredAliasMatchingAnotherSystemName() {
+        System foo = System.builder().name("foo").aliases(List.of("FOO", "BAR")).build();
+        System bar = System.builder().name("bar").build();
+        var model = ArchitectureModel.builder().systems(List.of(foo, bar)).build();
+
+        assertThatThrownBy(() -> service(List.of(team("blue")),
+                List.of(system("foo", "blue"), system("bar", "blue"))).apply(model))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("BAR", "foo", "bar");
+        assertSystem(foo).hasAliases("FOO", "BAR");
+        assertModel(model).hasNoRemovals();
     }
 
     @Test
