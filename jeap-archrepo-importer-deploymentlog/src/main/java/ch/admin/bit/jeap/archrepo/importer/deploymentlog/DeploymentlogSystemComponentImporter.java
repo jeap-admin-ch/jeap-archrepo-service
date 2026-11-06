@@ -45,7 +45,7 @@ class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
         String systemName = componentName.split("-")[0];
         Optional<System> system = architectureModel.findSystem(systemName);
         if (system.isEmpty()) {
-            log.error("Skipped system component {}: system {} is not declared in archrepo.model", componentName, systemName);
+            log.info("Skipped system component {}: system {} is not declared in archrepo.model", componentName, systemName);
             return;
         }
         if (component.undeployed()) {

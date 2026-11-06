@@ -164,8 +164,9 @@ class DeploymentlogSystemComponentImporterTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void importIntoModel_logsAnErrorForAComponentOfAnUnknownSystem(CapturedOutput output) {
-        // Systems are declared in configuration; a deployed component of an undeclared system needs attention.
+    void importIntoModel_logsForAComponentOfAnUnknownSystem(CapturedOutput output) {
+        // Systems are declared in configuration; a deployed component of an undeclared system is logged, but at
+        // INFO - this is reported in aggregate elsewhere, so a per-component ERROR would just be log noise.
         stubFor(get(urlEqualTo("/deploymentlog-service/api/environment/ref/components?includeUndeployed=true"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -179,7 +180,7 @@ class DeploymentlogSystemComponentImporterTest {
 
         assertThat(testModel.findSystemComponent("undeclared-service")).isEmpty();
         assertThat(output.getAll().lines().filter(line -> line.contains("undeclared-service")))
-                .anyMatch(line -> line.contains("ERROR") && line.contains("undeclared"));
+                .anyMatch(line -> line.contains("INFO") && line.contains("not declared"));
     }
 
     private ArchitectureModel createTestModel() {
