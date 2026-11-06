@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.1.0] - 2026-11-06
+
+### Added
+- Every entry of the message type index (`GET /docs-api/message-types`) carries the `etag` of its version,
+  byte-identical to the `ETag` of the version resource, so a consumer fetches only the versions whose tag changed
+  instead of revalidating every version with a request of its own. The tag is derived from the system, the message
+  type and a content hash stored with each version over everything the version resource serves, the compatible
+  version included.
+- The version resource answers a conditional request from that stored hash without reading the schemas.
+
+### Changed
+- New column `message_type_versions.content_hash` (Flyway `V2_9_0`), nullable and without a backfill: every model
+  update re-imports the message types and writes it. Until then a version keeps the entity tag over its serialized
+  body and is listed without an `etag`. When the hash is first written, the `ETag` of every version changes once, so
+  a consumer that stored the old tags fetches each version again once.
+- `jeap-archrepo-test`: the provider state "A message type version is published" serves an index `etag` equal to
+  the version's `ETag`, so a consumer pact that requires the `etag` verifies.
+
 ## [18.0.4] - 2026-11-06
 
 ### Changed

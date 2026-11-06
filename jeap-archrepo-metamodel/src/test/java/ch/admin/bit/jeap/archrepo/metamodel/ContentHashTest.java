@@ -46,4 +46,31 @@ class ContentHashTest {
     void of_null_isNull() {
         assertThat(ContentHash.of(null)).isNull();
     }
+
+    @Test
+    void ofValues_isStableForEqualValues() {
+        assertThat(ContentHash.ofValues("a", null, "b")).isEqualTo(ContentHash.ofValues("a", null, "b"));
+    }
+
+    @Test
+    void ofValues_keepsTheBoundariesBetweenValues() {
+        // Concatenated, the two would be the same string
+        assertThat(ContentHash.ofValues("ab", "c")).isNotEqualTo(ContentHash.ofValues("a", "bc"));
+    }
+
+    @Test
+    void ofValues_distinguishesNullFromEmptyAndFromTheMarker() {
+        assertThat(ContentHash.ofValues((String) null)).isNotEqualTo(ContentHash.ofValues(""));
+        assertThat(ContentHash.ofValues((String) null)).isNotEqualTo(ContentHash.ofValues("-"));
+    }
+
+    @Test
+    void ofValues_dependsOnTheOrder() {
+        assertThat(ContentHash.ofValues("a", "b")).isNotEqualTo(ContentHash.ofValues("b", "a"));
+    }
+
+    @Test
+    void ofValues_isLowercaseHexOfFixedLength() {
+        assertThat(ContentHash.ofValues("anything", null)).matches("[0-9a-f]{64}");
+    }
 }

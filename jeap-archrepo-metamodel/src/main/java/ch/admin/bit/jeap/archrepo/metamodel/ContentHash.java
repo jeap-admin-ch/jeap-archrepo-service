@@ -1,5 +1,6 @@
 package ch.admin.bit.jeap.archrepo.metamodel;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
@@ -25,6 +26,29 @@ public final class ContentHash {
             return null;
         }
         return HexFormat.of().formatHex(sha256(content));
+    }
+
+    /**
+     * SHA-256 over a sequence of values rather than over stored bytes - for what is stored as several columns,
+     * such as a message type version, and still has to be tagged as one thing.
+     * <p>
+     * The encoding is unambiguous: every value is prefixed with its length, and a null is written as a marker no
+     * length can produce. So {@code ("ab", "c")} and {@code ("a", "bc")} differ, and so do a null and an empty
+     * string - a key schema that is absent is not one that is blank.
+     *
+     * @param values the values in a fixed order, each may be null
+     * @return the lowercase hex encoded SHA-256 of the encoded values
+     */
+    public static String ofValues(String... values) {
+        StringBuilder encoded = new StringBuilder();
+        for (String value : values) {
+            if (value == null) {
+                encoded.append("-;");
+            } else {
+                encoded.append(value.length()).append(':').append(value).append(';');
+            }
+        }
+        return of(encoded.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private static byte[] sha256(byte[] content) {

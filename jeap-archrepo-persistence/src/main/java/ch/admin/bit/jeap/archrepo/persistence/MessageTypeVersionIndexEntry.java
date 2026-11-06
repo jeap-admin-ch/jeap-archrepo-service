@@ -21,4 +21,10 @@ public interface MessageTypeVersionIndexEntry {
     String getKind();
 
     String getVersion();
+
+    /**
+     * The stored content hash of the version, from which its entity tag is derived. Null for a version stored
+     * before the hash was recorded, until the next model update writes it again.
+     */
+    String getContentHash();
 }

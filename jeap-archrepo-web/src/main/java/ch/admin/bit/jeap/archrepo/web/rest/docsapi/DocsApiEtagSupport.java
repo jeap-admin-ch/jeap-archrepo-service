@@ -14,10 +14,16 @@ import tools.jackson.databind.ObjectMapper;
 /**
  * Entity tags and conditional requests for the docs API.
  * <p>
- * A tag is always {@code "sha256:<hex>"} over the bytes the resource is about. For the two content resources
- * those are the stored bytes of the artifact, which is what makes the tag of an index entry byte-identical to the
- * tag of the resource it points at: a consumer can compare without a request, and send the stored value as
- * {@code If-None-Match} when it does fetch.
+ * A tag is always {@code "sha256:<hex>"}, and it is computed from what is <b>stored</b> wherever an index lists
+ * the resource, so that the tag of an index entry is byte-identical to the tag of the resource it points at: a
+ * consumer can compare without a request, and send the stored value as {@code If-None-Match} when it does fetch.
+ * <ul>
+ *     <li>The two content resources: the stored hash of the artifact's bytes - see {@link #entityTag(String)}.</li>
+ *     <li>A message type version: derived from the system, the message type and the stored hash of the
+ *     version's fields - see {@link #messageVersionTag(String, String, String)}. A version stored before that
+ *     hash existed is tagged over its serialized body instead, and its index entry carries no tag.</li>
+ *     <li>Every other resource: the serialized body - see {@link #respond(WebRequest, Object)}.</li>
+ * </ul>
  * <p>
  * This holds only because every resource serves exactly one representation. A second representation would need
  * one tag per representation, and the index could no longer carry the content resource's tag.
@@ -34,6 +40,23 @@ public class DocsApiEtagSupport {
      */
     public String entityTag(String contentHash) {
         return contentHash == null ? null : "\"sha256:" + contentHash + "\"";
+    }
+
+    /**
+     * The entity tag of one message type version, as both the message type index and the version resource carry
+     * it.
+     * <p>
+     * The version resource serves the system and the message type next to the stored fields, in their stored
+     * spelling, and those two are not part of the version's stored hash - so they are folded in here. A system
+     * renamed in case, for example, answers with a different body and therefore has to carry a different tag.
+     *
+     * @param system      the system as it is stored
+     * @param message     the message type name as it is stored
+     * @param contentHash the stored hash of the version, may be null
+     * @return the entity tag, or null when the version has no stored hash
+     */
+    public String messageVersionTag(String system, String message, String contentHash) {
+        return contentHash == null ? null : entityTag(ContentHash.ofValues(system, message, contentHash));
     }
 
     /**
@@ -72,6 +95,18 @@ public class DocsApiEtagSupport {
                 .eTag(entityTag)
                 .cacheControl(CacheControl.noCache())
                 .body(serialized);
+    }
+
+    /**
+     * Answers with the body under an entity tag the caller derived from stored data, which it has already
+     * evaluated against {@code If-None-Match} with {@link #isNotModified(WebRequest, String)} - before reading
+     * what the body is made of.
+     */
+    public ResponseEntity<byte[]> respondTagged(String entityTag, Object body) {
+        return ResponseEntity.ok()
+                .eTag(entityTag)
+                .cacheControl(CacheControl.noCache())
+                .body(serialize(body));
     }
 
     /**

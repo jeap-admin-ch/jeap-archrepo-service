@@ -28,6 +28,28 @@ class DocsApiEtagSupportTest {
     }
 
     @Test
+    void messageVersionTag_isAQuotedSha256() {
+        assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", "41ab7c"))
+                .matches("\"sha256:[0-9a-f]{64}\"");
+    }
+
+    @Test
+    void messageVersionTag_coversTheSystemAndTheMessageTypeAsStored() {
+        // Both are in the body of the version resource, so a change of their spelling has to change the tag
+        String tag = etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", "41ab7c");
+
+        assertThat(etagSupport.messageVersionTag("WVS", "WvsDeclarationAcceptedEvent", "41ab7c")).isNotEqualTo(tag);
+        assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationacceptedEvent", "41ab7c")).isNotEqualTo(tag);
+        assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", "41ab7d")).isNotEqualTo(tag);
+        assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", "41ab7c")).isEqualTo(tag);
+    }
+
+    @Test
+    void messageVersionTag_ofAVersionWithoutAStoredHashIsNull() {
+        assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", null)).isNull();
+    }
+
+    @Test
     void serialize_isStableForAnEqualBody() {
         SystemListDto one = new SystemListDto(List.of(new SystemSummaryDto("wvs", null, List.of(), null)));
         SystemListDto other = new SystemListDto(List.of(new SystemSummaryDto("wvs", null, List.of(), null)));

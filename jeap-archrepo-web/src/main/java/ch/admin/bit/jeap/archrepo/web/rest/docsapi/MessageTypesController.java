@@ -38,6 +38,11 @@ import java.util.Map;
  * publishing an intermediate version changes what an existing version answers, and a re-import re-renders the
  * schemas. Both resources therefore revalidate like every other resource of this API rather than promising a
  * cache lifetime the importer does not guarantee.
+ * <p>
+ * What makes that cheap is the stored hash of each version: every model update re-imports the message types and
+ * writes it over everything the version resource serves, the compatible version included. The index lists the
+ * entity tag derived from it next to each version, so a consumer compares tags instead of asking about every
+ * version, and the version resource answers a conditional request from the same tag without reading the schemas.
  */
 @RestController
 @RequestMapping(value = DocsApiPaths.MESSAGE_TYPES, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,7 +80,8 @@ class MessageTypesController {
     @Operation(summary = "One version of one message type, with its schemas",
             description = "Everything a message page shows about a version: both schemas as the arch repo "
                           + "renders them, and the compatibility it declares. The system is matched by name or "
-                          + "by alias, ignoring case.")
+                          + "by alias, ignoring case. The ETag is the one the message type index lists for this "
+                          + "version, so a conditional request is answered without reading the schemas.")
     @ApiResponse(responseCode = "200", description = "The version",
             content = @Content(schema = @Schema(implementation = MessageTypeVersionDto.class)))
     @ApiResponse(responseCode = "304", description = "If-None-Match matched", content = @Content)
@@ -85,12 +91,27 @@ class MessageTypesController {
                                                         @PathVariable("version") String version,
                                                         WebRequest request) {
         String resolvedSystemName = resolveSystemName(systemName);
+        // The tag first, from the stored hash and without the schemas: a consumer that already holds this version
+        // is answered with a 304 that never reads them. Both queries match the same row - see findVersionTags.
+        String entityTag = messageTypeVersionRepository.findVersionTags(resolvedSystemName, messageName, version)
+                .stream()
+                .findFirst()
+                .map(tag -> etagSupport.messageVersionTag(resolvedSystemName, tag.message(), tag.contentHash()))
+                .orElse(null);
+        if (entityTag != null && etagSupport.isNotModified(request, entityTag)) {
+            return null;
+        }
         MessageTypeVersionDetail detail =
                 messageTypeVersionRepository.findVersions(resolvedSystemName, messageName, version).stream()
                         .findFirst()
                         .orElseThrow(() -> DocsApiException.messageTypeVersionNotFound(resolvedSystemName,
                                 messageName, version));
-        return etagSupport.respond(request, version(resolvedSystemName, detail));
+        MessageTypeVersionDto body = version(resolvedSystemName, detail);
+        // A version stored before its hash was recorded has no stored tag; it is tagged over its body until the
+        // next model update writes the hash, and the index lists it without a tag meanwhile.
+        return entityTag == null
+                ? etagSupport.respond(request, body)
+                : etagSupport.respondTagged(entityTag, body);
     }
 
     /**
@@ -100,15 +121,18 @@ class MessageTypesController {
      * The kind is part of the grouping key, so a system that defines an event and a command of the same name
      * yields two entries rather than one entry with the versions of both under whichever kind was read first.
      */
-    private static MessageTypeIndexDto index(List<MessageTypeVersionIndexEntry> entries) {
+    private MessageTypeIndexDto index(List<MessageTypeVersionIndexEntry> entries) {
         Map<String, List<MessageTypeVersionRefDto>> versionsByMessageType = new LinkedHashMap<>();
         Map<String, MessageTypeVersionIndexEntry> firstRowOf = new LinkedHashMap<>();
         for (MessageTypeVersionIndexEntry entry : entries) {
             String key = entry.getSystem() + "/" + entry.getKind() + "/" + entry.getMessage();
             firstRowOf.putIfAbsent(key, entry);
             versionsByMessageType.computeIfAbsent(key, ignored -> new ArrayList<>())
-                    .add(new MessageTypeVersionRefDto(entry.getVersion(), DocsApiPaths.messageTypeVersionPath(
-                            entry.getSystem(), entry.getMessage(), entry.getVersion())));
+                    .add(new MessageTypeVersionRefDto(entry.getVersion(),
+                            etagSupport.messageVersionTag(entry.getSystem(), entry.getMessage(),
+                                    entry.getContentHash()),
+                            DocsApiPaths.messageTypeVersionPath(entry.getSystem(), entry.getMessage(),
+                                    entry.getVersion())));
         }
 
         List<MessageTypeIndexEntryDto> messageTypes = new ArrayList<>();

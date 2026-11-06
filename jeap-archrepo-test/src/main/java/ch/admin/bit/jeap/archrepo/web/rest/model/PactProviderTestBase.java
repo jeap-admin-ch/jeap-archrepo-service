@@ -380,6 +380,11 @@ public class PactProviderTestBase {
         when(messageTypeVersionRepository.findVersions(DocsApiPactStubs.SYSTEM, DocsApiPactStubs.EVENT_NAME,
                 DocsApiPactStubs.MESSAGE_VERSION))
                 .thenReturn(List.of(DocsApiPactStubs.messageTypeVersion()));
+        // The tag the version resource answers with, from the same stored hash the index entry carries
+        when(messageTypeVersionRepository.findVersionTags(DocsApiPactStubs.SYSTEM, DocsApiPactStubs.EVENT_NAME,
+                DocsApiPactStubs.MESSAGE_VERSION))
+                .thenReturn(List.of(new MessageTypeVersionTag(DocsApiPactStubs.EVENT_NAME,
+                        DocsApiPactStubs.messageTypeVersionContentHash())));
     }
 
     /**

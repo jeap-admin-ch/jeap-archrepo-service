@@ -114,6 +114,40 @@ class MessageTypeVersionRepositoryTest extends PostgresDataJpaTestBase {
                 "wvs", "WvsDeclarationAcceptedEvent", "2.0.0")).isEmpty();
     }
 
+    @Test
+    void findIndexEntries_carriesTheStoredContentHashOfEveryVersion() {
+        MessageVersion eventVersion = messageVersion("1.0.0");
+        MessageVersion commandVersion = messageVersion("2.0.0");
+        System system = createSystem("alpha");
+        system.addEvent(event("ShipmentEvent", List.of(eventVersion)));
+        system.addCommand(command("InvoiceCommand", List.of(commandVersion)));
+        systemRepository.saveAndFlush(system);
+
+        // Unfiltered and filtered, events and commands: the four queries that make up the index
+        for (String filter : new String[]{null, "ALPHA"}) {
+            assertThat(messageTypeVersionRepository.findIndexEntries(filter))
+                    .extracting(MessageTypeVersionIndexEntry::getMessage, MessageTypeVersionIndexEntry::getContentHash)
+                    .containsExactly(
+                            tuple("InvoiceCommand", commandVersion.getContentHash()),
+                            tuple("ShipmentEvent", eventVersion.getContentHash()));
+        }
+        assertThat(eventVersion.getContentHash()).isNotNull();
+    }
+
+    @Test
+    void findVersionTags_returnsTheStoredMessageNameAndContentHashIgnoringCase() {
+        MessageVersion version = messageVersion("2.0.0");
+        System system = createSystem("wvs");
+        system.addEvent(event("WvsDeclarationAcceptedEvent", List.of(messageVersion("1.0.0"), version)));
+        systemRepository.saveAndFlush(system);
+
+        assertThat(messageTypeVersionRepository.findVersionTags("WVS", "wvsdeclarationacceptedevent", "2.0.0"))
+                .containsExactly(new MessageTypeVersionTag("WvsDeclarationAcceptedEvent",
+                        version.getContentHash()));
+        assertThat(messageTypeVersionRepository.findVersionTags("wvs", "WvsDeclarationAcceptedEvent", "9.9.9"))
+                .isEmpty();
+    }
+
     private System createSystem(String name) {
         Team team = teamRepository.save(Team.builder().name(name + "-team").build());
         return System.builder().name(name).defaultOwner(team).build();

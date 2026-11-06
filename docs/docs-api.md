@@ -65,15 +65,16 @@ from the registry. A long `max-age` or `immutable` would therefore promise more 
 
 The tag is `"sha256:<hex>"`. For the model resources it is computed over the serialized response body, so it
 changes exactly when the response would. For the two content resources it is the hash of the **stored bytes** of
-the artifact, which is what makes the following contract hold:
+the artifact. For a message type version it is derived from the system, the message type and a **stored hash**
+over everything the version resource serves, which every model update writes when it re-imports the message
+types. That is what makes the following contract hold:
 
-> The `etag` of an entry in an **artifact** index is **byte-identical** to the `ETag` header of the resource its
-> `contentUrl` names.
+> The `etag` of an entry in an index is **byte-identical** to the `ETag` header of the resource its `contentUrl`
+> names.
 
-That contract is about the OpenAPI spec and database schema indexes only. The message type index carries no
-`etag` per version - a tag would have to be computed from the schemas, which is exactly what that index exists
-not to read - so a consumer that keeps its copies current revalidates each stored version with `If-None-Match`
-and pays a `304` for the ones that did not move.
+For a message type version stored before the arch repo recorded that hash, the index entry carries **no** `etag`
+and the version resource tags its serialized body instead, until the next model update writes the hash. A
+consumer then revalidates that version with `If-None-Match`, as it would without the tag.
 
 That is the point of the indexes: a consumer compares the two without making a request, and fetches only what
 changed. It can also send the stored value as `If-None-Match`, so an artifact that changes between the index call
@@ -86,7 +87,7 @@ A replication run therefore looks like this:
 
 ```mermaid
 flowchart TB
-    A["GET /docs-api/openapi-specs<br/>GET /docs-api/database-schemas"] --> B{"entry known?"}
+    A["GET /docs-api/openapi-specs<br/>GET /docs-api/database-schemas<br/>GET /docs-api/message-types"] --> B{"entry known?"}
     B -- no --> F["fetch contentUrl, store with its etag"]
     B -- yes --> C{"etag == stored etag?"}
     C -- yes --> S["nothing to do"]
@@ -784,9 +785,10 @@ There is exactly one schema per component, updated in place by the push path.
 
 ## `GET /docs-api/message-types`
 
-Every message type of the model with the versions it has, and **without their schemas** - the index a consumer
-diffs against what it has already replicated. The schemas are the largest columns in the model, so deciding what
-to fetch must not read one. The entries are sorted by system, then by message type; the versions of a message
+Every message type of the model with the versions it has and the entity tag of each version, **without their
+schemas** - the index a consumer diffs against what it has already replicated. The schemas are the largest columns
+in the model, so deciding what to fetch must not read one: the tags are derived from a hash stored with each
+version. The entries are sorted by system, then by message type; the versions of a message
 type keep that order too.
 
 ### Request
@@ -826,10 +828,12 @@ Role: `architecture-model` / `read`.
       "versions": [
         {
           "version": "1.0.0",
+          "etag": "\"sha256:5d1e…\"",
           "contentUrl": "/my-archrepo-service/docs-api/message-types/system/systemDeclarationAcceptedEvent/versions/1.0.0"
         },
         {
           "version": "2.0.0",
+          "etag": "\"sha256:9c07…\"",
           "contentUrl": "/my-archrepo-service/docs-api/message-types/system/systemDeclarationAcceptedEvent/versions/2.0.0"
         }
       ]
@@ -846,15 +850,17 @@ Role: `architecture-model` / `read`.
 | `messageTypes[].kind`                 | string | `EVENT` or `COMMAND`                                               | never                                          |
 | `messageTypes[].versions`             | array  | Every version of the message type, sorted                          | never - a message type without versions is absent from the index entirely |
 | `messageTypes[].versions[].version`   | string | The version, and what `{version}` matches **exactly**              | never                                          |
+| `messageTypes[].versions[].etag`      | string | Byte-identical to the `ETag` of the version resource               | the version was stored before the arch repo recorded its hash, until the next model update |
 | `messageTypes[].versions[].contentUrl`| string | Path of the version resource, context path included, no host       | never                                          |
 
 A message type with no version at all does not appear: the index lists versions, and an entry without any would
 name nothing to fetch.
 
-Unlike the two artifact indexes, this one carries **no entity tag per version**: computing one would mean reading
-the schemas, which is what this index exists not to do. So it answers *which versions exist*, not *which of them
-changed* - a consumer diffs it against what it has stored to find the new ones, and revalidates the ones it
-already holds against the version resource itself.
+Like the two artifact indexes, this one answers both *which versions exist* and *which of them changed*: a
+consumer fetches a version whose `etag` differs from the one it stored, and keeps the others without a request. The
+tag covers everything the version resource serves - the compatible version included, which publishing an
+intermediate version can change, and the stored spelling of the system and message type. An entry without an
+`etag` is revalidated against the version resource with `If-None-Match`.
 
 | Status | `type`             | When                                                                   |
 | ------ | ------------------ | ---------------------------------------------------------------------- |
@@ -891,10 +897,10 @@ Role: `architecture-model` / `read`.
 
 `200 OK`, `application/json`.
 
-| Response header | Value                                     |
-| --------------- | ----------------------------------------- |
-| `ETag`          | `"sha256:<hex>"` over the serialized body |
-| `Cache-Control` | `no-cache`                                |
+| Response header | Value                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ETag`          | The tag the message type index lists for this version; over the serialized body for a version stored before the arch repo recorded its hash |
+| `Cache-Control` | `no-cache`                                                                                                                                  |
 
 ```json
 {

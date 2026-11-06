@@ -4,11 +4,13 @@ import ch.admin.bit.jeap.archrepo.metamodel.System;
 import ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionDetail;
 import ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionIndexEntry;
 import ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionRepository;
+import ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionTag;
 import ch.admin.bit.jeap.archrepo.persistence.SystemRepository;
 import ch.admin.bit.jeap.archrepo.web.config.WebSecurityConfig;
 import ch.admin.bit.jeap.security.resource.configuration.MvcSecurityConfiguration;
 import ch.admin.bit.jeap.security.resource.properties.ResourceServerProperties;
 import ch.admin.bit.jeap.security.resource.token.TokenConfiguration;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,6 +50,7 @@ class MessageTypesControllerTest extends DocsApiControllerTestBase {
     private static final String ALIAS = "WVS-ALIAS";
     private static final String EVENT = "WvsDeclarationAcceptedEvent";
     private static final String COMMAND = "WvsCheckNctsReferabilityV2Command";
+    private static final String CONTENT_HASH = "41ab7c";
 
     @Autowired
     private MockMvc mockMvc;
@@ -185,6 +193,89 @@ class MessageTypesControllerTest extends DocsApiControllerTestBase {
     }
 
     @Test
+    void getMessageTypes_listsTheEntityTagTheVersionResourceAnswersWith() throws Exception {
+        // What lets a consumer decide without a request: the tag in the index is the version's ETag, byte for byte
+        when(messageTypeVersionRepository.findIndexEntries(null))
+                .thenReturn(List.of(indexEntry(SYSTEM, EVENT, "EVENT", "2.0.0", CONTENT_HASH)));
+        when(messageTypeVersionRepository.findVersionTags(SYSTEM, EVENT, "2.0.0"))
+                .thenReturn(List.of(new MessageTypeVersionTag(EVENT, CONTENT_HASH)));
+
+        String listedTag = JsonPath.read(mockMvc.perform(get(DocsApiPaths.MESSAGE_TYPES)
+                                .with(authentication(tokenWithArchitectureModelRead())))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString(),
+                "$.messageTypes[0].versions[0].etag");
+        String versionTag = mockMvc.perform(get(DocsApiPaths.messageTypeVersionPath(SYSTEM, EVENT, "2.0.0"))
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getHeader("ETag");
+
+        assertThat(listedTag).isNotBlank().isEqualTo(versionTag);
+    }
+
+    @Test
+    void getMessageTypes_aVersionWithoutAStoredHashIsListedWithoutATag() throws Exception {
+        mockMvc.perform(get(DocsApiPaths.MESSAGE_TYPES)
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                // Absent rather than null: a consumer then falls back to asking about the version
+                .andExpect(jsonPath("$.messageTypes[0].versions[0].version").value("1.0.0"))
+                .andExpect(jsonPath("$.messageTypes[0].versions[0].etag").doesNotExist());
+    }
+
+    @Test
+    void getMessageTypeVersion_aConditionalRequestIsAnsweredWithoutReadingTheSchemas() throws Exception {
+        when(messageTypeVersionRepository.findVersionTags(SYSTEM, EVENT, "2.0.0"))
+                .thenReturn(List.of(new MessageTypeVersionTag(EVENT, CONTENT_HASH)));
+        String path = DocsApiPaths.messageTypeVersionPath(SYSTEM, EVENT, "2.0.0");
+        String etag = mockMvc.perform(get(path).with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.value.resolvedSchema").value("value schema"))
+                .andReturn().getResponse().getHeader("ETag");
+        clearInvocations(messageTypeVersionRepository);
+
+        mockMvc.perform(get(path).header("If-None-Match", etag)
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isNotModified())
+                .andExpect(content().string(""))
+                .andExpect(header().string("Cache-Control", "no-cache"));
+
+        verify(messageTypeVersionRepository, never()).findVersions(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void getMessageTypeVersion_aChangedHashIsAnsweredWithTheBody() throws Exception {
+        when(messageTypeVersionRepository.findVersionTags(SYSTEM, EVENT, "2.0.0"))
+                .thenReturn(List.of(new MessageTypeVersionTag(EVENT, CONTENT_HASH)));
+        String path = DocsApiPaths.messageTypeVersionPath(SYSTEM, EVENT, "2.0.0");
+        String etag = mockMvc.perform(get(path).with(authentication(tokenWithArchitectureModelRead())))
+                .andReturn().getResponse().getHeader("ETag");
+        when(messageTypeVersionRepository.findVersionTags(SYSTEM, EVENT, "2.0.0"))
+                .thenReturn(List.of(new MessageTypeVersionTag(EVENT, "another hash")));
+
+        mockMvc.perform(get(path).header("If-None-Match", etag)
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.version").value("2.0.0"));
+    }
+
+    @Test
+    void getMessageTypeVersion_withoutAStoredHashIsTaggedOverItsBody() throws Exception {
+        // A version stored before the hash was recorded: today's behaviour until the next model update
+        when(messageTypeVersionRepository.findVersionTags(SYSTEM, EVENT, "2.0.0"))
+                .thenReturn(List.of(new MessageTypeVersionTag(EVENT, null)));
+        String path = DocsApiPaths.messageTypeVersionPath(SYSTEM, EVENT, "2.0.0");
+        String etag = mockMvc.perform(get(path).with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andReturn().getResponse().getHeader("ETag");
+
+        mockMvc.perform(get(path).header("If-None-Match", etag)
+                        .with(authentication(tokenWithArchitectureModelRead())))
+                .andExpect(status().isNotModified());
+    }
+
+    @Test
     void getMessageTypes_anEventAndACommandOfOneNameStayApart() throws Exception {
         // Nothing forbids the two, and merging them would hide one message type behind the other's kind
         when(messageTypeVersionRepository.findIndexEntries(null)).thenReturn(List.of(
@@ -253,6 +344,11 @@ class MessageTypesControllerTest extends DocsApiControllerTestBase {
 
     private static MessageTypeVersionIndexEntry indexEntry(String system, String message, String kind,
                                                            String version) {
+        return indexEntry(system, message, kind, version, null);
+    }
+
+    private static MessageTypeVersionIndexEntry indexEntry(String system, String message, String kind,
+                                                           String version, String contentHash) {
         return new MessageTypeVersionIndexEntry() {
             @Override
             public String getSystem() {
@@ -272,6 +368,11 @@ class MessageTypesControllerTest extends DocsApiControllerTestBase {
             @Override
             public String getVersion() {
                 return version;
+            }
+
+            @Override
+            public String getContentHash() {
+                return contentHash;
             }
         };
     }

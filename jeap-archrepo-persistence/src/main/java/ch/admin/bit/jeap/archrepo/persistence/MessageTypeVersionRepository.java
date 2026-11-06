@@ -33,7 +33,8 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      * The versions of every event of the landscape, without their schemas.
      */
     @Query("""
-            select s.name as system, e.messageTypeName as message, 'EVENT' as kind, v.version as version
+            select s.name as system, e.messageTypeName as message, 'EVENT' as kind, v.version as version,
+                   v.contentHash as contentHash
             from Event e
             join e.parent s
             join e.messageVersions v
@@ -47,7 +48,8 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      *                   because only the caller can tell an unknown system from a system without messages
      */
     @Query("""
-            select s.name as system, e.messageTypeName as message, 'EVENT' as kind, v.version as version
+            select s.name as system, e.messageTypeName as message, 'EVENT' as kind, v.version as version,
+                   v.contentHash as contentHash
             from Event e
             join e.parent s
             join e.messageVersions v
@@ -59,7 +61,8 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      * The versions of every command of the landscape, without their schemas.
      */
     @Query("""
-            select s.name as system, c.messageTypeName as message, 'COMMAND' as kind, v.version as version
+            select s.name as system, c.messageTypeName as message, 'COMMAND' as kind, v.version as version,
+                   v.contentHash as contentHash
             from Command c
             join c.parent s
             join c.messageVersions v
@@ -72,7 +75,8 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      * @param systemName as in {@link #findEventIndexEntriesBySystemName(String)}
      */
     @Query("""
-            select s.name as system, c.messageTypeName as message, 'COMMAND' as kind, v.version as version
+            select s.name as system, c.messageTypeName as message, 'COMMAND' as kind, v.version as version,
+                   v.contentHash as contentHash
             from Command c
             join c.parent s
             join c.messageVersions v
@@ -128,6 +132,26 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
               and v.version = :version
             """)
     List<MessageTypeVersionDetail> findVersions(@Param("systemName") String systemName,
+                                                @Param("messageName") String messageName,
+                                                @Param("version") String version);
+
+    /**
+     * The stored content hash of one version, and the message type name as it is stored - without the schemas.
+     * <p>
+     * What a conditional request for a version is answered from: the entity tag is derived from these two and the
+     * system, so a {@code 304} never reads the schemas it does not return. Matched exactly like
+     * {@link #findVersions(String, String, String)}, so both read the same row.
+     */
+    @Query("""
+            select new ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionTag(mt.messageTypeName, v.contentHash)
+            from MessageType mt
+            join mt.parent s
+            join mt.messageVersions v
+            where lower(s.name) = lower(:systemName)
+              and lower(mt.messageTypeName) = lower(:messageName)
+              and v.version = :version
+            """)
+    List<MessageTypeVersionTag> findVersionTags(@Param("systemName") String systemName,
                                                 @Param("messageName") String messageName,
                                                 @Param("version") String version);
 }

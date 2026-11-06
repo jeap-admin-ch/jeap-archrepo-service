@@ -220,8 +220,34 @@ public class DocsApiPactStubs {
                 ZonedDateTime.parse("2026-08-12T04:00:00Z"));
     }
 
+    /**
+     * The index entry of the event's version, carrying the stored hash of exactly the version
+     * {@link #messageTypeVersion()} serves - so the tag the index lists is the tag the version resource answers
+     * with, which is what a consumer comparing the two relies on.
+     */
     public static MessageTypeVersionIndexEntry messageTypeIndexEntry() {
-        return new MessageTypeIndexEntry(SYSTEM, EVENT_NAME, "EVENT", MESSAGE_VERSION);
+        return new MessageTypeIndexEntry(SYSTEM, EVENT_NAME, "EVENT", MESSAGE_VERSION,
+                messageTypeVersionContentHash());
+    }
+
+    /**
+     * The stored hash of the version {@link #messageTypeVersion()} serves, computed the way the model computes it
+     * when the version is imported.
+     */
+    public static String messageTypeVersionContentHash() {
+        MessageTypeVersionDetail detail = messageTypeVersion();
+        return MessageVersion.builder()
+                .version(detail.version())
+                .compatibilityMode(detail.compatibilityMode())
+                .compatibleVersion(detail.compatibleVersion())
+                .keySchemaName(detail.keySchemaName())
+                .keySchemaUrl(detail.keySchemaUrl())
+                .keySchemaResolved(detail.keySchemaResolved())
+                .valueSchemaName(detail.valueSchemaName())
+                .valueSchemaUrl(detail.valueSchemaUrl())
+                .valueSchemaResolved(detail.valueSchemaResolved())
+                .build()
+                .getContentHash();
     }
 
     /**
@@ -281,5 +307,6 @@ public class DocsApiPactStubs {
         String message;
         String kind;
         String version;
+        String contentHash;
     }
 }
