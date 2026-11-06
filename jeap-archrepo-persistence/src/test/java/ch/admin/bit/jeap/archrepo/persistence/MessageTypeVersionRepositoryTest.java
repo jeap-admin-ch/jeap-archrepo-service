@@ -148,6 +148,31 @@ class MessageTypeVersionRepositoryTest extends PostgresDataJpaTestBase {
                 .isEmpty();
     }
 
+    @Test
+    void findVersionTagsAndFindVersions_pickTheSameMessageTypeFirst() {
+        // An event and a command of one name share the path of a version; the tag and the body must not differ
+        MessageVersion eventVersion = messageVersion("1.0.0");
+        System system = createSystem("wvs");
+        system.addEvent(event("WvsThing", List.of(eventVersion)));
+        system.addCommand(command("WvsThing", List.of(MessageVersion.builder()
+                .version("1.0.0")
+                .valueSchemaName("Value.avdl")
+                .valueSchemaUrl("https://registry.example.com/Value.avdl")
+                .valueSchemaResolved("the command's value schema")
+                .build())));
+        systemRepository.saveAndFlush(system);
+
+        List<MessageTypeVersionTag> tags = messageTypeVersionRepository.findVersionTags("wvs", "WvsThing", "1.0.0");
+        List<MessageTypeVersionDetail> versions = messageTypeVersionRepository.findVersions("wvs", "WvsThing", "1.0.0");
+
+        assertThat(tags).hasSize(2);
+        assertThat(versions).hasSize(2);
+        String firstHash = tags.getFirst().contentHash();
+        String firstSchema = versions.getFirst().valueSchemaResolved();
+        assertThat(firstHash.equals(eventVersion.getContentHash()))
+                .isEqualTo(firstSchema.equals(eventVersion.getValueSchemaResolved()));
+    }
+
     private System createSystem(String name) {
         Team team = teamRepository.save(Team.builder().name(name + "-team").build());
         return System.builder().name(name).defaultOwner(team).build();

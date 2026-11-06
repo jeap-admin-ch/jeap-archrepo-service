@@ -45,6 +45,17 @@ class DocsApiEtagSupportTest {
     }
 
     @Test
+    void messageVersionTag_coversTheVersionOfTheRepresentation() {
+        // A change of the representation alone has to reach consumers that compare tags
+        assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", "41ab7c"))
+                .isEqualTo(etagSupport.entityTag(ContentHash.ofValues(
+                        DocsApiEtagSupport.MESSAGE_VERSION_REPRESENTATION, "wvs", "WvsDeclarationAcceptedEvent",
+                        "41ab7c")))
+                .isNotEqualTo(etagSupport.entityTag(ContentHash.ofValues(
+                        "another representation", "wvs", "WvsDeclarationAcceptedEvent", "41ab7c")));
+    }
+
+    @Test
     void messageVersionTag_ofAVersionWithoutAStoredHashIsNull() {
         assertThat(etagSupport.messageVersionTag("wvs", "WvsDeclarationAcceptedEvent", null)).isNull();
     }

@@ -117,7 +117,9 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      * A list rather than an {@code Optional}, because neither the schema nor the model forbids a system from
      * defining an event and a command of the same name: they would be two message types at one path, since a
      * version is addressed by system and name only. The registry's naming conventions make that combination
-     * practically impossible, and answering with the first is a better failure than a {@code 500}.
+     * practically impossible, and answering with the first is a better failure than a {@code 500}. The order is
+     * fixed, and the same as {@link #findVersionTags(String, String, String)}'s, so that "the first" is the same row
+     * for both.
      */
     @Query("""
             select new ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionDetail(
@@ -130,6 +132,7 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
             where lower(s.name) = lower(:systemName)
               and lower(mt.messageTypeName) = lower(:messageName)
               and v.version = :version
+            order by mt.id
             """)
     List<MessageTypeVersionDetail> findVersions(@Param("systemName") String systemName,
                                                 @Param("messageName") String messageName,
@@ -139,8 +142,9 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
      * The stored content hash of one version, and the message type name as it is stored - without the schemas.
      * <p>
      * What a conditional request for a version is answered from: the entity tag is derived from these two and the
-     * system, so a {@code 304} never reads the schemas it does not return. Matched exactly like
-     * {@link #findVersions(String, String, String)}, so both read the same row.
+     * system, so a {@code 304} never reads the schemas it does not return. Matched and <b>ordered</b> exactly like
+     * {@link #findVersions(String, String, String)}, so the first row of each is the same message type even where
+     * an event and a command share a name - the tag and the body it is sent with must not describe two rows.
      */
     @Query("""
             select new ch.admin.bit.jeap.archrepo.persistence.MessageTypeVersionTag(mt.messageTypeName, v.contentHash)
@@ -150,6 +154,7 @@ public interface MessageTypeVersionRepository extends JpaRepository<MessageType,
             where lower(s.name) = lower(:systemName)
               and lower(mt.messageTypeName) = lower(:messageName)
               and v.version = :version
+            order by mt.id
             """)
     List<MessageTypeVersionTag> findVersionTags(@Param("systemName") String systemName,
                                                 @Param("messageName") String messageName,

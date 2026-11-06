@@ -32,6 +32,14 @@ import tools.jackson.databind.ObjectMapper;
 @RequiredArgsConstructor
 public class DocsApiEtagSupport {
 
+    /**
+     * The version of the representation a message type version is served in, folded into its tag. The tag is
+     * derived from stored data rather than from the serialized body, so a change to the representation alone -
+     * a field added to or renamed in {@link MessageTypeVersionDto}, or a change to how it is mapped - would not
+     * change it, and a consumer comparing tags would keep its stale copies. <b>Bump it with every such change.</b>
+     */
+    static final String MESSAGE_VERSION_REPRESENTATION = "1";
+
     private final ObjectMapper objectMapper;
 
     /**
@@ -48,7 +56,8 @@ public class DocsApiEtagSupport {
      * <p>
      * The version resource serves the system and the message type next to the stored fields, in their stored
      * spelling, and those two are not part of the version's stored hash - so they are folded in here. A system
-     * renamed in case, for example, answers with a different body and therefore has to carry a different tag.
+     * renamed in case, for example, answers with a different body and therefore has to carry a different tag. So is
+     * the version of the representation, see {@link #MESSAGE_VERSION_REPRESENTATION}.
      *
      * @param system      the system as it is stored
      * @param message     the message type name as it is stored
@@ -56,7 +65,8 @@ public class DocsApiEtagSupport {
      * @return the entity tag, or null when the version has no stored hash
      */
     public String messageVersionTag(String system, String message, String contentHash) {
-        return contentHash == null ? null : entityTag(ContentHash.ofValues(system, message, contentHash));
+        return contentHash == null ? null
+                : entityTag(ContentHash.ofValues(MESSAGE_VERSION_REPRESENTATION, system, message, contentHash));
     }
 
     /**
