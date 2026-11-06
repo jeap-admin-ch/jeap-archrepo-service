@@ -12,11 +12,9 @@ import org.springframework.stereotype.Component;
 class AWSJeapRelationImporter implements ArchRepoImporter {
 
     private final AWSPrometheusClient awsPrometheusClient;
-    private final ValidatedJeapRelationImporter jeapRelationImporter;
 
     AWSJeapRelationImporter(AWSPrometheusClient awsPrometheusClient) {
         this.awsPrometheusClient = awsPrometheusClient;
-        jeapRelationImporter = new ValidatedJeapRelationImporter(log);
     }
 
     @Override
@@ -27,6 +25,7 @@ class AWSJeapRelationImporter implements ArchRepoImporter {
 
     @Override
     public void importIntoModel(ArchitectureModel model, String environment) {
+        ValidatedJeapRelationImporter jeapRelationImporter = new ValidatedJeapRelationImporter(log);
         try {
             awsPrometheusClient.apiRelations(environment)
                     .forEach(jeapRelation -> jeapRelationImporter.importJeapRelationFromPrometheus(model, jeapRelation));

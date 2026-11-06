@@ -3,6 +3,7 @@ package ch.admin.bit.jeap.archrepo.importer.deploymentlog;
 import ch.admin.bit.jeap.archrepo.importer.deploymentlog.client.ComponentVersionSummaryDto;
 import ch.admin.bit.jeap.archrepo.importer.deploymentlog.client.DeploymentlogService;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
+import ch.admin.bit.jeap.archrepo.importers.UndeclaredSystems;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
@@ -36,16 +37,20 @@ class DeploymentlogSystemComponentImporter implements ArchRepoImporter {
     public void importIntoModel(ArchitectureModel architectureModel, String environment) {
         log.info("Getting components from the deployment log...");
         List<ComponentVersionSummaryDto> components = deploymentlogService.getDeployedComponents(environment);
-        components.forEach(component -> importComponent(architectureModel, component));
+        UndeclaredSystems undeclaredSystems = new UndeclaredSystems();
+        components.forEach(component -> importComponent(architectureModel, component, undeclaredSystems));
+        undeclaredSystems.logSummary(log, "Deployment log");
         removeDeletedComponentsFromArchitectureModel(architectureModel, components);
     }
 
-    private void importComponent(ArchitectureModel architectureModel, ComponentVersionSummaryDto component) {
+    private void importComponent(ArchitectureModel architectureModel, ComponentVersionSummaryDto component,
+                                 UndeclaredSystems undeclaredSystems) {
         String componentName = component.componentName();
         String systemName = componentName.split("-")[0];
         Optional<System> system = architectureModel.findSystem(systemName);
         if (system.isEmpty()) {
-            log.error("Skipped system component {}: system {} is not declared in archrepo.model", componentName, systemName);
+            log.debug("Skipped system component {}: system {} is not declared in archrepo.model", componentName, systemName);
+            undeclaredSystems.skip(systemName, componentName);
             return;
         }
         if (component.undeployed()) {

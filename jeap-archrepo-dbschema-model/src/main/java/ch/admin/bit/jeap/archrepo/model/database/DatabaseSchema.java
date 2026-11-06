@@ -14,7 +14,7 @@ import java.util.List;
 public record DatabaseSchema(
         @NotEmpty String name,
         @NotEmpty String version,
-        @NotEmpty @Valid List<Table> tables)
+        @NotEmpty List<@Valid Table> tables)
 {
     private static final ObjectMapper MAPPER = JsonMapper.builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)

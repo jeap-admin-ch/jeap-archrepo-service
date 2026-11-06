@@ -14,9 +14,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -118,6 +121,30 @@ class AWSJeapRelationImporterTest {
 
         assertEquals(1, shared.getRestApis().size());
         assertEquals(1, shared.getRelations().size());
+    }
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void importIntoModel_providerThatCannotProvideRestApis_reportedOncePerRun(CapturedOutput output) {
+        List<JeapRelation> jeapRelations = List.of(
+                new JeapRelation("jeap-mobile-app", "shared-agir-service", "GET", "http", "/api/tasks/{param}"),
+                new JeapRelation("jeap-mobile-app", "shared-agir-service", "PUT", "http", "/api/tasks/{param}"));
+        when(awsPrometheusClient.apiRelations("ref")).thenReturn(jeapRelations);
+
+        importer.importIntoModel(model, "ref");
+        assertThat(warningsAboutMobileAppProvider(output)).hasSize(1);
+
+        importer.importIntoModel(model, "ref");
+        assertThat(warningsAboutMobileAppProvider(output))
+                .describedAs("Reported again on the next run")
+                .hasSize(2);
+        assertTrue(shared.getRelations().isEmpty());
+    }
+
+    private static List<String> warningsAboutMobileAppProvider(CapturedOutput output) {
+        return output.getAll().lines()
+                .filter(line -> line.contains("Provider jeap-mobile-app found, but is not a component type"))
+                .toList();
     }
 
     @BeforeEach

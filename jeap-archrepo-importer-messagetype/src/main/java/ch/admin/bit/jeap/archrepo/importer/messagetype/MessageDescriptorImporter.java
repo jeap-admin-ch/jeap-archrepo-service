@@ -1,6 +1,7 @@
 package ch.admin.bit.jeap.archrepo.importer.messagetype;
 
 import ch.admin.bit.jeap.archrepo.importer.messagetype.repository.*;
+import ch.admin.bit.jeap.archrepo.importers.UndeclaredSystems;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
@@ -25,23 +26,27 @@ public class MessageDescriptorImporter {
 
     public void importDescriptors(ArchitectureModel architectureModel) {
         List<MessageTypeRepository> messageTypeRepositories = messageTypeRepositoryFactory.cloneRepositories();
+        UndeclaredSystems undeclaredSystems = new UndeclaredSystems();
         try {
             for (MessageTypeRepository messageTypeRepository : messageTypeRepositories) {
                 messageTypeRepository.getAllEventDescriptors().forEach(event ->
-                        importEvent(architectureModel, messageTypeRepository, event));
+                        importEvent(architectureModel, messageTypeRepository, event, undeclaredSystems));
                 messageTypeRepository.getAllCommandDescriptors().forEach(command ->
-                        importCommand(architectureModel, messageTypeRepository, command));
+                        importCommand(architectureModel, messageTypeRepository, command, undeclaredSystems));
             }
         } finally {
             messageTypeRepositories.forEach(MessageTypeRepository::close);
         }
+        undeclaredSystems.logSummary(log, "Message type registry");
     }
 
-    private void importEvent(ArchitectureModel architectureModel, MessageTypeRepository messageTypeRepository, EventDescriptor eventDescriptor) {
+    private void importEvent(ArchitectureModel architectureModel, MessageTypeRepository messageTypeRepository,
+                             EventDescriptor eventDescriptor, UndeclaredSystems undeclaredSystems) {
         Optional<System> definingSystem = architectureModel.findSystem(eventDescriptor.getDefiningSystem());
         if (definingSystem.isEmpty()) {
-            log.error("Event {} is defined by {} but this system is not declared in archrepo.model, ignore it",
+            log.debug("Event {} is defined by {} but this system is not declared in archrepo.model, ignore it",
                     kv("messageType", eventDescriptor.getMessageTypeName()), kv("unknownSystem", eventDescriptor.getDefiningSystem()));
+            undeclaredSystems.skip(eventDescriptor.getDefiningSystem(), eventDescriptor.getMessageTypeName());
             return;
         }
 
@@ -66,11 +71,13 @@ public class MessageDescriptorImporter {
                 .build();
     }
 
-    private void importCommand(ArchitectureModel architectureModel, MessageTypeRepository messageTypeRepository, CommandDescriptor commandDescriptor) {
+    private void importCommand(ArchitectureModel architectureModel, MessageTypeRepository messageTypeRepository,
+                               CommandDescriptor commandDescriptor, UndeclaredSystems undeclaredSystems) {
         Optional<System> definingSystem = architectureModel.findSystem(commandDescriptor.getDefiningSystem());
         if (definingSystem.isEmpty()) {
-            log.error("Command {} is defined by {} but this system is not declared in archrepo.model, ignore it",
+            log.debug("Command {} is defined by {} but this system is not declared in archrepo.model, ignore it",
                     kv("messageType", commandDescriptor.getMessageTypeName()), kv("unknownSystem", commandDescriptor.getDefiningSystem()));
+            undeclaredSystems.skip(commandDescriptor.getDefiningSystem(), commandDescriptor.getMessageTypeName());
             return;
         }
 

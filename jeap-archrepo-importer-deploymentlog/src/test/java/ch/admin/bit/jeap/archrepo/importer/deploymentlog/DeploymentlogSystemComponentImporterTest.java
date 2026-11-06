@@ -164,22 +164,32 @@ class DeploymentlogSystemComponentImporterTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void importIntoModel_logsAnErrorForAComponentOfAnUnknownSystem(CapturedOutput output) {
-        // Systems are declared in configuration; a deployed component of an undeclared system needs attention.
+    void importIntoModel_logsOneWarningPerRunForComponentsOfUnknownSystems(CapturedOutput output) {
+        // Systems are declared in configuration; components of undeclared systems are a configuration gap, reported
+        // once per run - the deployment log reports some components many times.
         stubFor(get(urlEqualTo("/deploymentlog-service/api/environment/ref/components?includeUndeployed=true"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("""
                                 [
-                                {"componentName":"undeclared-service", "version":"1.0.0"}
+                                {"componentName":"undeclared-service", "version":"1.0.0"},
+                                {"componentName":"undeclared-service", "version":"1.1.0"},
+                                {"componentName":"undeclared-ui", "version":"1.0.0"},
+                                {"componentName":"unknown-service", "version":"1.0.0"}
                                 ]""")));
         ArchitectureModel testModel = createTestModel();
 
         importer.importIntoModel(testModel, "ref");
 
         assertThat(testModel.findSystemComponent("undeclared-service")).isEmpty();
+        assertThat(output.getAll().lines().filter(line -> line.contains("systems not declared in archrepo.model")))
+                .singleElement()
+                .satisfies(line -> assertThat(line)
+                        .contains("WARN")
+                        .contains("skipped 2 systems")
+                        .contains("undeclared [undeclared-service, undeclared-ui], unknown [unknown-service]"));
         assertThat(output.getAll().lines().filter(line -> line.contains("undeclared-service")))
-                .anyMatch(line -> line.contains("ERROR") && line.contains("undeclared"));
+                .noneMatch(line -> line.contains("ERROR"));
     }
 
     private ArchitectureModel createTestModel() {

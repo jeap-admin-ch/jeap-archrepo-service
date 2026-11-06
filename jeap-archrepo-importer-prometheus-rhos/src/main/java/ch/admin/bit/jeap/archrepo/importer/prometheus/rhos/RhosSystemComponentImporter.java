@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.prometheus.rhos;
 
 import ch.admin.bit.jeap.archrepo.importer.prometheus.rhos.client.RhosGrafanaClient;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
+import ch.admin.bit.jeap.archrepo.importers.UndeclaredSystems;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
@@ -46,6 +47,7 @@ class RhosSystemComponentImporter implements ArchRepoImporter {
         Set<String> namespaces = grafanaClient.namespaces(environment);
         log.info("Found namespaces {} on stage {}", namespaces, environment);
 
+        UndeclaredSystems undeclaredSystems = new UndeclaredSystems();
         for (String namespace : namespaces) {
             Optional<String> systemNameOptional = systemNameExtractor.extractSystemName(namespace);
             if (systemNameOptional.isEmpty()) {
@@ -56,11 +58,13 @@ class RhosSystemComponentImporter implements ArchRepoImporter {
             Optional<System> system = architectureModel.findSystem(systemName);
             if (system.isPresent()) {
                 log.info("Importing SystemComponents from system {}", systemName);
-                importSystemComponent(architectureModel, systemName, environment, namespace);
+                importSystemComponent(architectureModel, systemName, environment, namespace, undeclaredSystems);
             } else {
-                log.error("Skipped namespace of system {}: system is not declared in archrepo.model", systemName);
+                log.debug("Skipped namespace of system {}: system is not declared in archrepo.model", systemName);
+                undeclaredSystems.skip(systemName);
             }
         }
+        undeclaredSystems.logSummary(log, "Prometheus RHOS");
 
         removeFromArchitectureModel(architectureModel);
     }
@@ -78,18 +82,21 @@ class RhosSystemComponentImporter implements ArchRepoImporter {
         }
     }
 
-    private void importSystemComponent(ArchitectureModel architectureModel, String systemName, String environment, String namespace) {
+    private void importSystemComponent(ArchitectureModel architectureModel, String systemName, String environment, String namespace,
+                                       UndeclaredSystems undeclaredSystems) {
         log.info("Importing SystemComponents from {} from namespace {}", systemName, namespace);
         Set<String> serviceNames = grafanaClient.services(environment, namespace);
-        serviceNames.forEach(serviceName -> importSystemComponentIntoSystem(architectureModel, systemName, serviceName));
+        serviceNames.forEach(serviceName -> importSystemComponentIntoSystem(architectureModel, systemName, serviceName, undeclaredSystems));
     }
 
-    private void importSystemComponentIntoSystem(ArchitectureModel architectureModel, String systemName, String componentName) {
+    private void importSystemComponentIntoSystem(ArchitectureModel architectureModel, String systemName, String componentName,
+                                                 UndeclaredSystems undeclaredSystems) {
         Optional<System> system = architectureModel.findSystem(systemName);
         if (system.isPresent()) {
             createOrUpdateSystemComponent(architectureModel, system.get(), componentName);
         } else {
-            log.error("Skipped SystemComponent {}: system {} is not declared in archrepo.model", componentName, systemName);
+            log.debug("Skipped SystemComponent {}: system {} is not declared in archrepo.model", componentName, systemName);
+            undeclaredSystems.skip(systemName, componentName);
         }
     }
 

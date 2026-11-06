@@ -10,10 +10,15 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.http.HttpMethod;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * Imports the relations of one run. Create a new instance for every run: it remembers which providers it already
+ * reported, so that a provider with many relations is reported once per run rather than once per relation.
+ */
 @RequiredArgsConstructor
 public class ValidatedJeapRelationImporter {
 
@@ -28,6 +33,7 @@ public class ValidatedJeapRelationImporter {
     );
 
     private final Logger log;
+    private final Set<String> providersReportedAsNotProvidingRestApis = new HashSet<>();
 
     public void importJeapRelationFromPrometheus(ArchitectureModel model, JeapRelation jeapRelation) {
         if (!validHttpRequest(jeapRelation)) {
@@ -46,7 +52,9 @@ public class ValidatedJeapRelationImporter {
             return;
         }
         if (!(providerComponent.get() instanceof BackendService) && !(providerComponent.get() instanceof SelfContainedSystem)) {
-            log.warn("Provider {} found, but is not a component type that can provide REST APIs", jeapRelation.getProvider());
+            if (providersReportedAsNotProvidingRestApis.add(jeapRelation.getProvider())) {
+                log.warn("Provider {} found, but is not a component type that can provide REST APIs", jeapRelation.getProvider());
+            }
             return;
         }
 

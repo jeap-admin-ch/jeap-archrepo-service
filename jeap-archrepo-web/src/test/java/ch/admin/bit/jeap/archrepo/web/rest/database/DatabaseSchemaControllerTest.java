@@ -162,6 +162,35 @@ class DatabaseSchemaControllerTest extends PostgresIntegrationTestBase {
     }
 
     @Test
+    void testCreateOrUpdateDbSchema_CreateWithInvalidNestedColumn() throws Exception {
+        final String bearerAuth = createBearerAuthForUserRoles(DB_SCHEMA_WRITE_ROLE);
+        String blankColumnNameContent = """
+                {
+                    "systemName": "test-system",
+                    "systemComponentName": "test-component",
+                    "schema": {
+                        "name": "test-schema",
+                        "version": "1.2.3",
+                        "tables": [
+                            {
+                                "name": "table_foo",
+                                "columns": [ { "name": "", "type": "text", "nullable": false } ]
+                            }
+                        ]
+                    }
+                }""";
+
+        mockMvc.perform(
+                        post(DB_SCHEMA_API_PATH).
+                                header(HttpHeaders.AUTHORIZATION, bearerAuth).
+                                contentType(MediaType.APPLICATION_JSON).
+                                content(blankColumnNameContent).
+                                with(csrf())).
+                andExpect(status().isBadRequest());
+        verify(systemComponentDatabaseSchemaRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void testCreateOrUpdateDbSchema_Update() throws Exception {
         final String bearerAuth = createBearerAuthForUserRoles(DB_SCHEMA_WRITE_ROLE);
         final System system = createSystem();

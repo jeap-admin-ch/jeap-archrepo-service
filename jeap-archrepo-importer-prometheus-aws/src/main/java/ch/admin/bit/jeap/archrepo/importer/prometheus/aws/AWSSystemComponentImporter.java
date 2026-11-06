@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.archrepo.importer.prometheus.aws;
 
 import ch.admin.bit.jeap.archrepo.importer.prometheus.aws.client.AWSPrometheusClient;
 import ch.admin.bit.jeap.archrepo.importers.ArchRepoImporter;
+import ch.admin.bit.jeap.archrepo.importers.UndeclaredSystems;
 import ch.admin.bit.jeap.archrepo.metamodel.ArchitectureModel;
 import ch.admin.bit.jeap.archrepo.metamodel.Importer;
 import ch.admin.bit.jeap.archrepo.metamodel.System;
@@ -47,15 +48,18 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
         Set<String> applications = awsPrometheusClient.listApplications(environment);
         log.info("Found applications {}", applications);
 
+        UndeclaredSystems undeclaredSystems = new UndeclaredSystems();
         for (String application : applications) {
             Optional<System> system = architectureModel.findSystem(application);
             if (system.isPresent()) {
                 log.info("Importing SystemComponents from application {}", application);
-                importSystemComponent(architectureModel, application, environment);
+                importSystemComponent(architectureModel, application, environment, undeclaredSystems);
             } else {
-                log.error("Skipped application {}: system is not declared in archrepo.model", application);
+                log.debug("Skipped application {}: system is not declared in archrepo.model", application);
+                undeclaredSystems.skip(application);
             }
         }
+        undeclaredSystems.logSummary(log, "Prometheus AWS");
 
         removeFromArchitectureModel(architectureModel);
     }
@@ -73,23 +77,27 @@ class AWSSystemComponentImporter implements ArchRepoImporter {
         }
     }
 
-    private void importSystemComponent(ArchitectureModel architectureModel, String application, String stage) {
+    private void importSystemComponent(ArchitectureModel architectureModel, String application, String stage,
+                                       UndeclaredSystems undeclaredSystems) {
         log.info("Importing SystemComponents from {} from stage {}", application, stage);
-        importSystemComponentFromApplicationAndStage(architectureModel, application, stage);
+        importSystemComponentFromApplicationAndStage(architectureModel, application, stage, undeclaredSystems);
     }
 
-    private void importSystemComponentFromApplicationAndStage(ArchitectureModel architectureModel, String application, String stage) {
+    private void importSystemComponentFromApplicationAndStage(ArchitectureModel architectureModel, String application, String stage,
+                                                              UndeclaredSystems undeclaredSystems) {
         Set<String> services = awsPrometheusClient.listServices(application, stage);
-        services.forEach(service -> importSystemComponentIntoSystem(architectureModel, service));
+        services.forEach(service -> importSystemComponentIntoSystem(architectureModel, service, undeclaredSystems));
     }
 
-    private void importSystemComponentIntoSystem(ArchitectureModel architectureModel, String componentName) {
+    private void importSystemComponentIntoSystem(ArchitectureModel architectureModel, String componentName,
+                                                 UndeclaredSystems undeclaredSystems) {
         String systemName = componentName.split("-")[0];
         Optional<System> system = architectureModel.findSystem(systemName);
         if (system.isPresent()) {
             createOrUpdateSystemComponent(architectureModel, system.get(), componentName);
         } else {
-            log.error("Skipped SystemComponent {}: system {} is not declared in archrepo.model", componentName, systemName);
+            log.debug("Skipped SystemComponent {}: system {} is not declared in archrepo.model", componentName, systemName);
+            undeclaredSystems.skip(systemName, componentName);
         }
     }
 

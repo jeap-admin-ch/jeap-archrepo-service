@@ -166,7 +166,8 @@ class OpenApiController {
         Optional<OpenApiSpec> openApiSpecOptional = openApiSpecRepository.findByProvider(systemComponent);
 
         if (openApiSpecOptional.isEmpty()) {
-            log.warn("No Open API spec found for system component {}", systemComponentName);
+            // Not a warning: the Doc Service asks for the spec of every component, and most have none.
+            log.debug("No Open API spec found for system component {}", systemComponentName);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("No Open API spec found for system component " + systemComponentName);
         }

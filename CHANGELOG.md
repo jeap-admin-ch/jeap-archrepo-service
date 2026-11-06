@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.0.4] - 2026-11-06
+
+### Changed
+- Importers report systems that are not declared in `archrepo.model` with one WARN per run, listing every skipped
+  system with its skipped elements sorted and without duplicates, instead of an ERROR per skipped element. This
+  reverts the ERROR level introduced in 18.0.0: a landscape keeps undeclared systems for a long time, so the ERROR
+  fired on every run - one deployment-log component alone was logged 57 times per run - and buried real failures. The
+  summary line still names every gap and can be searched or alerted on. The individual elements are logged at DEBUG.
+- A provider that is not a component type able to provide REST APIs is reported once per run of the metrics relation
+  importers instead of once per relation.
+- A request for the OpenAPI spec of a component without one is logged at DEBUG instead of WARN; the Doc Service asks
+  for the spec of every component, so the 404 is the normal answer.
+
+### Fixed
+- `@Valid` on the lists of `DatabaseSchema` and `Table` moved to their type arguments, which removes the Hibernate
+  Validator deprecation warning HV000271 at startup. Validation still cascades into tables, columns and foreign keys.
+
 ## [18.0.3] - 2026-11-04
 
 ### Changed

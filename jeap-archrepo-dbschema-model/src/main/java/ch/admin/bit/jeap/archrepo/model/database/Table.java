@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public record Table(
         @NotEmpty String name,
-        @NotEmpty @Valid List<TableColumn> columns,
-        @Valid List<TableForeignKey> foreignKeys,
+        @NotEmpty List<@Valid TableColumn> columns,
+        List<@Valid TableForeignKey> foreignKeys,
         @Valid TablePrimaryKey primaryKey)
 {}

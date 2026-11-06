@@ -12,11 +12,9 @@ import org.springframework.stereotype.Component;
 class RhosJeapRelationImporter implements ArchRepoImporter {
 
     private final RhosGrafanaClient rhosGrafanaClient;
-    private final ValidatedJeapRelationImporter jeapRelationImporter;
 
     RhosJeapRelationImporter(RhosGrafanaClient rhosGrafanaClient) {
         this.rhosGrafanaClient = rhosGrafanaClient;
-        jeapRelationImporter = new ValidatedJeapRelationImporter(log);
     }
 
     @Override
@@ -27,6 +25,7 @@ class RhosJeapRelationImporter implements ArchRepoImporter {
 
     @Override
     public void importIntoModel(ArchitectureModel model, String environment) {
+        ValidatedJeapRelationImporter jeapRelationImporter = new ValidatedJeapRelationImporter(log);
         try {
             rhosGrafanaClient.apiRelations(environment)
                     .forEach(jeapRelation -> jeapRelationImporter.importJeapRelationFromPrometheus(model, jeapRelation));

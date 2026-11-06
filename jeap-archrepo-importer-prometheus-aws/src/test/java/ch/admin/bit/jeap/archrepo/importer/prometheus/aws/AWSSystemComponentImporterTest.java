@@ -94,26 +94,34 @@ class AWSSystemComponentImporterTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void importIntoModel_logsAnErrorForAnApplicationOfAnUnknownSystem(CapturedOutput output) {
+    void importIntoModel_logsAWarningForAnApplicationOfAnUnknownSystem(CapturedOutput output) {
         doReturn(Set.of("undeclared")).when(awsPrometheusClient).listApplications("ref");
 
         awsSystemComponentImporter.importIntoModel(model, "ref");
 
+        assertThat(output.getAll().lines().filter(line -> line.contains("systems not declared in archrepo.model")))
+                .singleElement()
+                .satisfies(line -> assertThat(line).contains("WARN").contains("skipped 1 systems").endsWith("undeclared"));
         assertThat(output.getAll().lines().filter(line -> line.contains("undeclared")))
-                .anyMatch(line -> line.contains("ERROR"));
+                .noneMatch(line -> line.contains("ERROR"));
     }
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void importIntoModel_logsAnErrorForAComponentOfAnUnknownSystem(CapturedOutput output) {
+    void importIntoModel_logsOneWarningPerRunForComponentsOfUnknownSystems(CapturedOutput output) {
         doReturn(Set.of(SYSTEM)).when(awsPrometheusClient).listApplications("ref");
-        doReturn(Set.of("undeclared-app-service")).when(awsPrometheusClient).listServices(SYSTEM, SPACE);
+        doReturn(Set.of("undeclared-app-service", "undeclared-other-service")).when(awsPrometheusClient).listServices(SYSTEM, SPACE);
 
         awsSystemComponentImporter.importIntoModel(model, "ref");
 
         assertThat(model.findSystemComponent("undeclared-app-service")).isEmpty();
+        assertThat(output.getAll().lines().filter(line -> line.contains("systems not declared in archrepo.model")))
+                .singleElement()
+                .satisfies(line -> assertThat(line)
+                        .contains("WARN")
+                        .contains("undeclared [undeclared-app-service, undeclared-other-service]"));
         assertThat(output.getAll().lines().filter(line -> line.contains("undeclared-app-service")))
-                .anyMatch(line -> line.contains("ERROR"));
+                .noneMatch(line -> line.contains("ERROR"));
     }
 
     @BeforeEach
