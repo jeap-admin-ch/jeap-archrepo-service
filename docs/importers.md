@@ -56,12 +56,8 @@ See [Configuration](configuration.md) for the full properties of each.
 ## Components go into systems that already exist
 
 No importer creates a `System`. Each resolves a system name, looks it up as a name or alias, and **skips the
-element** when there is no match - a system that is deployed or publishes messages but is not declared in
-`archrepo.model` is a configuration gap. At the end of its run each importer logs **one WARN** naming every skipped
-system with its skipped elements, sorted and without duplicates (`Deployment log: skipped 2 systems not declared in
-archrepo.model: amia [amia-portal-scs], catalogi [catalogi-datahub-gms]`); the individual elements are logged at DEBUG.
-It is a WARN rather than an ERROR because a landscape usually has undeclared systems for a long time, and an ERROR on
-every run buries the real failures; the summary line can still be searched or alerted on. A system is created deliberately, through
+element with an ERROR log** when there is no match - a system that is deployed or publishes messages but is not
+declared in `archrepo.model` is a configuration gap, and the error lets alerting pick it up. A system is created deliberately, through
 `archrepo.model` configuration, applied before every full or single-importer run - see [Configuration](configuration.md).
 This is enforced: after onboarding the model is sealed, and an importer that adds or removes a system or a team
 fails the whole update with an `IllegalStateException`.

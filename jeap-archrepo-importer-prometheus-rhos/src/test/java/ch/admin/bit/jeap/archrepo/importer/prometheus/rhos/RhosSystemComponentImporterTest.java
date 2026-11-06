@@ -91,16 +91,13 @@ class RhosSystemComponentImporterTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void importIntoModel_logsAWarningForANamespaceOfAnUnknownSystem(CapturedOutput output) {
+    void importIntoModel_logsAnErrorForANamespaceOfAnUnknownSystem(CapturedOutput output) {
         doReturn(Set.of("bit-undeclared-r")).when(grafanaClient).namespaces("ref");
 
         systemComponentImporter.importIntoModel(model, "ref");
 
-        assertThat(output.getAll().lines().filter(line -> line.contains("systems not declared in archrepo.model")))
-                .singleElement()
-                .satisfies(line -> assertThat(line).contains("WARN").contains("undeclared"));
         assertThat(output.getAll().lines().filter(line -> line.contains("undeclared")))
-                .noneMatch(line -> line.contains("ERROR"));
+                .anyMatch(line -> line.contains("ERROR"));
     }
 
     @Test

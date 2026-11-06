@@ -39,9 +39,8 @@ class MessageDescriptorImporterIT extends CreateLocalGitRepoBaseTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void logsOneWarningPerRunForMessageTypesOfUnknownSystems(CapturedOutput output) {
-        // Systems are declared in configuration; message types of undeclared systems are a configuration gap,
-        // reported once per run.
+    void logsAnErrorForAMessageTypeOfAnUnknownSystem(CapturedOutput output) {
+        // Systems are declared in configuration; a message type of an undeclared system needs attention.
         MessageTypeImporterProperties props = new MessageTypeImporterProperties(
                 List.of(repoUrl),
                 null,
@@ -52,13 +51,7 @@ class MessageDescriptorImporterIT extends CreateLocalGitRepoBaseTest {
         importer.importDescriptors(model);
 
         assertThat(model.getAllMessageTypes()).isEmpty();
-        assertThat(output.getAll().lines().filter(line -> line.contains("systems not declared in archrepo.model")))
-                .singleElement()
-                .satisfies(line -> assertThat(line)
-                        .contains("WARN")
-                        .contains("_SHARED [")
-                        .contains("SharedArchivedArtifactVersionCreatedEvent"));
         assertThat(output.getAll().lines().filter(line -> line.contains("SharedArchivedArtifactVersionCreatedEvent")))
-                .noneMatch(line -> line.contains("ERROR"));
+                .anyMatch(line -> line.contains("ERROR") && line.contains("_SHARED"));
     }
 }
