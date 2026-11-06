@@ -102,6 +102,8 @@ public class PactProviderTestBase {
     }
 
     private static final String BEARER = "Bearer ";
+    /** The provider state of the three model resources of the docs API. */
+    private static final String DOCUMENTED_LANDSCAPE = "A documented landscape is available";
 
     /**
      * The resource of the docs API's semantic role. Every one of its resources requires
@@ -313,9 +315,9 @@ public class PactProviderTestBase {
      * declare them, with their path variables.
      */
     public static final Map<String, String> DOCS_API_ROUTE_STATES = Map.of(
-            "/docs-api/systems", "A documented landscape is available",
-            "/docs-api/systems/{system}", "A documented landscape is available",
-            "/docs-api/systems/{system}/messages", "A documented landscape is available",
+            "/docs-api/systems", DOCUMENTED_LANDSCAPE,
+            "/docs-api/systems/{system}", DOCUMENTED_LANDSCAPE,
+            "/docs-api/systems/{system}/messages", DOCUMENTED_LANDSCAPE,
             "/docs-api/openapi-specs", "An OpenAPI specification is published",
             "/docs-api/database-schemas", "A database schema is published",
             "/docs-api/systems/{system}/components/{component}/openapi", "An OpenAPI specification is published",
@@ -328,7 +330,7 @@ public class PactProviderTestBase {
      * <p>
      * One state for all three because they are three views of one landscape - see {@link DocsApiPactStubs}.
      */
-    @State("A documented landscape is available")
+    @State(DOCUMENTED_LANDSCAPE)
     void aDocumentedLandscapeIsAvailable() {
         when(architectureModelRepository.load()).thenReturn(DocsApiPactStubs.model());
     }
