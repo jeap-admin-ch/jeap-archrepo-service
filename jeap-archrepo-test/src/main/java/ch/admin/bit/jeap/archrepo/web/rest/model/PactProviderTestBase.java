@@ -18,6 +18,7 @@ import ch.admin.bit.jeap.archrepo.model.database.*;
 import ch.admin.bit.jeap.archrepo.persistence.*;
 import ch.admin.bit.jeap.archrepo.test.DocsApiPactStubs;
 import ch.admin.bit.jeap.archrepo.web.ArchRepoApplication;
+import ch.admin.bit.jeap.security.resource.properties.ResourceServerProperties;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.SemanticApplicationRole;
 import ch.admin.bit.jeap.security.resource.semanticAuthentication.ServletSemanticAuthorization;
 import ch.admin.bit.jeap.security.resource.token.JeapAuthenticationContext;
@@ -161,6 +162,16 @@ public class PactProviderTestBase {
     @org.springframework.beans.factory.annotation.Value("${jeap.security.oauth2.resourceserver.system-name}")
     private String securitySystemName;
 
+    /**
+     * Where the token is addressed to: the resource id of this application. Taken from the properties of the jEAP
+     * security starter rather than from the configuration, because the starter falls back to
+     * {@code spring.application.name} when an instance sets none - so the token carries exactly the audience this
+     * application validates, and is accepted whatever its strict audience validation is set to, {@code on}
+     * included.
+     */
+    @Autowired
+    private ResourceServerProperties resourceServerProperties;
+
     @BeforeEach
     void setUp(PactVerificationContext context) {
         // If there are no pacts there will be no context.
@@ -191,10 +202,11 @@ public class PactProviderTestBase {
      * {@code Authorization} header</b> - injecting a request header is the mechanism pact-jvm offers for
      * exactly this, and its price is that the header is no longer what the consumer wrote.
      * <p>
-     * The token carries the semantic role of the docs API, so <b>authorization is exercised rather than
-     * mocked</b>: that API is authorized with {@code @PreAuthorize}, which jEAP evaluates against the roles in
-     * the token and not against the {@link ServletSemanticAuthorization} bean this class mocks. That bean is
-     * what the OpenAPI upload consults programmatically, which is why its own states stub it.
+     * The token is addressed to this application and carries the semantic role of the docs API, so <b>audience
+     * validation and authorization are exercised rather than mocked</b>: that API is authorized with
+     * {@code @PreAuthorize}, which jEAP evaluates against the roles in the token and not against the
+     * {@link ServletSemanticAuthorization} bean this class mocks. That bean is what the OpenAPI upload consults
+     * programmatically, which is why its own states stub it.
      * <p>
      * <b>Only a bearer header is replaced.</b> A request carrying none belongs to an interaction about being
      * unauthenticated, and one carrying HTTP basic credentials belongs to the {@code /api} chain, which
@@ -207,6 +219,7 @@ public class PactProviderTestBase {
         }
         String token = jwsBuilderFactory
                 .createValidFromNowBuilder("doc-service", JeapAuthenticationContext.SYS, 5, ChronoUnit.MINUTES)
+                .withAudiences(resourceServerProperties.getResourceId())
                 .withUserRoles(SemanticApplicationRole.builder()
                         .system(securitySystemName)
                         .resource(ARCHITECTURE_MODEL)
